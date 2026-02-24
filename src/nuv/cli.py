@@ -1,6 +1,5 @@
 import argparse
-import sys
-from typing import Sequence
+from collections.abc import Sequence
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -12,7 +11,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     new_parser = subparsers.add_parser("new", help="Create a new project.")
     new_parser.add_argument("name", help="Project name.")
-    new_parser.add_argument("--at", metavar="PATH", help="Target directory (default: ./<name>).")
+    new_parser.add_argument(
+        "--at", metavar="PATH", help="Target directory (default: ./<name>)."
+    )
 
     return parser
 

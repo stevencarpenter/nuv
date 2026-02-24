@@ -1,11 +1,26 @@
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
 import pytest
 
-from nuv.cli import main
-from nuv.commands.new import validate_name
+from nuv.cli import main as cli_main
+from nuv.commands.new import (
+    render_template,
+    resolve_target,
+    run_new,
+    run_uv_sync,
+    scaffold_files,
+    validate_name,
+)
 
 
 def test_no_command_returns_1() -> None:
-    assert main([]) == 1
+    assert cli_main([]) == 1
+
+
+# ---------------------------------------------------------------------------
+# validate_name
+# ---------------------------------------------------------------------------
 
 
 def test_validate_name_simple() -> None:
@@ -36,9 +51,9 @@ def test_validate_name_invalid_chars() -> None:
         validate_name("bad/name")
 
 
-from pathlib import Path
-
-from nuv.commands.new import resolve_target
+# ---------------------------------------------------------------------------
+# resolve_target
+# ---------------------------------------------------------------------------
 
 
 def test_resolve_target_default(tmp_path: Path) -> None:
@@ -59,16 +74,22 @@ def test_resolve_target_already_exists(tmp_path: Path) -> None:
         resolve_target("my-project", at=None, cwd=tmp_path)
 
 
-from nuv.commands.new import render_template
+# ---------------------------------------------------------------------------
+# render_template
+# ---------------------------------------------------------------------------
 
 
 def test_render_template_substitutes_name() -> None:
-    result = render_template("readme.md.tpl", name="hello-world", module_name="hello_world")
+    result = render_template(
+        "readme.md.tpl", name="hello-world", module_name="hello_world"
+    )
     assert "hello-world" in result
 
 
 def test_render_template_substitutes_module_name() -> None:
-    result = render_template("pyproject.toml.tpl", name="hello-world", module_name="hello_world")
+    result = render_template(
+        "pyproject.toml.tpl", name="hello-world", module_name="hello_world"
+    )
     assert "hello-world" in result
 
 
@@ -77,7 +98,9 @@ def test_render_template_unknown_raises() -> None:
         render_template("nonexistent.tpl", name="x", module_name="x")
 
 
-from nuv.commands.new import scaffold_files
+# ---------------------------------------------------------------------------
+# scaffold_files
+# ---------------------------------------------------------------------------
 
 
 def test_scaffold_files_creates_expected_files(tmp_path: Path) -> None:
@@ -106,14 +129,16 @@ def test_scaffold_files_main_has_project_name(tmp_path: Path) -> None:
     assert 'PROJECT_NAME = "cool-tool"' in (target / "main.py").read_text()
 
 
-from unittest.mock import MagicMock, patch
-
-from nuv.commands.new import run_uv_sync
+# ---------------------------------------------------------------------------
+# run_uv_sync
+# ---------------------------------------------------------------------------
 
 
 def test_run_uv_sync_calls_uv(tmp_path: Path) -> None:
-    with patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"), \
-         patch("nuv.commands.new.subprocess.run") as mock_run:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
         mock_run.return_value = MagicMock(returncode=0)
         run_uv_sync(tmp_path)
         mock_run.assert_called_once_with(
@@ -124,25 +149,33 @@ def test_run_uv_sync_calls_uv(tmp_path: Path) -> None:
 
 
 def test_run_uv_sync_uv_not_found(tmp_path: Path) -> None:
-    with patch("nuv.commands.new.shutil.which", return_value=None):
-        with pytest.raises(RuntimeError, match="uv not found"):
-            run_uv_sync(tmp_path)
+    with (
+        patch("nuv.commands.new.shutil.which", return_value=None),
+        pytest.raises(RuntimeError, match="uv not found"),
+    ):
+        run_uv_sync(tmp_path)
 
 
 def test_run_uv_sync_nonzero_exit(tmp_path: Path) -> None:
-    with patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"), \
-         patch("nuv.commands.new.subprocess.run") as mock_run:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+        pytest.raises(RuntimeError, match="uv sync failed"),
+    ):
         mock_run.return_value = MagicMock(returncode=1)
-        with pytest.raises(RuntimeError, match="uv sync failed"):
-            run_uv_sync(tmp_path)
+        run_uv_sync(tmp_path)
 
 
-from nuv.commands.new import run_new
+# ---------------------------------------------------------------------------
+# run_new
+# ---------------------------------------------------------------------------
 
 
 def test_run_new_success(tmp_path: Path) -> None:
-    with patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"), \
-         patch("nuv.commands.new.subprocess.run") as mock_run:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
         mock_run.return_value = MagicMock(returncode=0)
         result = run_new("cool-tool", at=str(tmp_path / "cool-tool"), cwd=tmp_path)
     assert result == 0
@@ -164,3 +197,22 @@ def test_run_new_uv_not_found(tmp_path: Path) -> None:
     with patch("nuv.commands.new.shutil.which", return_value=None):
         result = run_new("my-project", cwd=tmp_path)
     assert result == 1
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+
+def test_cli_no_args_returns_1() -> None:
+    assert cli_main([]) == 1
+
+
+def test_cli_new_dispatches(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj")])
+    assert result == 0

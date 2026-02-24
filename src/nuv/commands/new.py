@@ -53,7 +53,9 @@ def scaffold_files(target: Path, *, name: str, module_name: str) -> None:
 
 def run_uv_sync(target: Path) -> None:
     if shutil.which("uv") is None:
-        raise RuntimeError("uv not found in PATH. Install uv: https://docs.astral.sh/uv/")
+        raise RuntimeError(
+            "uv not found in PATH. Install uv: https://docs.astral.sh/uv/"
+        )
     result = subprocess.run(["uv", "sync"], cwd=target, check=False)
     if result.returncode != 0:
         raise RuntimeError(f"uv sync failed (exit {result.returncode})")
