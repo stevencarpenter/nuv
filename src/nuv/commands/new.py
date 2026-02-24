@@ -28,6 +28,26 @@ def render_template(tpl_name: str, *, name: str, module_name: str) -> str:
     )
 
 
+def scaffold_files(target: Path, *, name: str, module_name: str) -> None:
+    vars = {"name": name, "module_name": module_name}
+
+    (target / "main.py").write_text(
+        render_template("main.py.tpl", **vars), encoding="utf-8"
+    )
+    (target / "pyproject.toml").write_text(
+        render_template("pyproject.toml.tpl", **vars), encoding="utf-8"
+    )
+    (target / "README.md").write_text(
+        render_template("readme.md.tpl", **vars), encoding="utf-8"
+    )
+    tests_dir = target / "tests"
+    tests_dir.mkdir()
+    (tests_dir / "__init__.py").write_text("", encoding="utf-8")
+    (tests_dir / "test_main.py").write_text(
+        render_template("test_main.py.tpl", **vars), encoding="utf-8"
+    )
+
+
 def resolve_target(name: str, *, at: str | None, cwd: Path) -> Path:
     target = Path(at) if at else cwd / name
     if target.exists():

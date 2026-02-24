@@ -75,3 +75,32 @@ def test_render_template_substitutes_module_name() -> None:
 def test_render_template_unknown_raises() -> None:
     with pytest.raises(FileNotFoundError):
         render_template("nonexistent.tpl", name="x", module_name="x")
+
+
+from nuv.commands.new import scaffold_files
+
+
+def test_scaffold_files_creates_expected_files(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    scaffold_files(target, name="my-project", module_name="my_project")
+
+    assert (target / "main.py").exists()
+    assert (target / "pyproject.toml").exists()
+    assert (target / "README.md").exists()
+    assert (target / "tests" / "test_main.py").exists()
+    assert (target / "tests" / "__init__.py").exists()
+
+
+def test_scaffold_files_substitutes_name(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    scaffold_files(target, name="my-project", module_name="my_project")
+    assert "my-project" in (target / "README.md").read_text()
+
+
+def test_scaffold_files_main_has_project_name(tmp_path: Path) -> None:
+    target = tmp_path / "cool-tool"
+    target.mkdir()
+    scaffold_files(target, name="cool-tool", module_name="cool_tool")
+    assert 'PROJECT_NAME = "cool-tool"' in (target / "main.py").read_text()
