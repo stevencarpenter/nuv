@@ -104,3 +104,34 @@ def test_scaffold_files_main_has_project_name(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="cool-tool", module_name="cool_tool")
     assert 'PROJECT_NAME = "cool-tool"' in (target / "main.py").read_text()
+
+
+from unittest.mock import MagicMock, patch
+
+from nuv.commands.new import run_uv_sync
+
+
+def test_run_uv_sync_calls_uv(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"), \
+         patch("nuv.commands.new.subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0)
+        run_uv_sync(tmp_path)
+        mock_run.assert_called_once_with(
+            ["uv", "sync"],
+            cwd=tmp_path,
+            check=False,
+        )
+
+
+def test_run_uv_sync_uv_not_found(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        with pytest.raises(RuntimeError, match="uv not found"):
+            run_uv_sync(tmp_path)
+
+
+def test_run_uv_sync_nonzero_exit(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"), \
+         patch("nuv.commands.new.subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=1)
+        with pytest.raises(RuntimeError, match="uv sync failed"):
+            run_uv_sync(tmp_path)

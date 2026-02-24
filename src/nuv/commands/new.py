@@ -1,4 +1,6 @@
 import re
+import shutil
+import subprocess
 from pathlib import Path
 from string import Template
 
@@ -46,6 +48,14 @@ def scaffold_files(target: Path, *, name: str, module_name: str) -> None:
     (tests_dir / "test_main.py").write_text(
         render_template("test_main.py.tpl", **vars), encoding="utf-8"
     )
+
+
+def run_uv_sync(target: Path) -> None:
+    if shutil.which("uv") is None:
+        raise RuntimeError("uv not found in PATH. Install uv: https://docs.astral.sh/uv/")
+    result = subprocess.run(["uv", "sync"], cwd=target, check=False)
+    if result.returncode != 0:
+        raise RuntimeError(f"uv sync failed (exit {result.returncode})")
 
 
 def resolve_target(name: str, *, at: str | None, cwd: Path) -> Path:
