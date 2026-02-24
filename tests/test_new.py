@@ -34,3 +34,26 @@ def test_validate_name_leading_hyphen() -> None:
 def test_validate_name_invalid_chars() -> None:
     with pytest.raises(ValueError, match="invalid"):
         validate_name("bad/name")
+
+
+from pathlib import Path
+
+from nuv.commands.new import resolve_target
+
+
+def test_resolve_target_default(tmp_path: Path) -> None:
+    target = resolve_target("my-project", at=None, cwd=tmp_path)
+    assert target == tmp_path / "my-project"
+
+
+def test_resolve_target_explicit(tmp_path: Path) -> None:
+    explicit = tmp_path / "elsewhere"
+    target = resolve_target("my-project", at=str(explicit), cwd=tmp_path)
+    assert target == explicit
+
+
+def test_resolve_target_already_exists(tmp_path: Path) -> None:
+    existing = tmp_path / "my-project"
+    existing.mkdir()
+    with pytest.raises(ValueError, match="already exists"):
+        resolve_target("my-project", at=None, cwd=tmp_path)

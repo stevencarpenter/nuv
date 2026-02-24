@@ -14,5 +14,12 @@ def validate_name(name: str) -> str:
     return name
 
 
+def resolve_target(name: str, *, at: str | None, cwd: Path) -> Path:
+    target = Path(at) if at else cwd / name
+    if target.exists():
+        raise ValueError(f"Directory already exists: {target}")
+    return target
+
+
 def run_new(name: str, *, at: str | None = None) -> int:
     return 0
