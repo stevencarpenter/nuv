@@ -57,3 +57,21 @@ def test_resolve_target_already_exists(tmp_path: Path) -> None:
     existing.mkdir()
     with pytest.raises(ValueError, match="already exists"):
         resolve_target("my-project", at=None, cwd=tmp_path)
+
+
+from nuv.commands.new import render_template
+
+
+def test_render_template_substitutes_name() -> None:
+    result = render_template("readme.md.tpl", name="hello-world", module_name="hello_world")
+    assert "hello-world" in result
+
+
+def test_render_template_substitutes_module_name() -> None:
+    result = render_template("pyproject.toml.tpl", name="hello-world", module_name="hello_world")
+    assert "hello-world" in result
+
+
+def test_render_template_unknown_raises() -> None:
+    with pytest.raises(FileNotFoundError):
+        render_template("nonexistent.tpl", name="x", module_name="x")

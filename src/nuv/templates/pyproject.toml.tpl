@@ -1,13 +1,10 @@
 [project]
-name = "nuv"
+name = "$name"
 version = "0.1.0"
-description = "Scaffold opinionated uv Python projects"
+description = ""
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = []
-
-[project.scripts]
-nuv = "nuv.cli:main"
 
 [dependency-groups]
 dev = [
@@ -18,7 +15,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=nuv --cov-report=term-missing --cov-fail-under=100"
+addopts = "--cov=. --cov-report=term-missing --cov-fail-under=100"
 
 [tool.ruff]
 target-version = "py314"
@@ -31,13 +28,3 @@ branch = true
 
 [tool.coverage.report]
 exclude_lines = ["if __name__ == .__main__.:"]
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-data]
-"nuv.templates" = ["*.tpl"]
-
-[build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"

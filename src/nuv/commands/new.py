@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+from string import Template
 
 
 def validate_name(name: str) -> str:
@@ -12,6 +13,19 @@ def validate_name(name: str) -> str:
     if not re.fullmatch(r"[a-zA-Z0-9_\-]+", name):
         raise ValueError(f"Name contains invalid characters: {name!r}")
     return name
+
+
+_TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
+
+
+def render_template(tpl_name: str, *, name: str, module_name: str) -> str:
+    tpl_path = _TEMPLATES_DIR / tpl_name
+    if not tpl_path.exists():
+        raise FileNotFoundError(f"Template not found: {tpl_name}")
+    return Template(tpl_path.read_text(encoding="utf-8")).substitute(
+        name=name,
+        module_name=module_name,
+    )
 
 
 def resolve_target(name: str, *, at: str | None, cwd: Path) -> Path:
