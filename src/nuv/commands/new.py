@@ -18,21 +18,25 @@ def validate_name(name: str) -> str:
     return name
 
 
-_TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
+_TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
 
 
-def render_template(tpl_name: str, *, name: str, module_name: str) -> str:
-    tpl_path = _TEMPLATES_DIR / tpl_name
+def render_template(
+    tpl_name: str, *, archetype: str = "script", name: str, module_name: str
+) -> str:
+    tpl_path = _TEMPLATES_ROOT / archetype / tpl_name
     if not tpl_path.exists():
-        raise FileNotFoundError(f"Template not found: {tpl_name}")
+        raise FileNotFoundError(f"Template not found: {archetype}/{tpl_name}")
     return Template(tpl_path.read_text(encoding="utf-8")).substitute(
         name=name,
         module_name=module_name,
     )
 
 
-def scaffold_files(target: Path, *, name: str, module_name: str) -> None:
-    vars = {"name": name, "module_name": module_name}
+def scaffold_files(
+    target: Path, *, name: str, module_name: str, archetype: str = "script"
+) -> None:
+    vars = {"name": name, "module_name": module_name, "archetype": archetype}
 
     (target / "main.py").write_text(
         render_template("main.py.tpl", **vars), encoding="utf-8"
@@ -68,7 +72,13 @@ def resolve_target(name: str, *, at: str | None, cwd: Path) -> Path:
     return target
 
 
-def run_new(name: str, *, at: str | None = None, cwd: Path | None = None) -> int:
+def run_new(
+    name: str,
+    *,
+    at: str | None = None,
+    cwd: Path | None = None,
+    archetype: str = "script",
+) -> int:
     if cwd is None:
         cwd = Path.cwd()
     try:
@@ -76,7 +86,9 @@ def run_new(name: str, *, at: str | None = None, cwd: Path | None = None) -> int
         target = resolve_target(validated, at=at, cwd=cwd)
         module_name = validated.replace("-", "_")
         target.mkdir(parents=True)
-        scaffold_files(target, name=validated, module_name=module_name)
+        scaffold_files(
+            target, name=validated, module_name=module_name, archetype=archetype
+        )
         run_uv_sync(target)
     except (ValueError, RuntimeError) as exc:
         print(f"Error: {exc}", file=sys.stderr)

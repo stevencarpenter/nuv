@@ -36,7 +36,7 @@ exclude_lines = ["if __name__ == .__main__.:"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-"nuv.templates" = ["*.tpl"]
+"*" = ["*.tpl"]
 
 [build-system]
 requires = ["setuptools>=68"]

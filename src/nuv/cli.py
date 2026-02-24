@@ -14,6 +14,12 @@ def build_parser() -> argparse.ArgumentParser:
     new_parser.add_argument(
         "--at", metavar="PATH", help="Target directory (default: ./<name>)."
     )
+    new_parser.add_argument(
+        "--archetype",
+        default="script",
+        metavar="TYPE",
+        help="Project archetype (default: script).",
+    )
 
     return parser
 
@@ -25,7 +31,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "new":
-        return run_new(args.name, at=args.at)
+        return run_new(args.name, at=args.at, archetype=args.archetype)
 
     parser.print_help()
     return 1
