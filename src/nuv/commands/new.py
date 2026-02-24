@@ -1,6 +1,7 @@
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from string import Template
 
@@ -65,5 +66,18 @@ def resolve_target(name: str, *, at: str | None, cwd: Path) -> Path:
     return target
 
 
-def run_new(name: str, *, at: str | None = None) -> int:
+def run_new(name: str, *, at: str | None = None, cwd: Path | None = None) -> int:
+    if cwd is None:
+        cwd = Path.cwd()
+    try:
+        validated = validate_name(name)
+        target = resolve_target(validated, at=at, cwd=cwd)
+        module_name = validated.replace("-", "_")
+        target.mkdir(parents=True)
+        scaffold_files(target, name=validated, module_name=module_name)
+        run_uv_sync(target)
+    except (ValueError, RuntimeError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    print(f"created {target}/")
     return 0

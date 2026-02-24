@@ -135,3 +135,32 @@ def test_run_uv_sync_nonzero_exit(tmp_path: Path) -> None:
         mock_run.return_value = MagicMock(returncode=1)
         with pytest.raises(RuntimeError, match="uv sync failed"):
             run_uv_sync(tmp_path)
+
+
+from nuv.commands.new import run_new
+
+
+def test_run_new_success(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"), \
+         patch("nuv.commands.new.subprocess.run") as mock_run:
+        mock_run.return_value = MagicMock(returncode=0)
+        result = run_new("cool-tool", at=str(tmp_path / "cool-tool"), cwd=tmp_path)
+    assert result == 0
+    assert (tmp_path / "cool-tool" / "main.py").exists()
+
+
+def test_run_new_invalid_name(tmp_path: Path) -> None:
+    result = run_new("bad name", cwd=tmp_path)
+    assert result == 1
+
+
+def test_run_new_existing_dir(tmp_path: Path) -> None:
+    (tmp_path / "existing").mkdir()
+    result = run_new("existing", cwd=tmp_path)
+    assert result == 1
+
+
+def test_run_new_uv_not_found(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = run_new("my-project", cwd=tmp_path)
+    assert result == 1
