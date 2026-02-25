@@ -536,6 +536,7 @@ FodyWeavers.xsd
 
 pkg/
 src/
+!src/
 
 ### Vim template
 # Swap
@@ -762,4 +763,3 @@ cython_debug/
 .junie
 .agents
 .opencode
-!src/
