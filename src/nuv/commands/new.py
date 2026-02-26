@@ -50,6 +50,8 @@ def scaffold_files(
     archetype: str = "script",
     python_version: str = DEFAULT_PYTHON_VERSION,
 ) -> None:
+    if not re.fullmatch(r"\d+\.\d+", python_version):
+        raise ValueError(f"Python version must be MAJOR.MINOR (e.g. 3.14), got: {python_version!r}")
     template_vars = {
         "name": name,
         "module_name": module_name,
