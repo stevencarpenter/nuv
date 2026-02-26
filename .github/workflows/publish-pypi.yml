@@ -33,6 +33,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
+      actions: read
+      contents: read
       id-token: write
     environment:
       name: pypi
