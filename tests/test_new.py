@@ -329,6 +329,14 @@ def test_run_new_uv_not_found(tmp_path: Path) -> None:
     with patch("nuv.commands.new.shutil.which", return_value=None):
         result = run_new("my-project", cwd=tmp_path)
     assert result == 1
+    assert not (tmp_path / "my-project").exists()
+
+
+def test_run_new_uv_not_found_keep_on_failure(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = run_new("my-project", cwd=tmp_path, keep_on_failure=True)
+    assert result == 1
+    assert (tmp_path / "my-project").exists()
 
 
 def test_run_new_missing_template(tmp_path: Path) -> None:
@@ -411,3 +419,20 @@ def test_cli_install_command_only(tmp_path: Path, caplog: pytest.LogCaptureFixtu
     assert result == 0
     mock_run.assert_called_once_with(["uv", "sync"], cwd=tmp_path / "test-proj", check=False)
     assert "uv tool install --editable" in caplog.text
+
+
+def test_cli_new_keep_on_failure_flag(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = cli_main(["new", "my-project", "--at", str(tmp_path / "my-project"), "--keep-on-failure"])
+    assert result == 1
+    assert (tmp_path / "my-project").exists()
+
+
+def test_cli_new_unexpected_error_returns_1(capsys: pytest.CaptureFixture[str]) -> None:
+    with (
+        patch("nuv.commands.new.run_new", side_effect=Exception("boom")),
+        pytest.raises(SystemExit) as exc_info,
+    ):
+        cli_main(["new", "my-project"])
+    assert exc_info.value.code == 1
+    assert "ERROR unexpected failure" in capsys.readouterr().err

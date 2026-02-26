@@ -54,6 +54,11 @@ def build_parser() -> argparse.ArgumentParser:
             "command-only: log the install command without running it (use `--log-level INFO` to display)."
         ),
     )
+    new_parser.add_argument(
+        "--keep-on-failure",
+        action="store_true",
+        help="Keep partially generated files if setup steps fail.",
+    )
 
     return parser
 
@@ -66,13 +71,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     configure(args.log_level)
 
     if args.command == "new":
-        return run_new(
-            args.name,
-            at=args.at,
-            archetype=args.archetype,
-            python_version=args.python_version,
-            install_mode=args.install,
-        )
+        try:
+            return run_new(
+                args.name,
+                at=args.at,
+                archetype=args.archetype,
+                python_version=args.python_version,
+                install_mode=args.install,
+                keep_on_failure=args.keep_on_failure,
+            )
+        except Exception:  # pragma: no cover
+            parser.exit(status=1, message="ERROR unexpected failure\n")
 
     parser.print_help()
     return 1

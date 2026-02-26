@@ -130,14 +130,18 @@ def run_new(
     archetype: str = "script",
     python_version: str = DEFAULT_PYTHON_VERSION,
     install_mode: str = "editable",
+    keep_on_failure: bool = False,
 ) -> int:
     if cwd is None:
         cwd = Path.cwd()
+    target: Path | None = None
+    created_target = False
     try:
         validated = validate_name(name)
         target = resolve_target(validated, at=at, cwd=cwd)
         module_name = validated.replace("-", "_")
         target.mkdir(parents=True)
+        created_target = True
         scaffold_files(
             target,
             name=validated,
@@ -148,6 +152,8 @@ def run_new(
         run_uv_sync(target)
         run_tool_install(target, mode=install_mode)
     except (ValueError, RuntimeError, FileNotFoundError) as exc:
+        if created_target and target is not None and not keep_on_failure:
+            shutil.rmtree(target, ignore_errors=True)
         log.error("%s", exc)
         return 1
     log.info("created %s/", target)
