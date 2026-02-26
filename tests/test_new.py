@@ -6,11 +6,14 @@ import pytest
 from nuv.cli import main as cli_main
 from nuv.commands.new import (
     DEFAULT_PYTHON_VERSION,
+    build_tool_install_command,
     render_template,
     resolve_target,
     run_new,
+    run_tool_install,
     run_uv_sync,
     scaffold_files,
+    validate_install_mode,
     validate_name,
     validate_python_version,
 )
@@ -71,6 +74,69 @@ def test_validate_python_version_invalid_bare() -> None:
     with pytest.raises(ValueError, match="MAJOR.MINOR"):
         validate_python_version("3")
 
+
+
+
+# ---------------------------------------------------------------------------
+# install mode
+# ---------------------------------------------------------------------------
+
+
+def test_validate_install_mode_valid() -> None:
+    assert validate_install_mode("editable") == "editable"
+
+
+def test_validate_install_mode_invalid() -> None:
+    with pytest.raises(ValueError, match="Install mode"):
+        validate_install_mode("bad")
+
+
+def test_build_tool_install_command(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    assert build_tool_install_command(target) == ["uv", "tool", "install", "--editable", str(target)]
+
+
+def test_run_tool_install_none(tmp_path: Path) -> None:
+    run_tool_install(tmp_path, mode="none")
+
+
+def test_run_tool_install_command_only(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    run_tool_install(tmp_path, mode="command-only")
+    output = capsys.readouterr().out
+    assert "uv tool install --editable" in output
+
+
+def test_run_tool_install_editable_calls_uv(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        run_tool_install(tmp_path, mode="editable")
+    mock_run.assert_called_once_with(
+        ["uv", "tool", "install", "--editable", str(tmp_path)],
+        cwd=tmp_path,
+        check=False,
+    )
+
+
+
+
+def test_run_tool_install_editable_uv_not_found(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value=None),
+        pytest.raises(RuntimeError, match="uv not found"),
+    ):
+        run_tool_install(tmp_path, mode="editable")
+
+def test_run_tool_install_editable_nonzero_exit(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+        pytest.raises(RuntimeError, match="uv tool install failed"),
+    ):
+        mock_run.return_value = MagicMock(returncode=1)
+        run_tool_install(tmp_path, mode="editable")
 
 # ---------------------------------------------------------------------------
 # resolve_target
@@ -150,6 +216,9 @@ def test_scaffold_files_custom_python_version(tmp_path: Path) -> None:
     pyproject = (target / "pyproject.toml").read_text()
     assert ">=3.13" in pyproject
     assert "py313" in pyproject
+    assert "[project.scripts]" in pyproject
+    assert "build-backend = \"hatchling.build\"" in pyproject
+    assert "setuptools" not in pyproject
 
 
 def test_scaffold_files_invalid_python_version(tmp_path: Path) -> None:
@@ -233,6 +302,7 @@ def test_run_new_success(tmp_path: Path) -> None:
         result = run_new("cool-tool", at=str(tmp_path / "cool-tool"), cwd=tmp_path)
     assert result == 0
     assert (tmp_path / "cool-tool" / "main.py").exists()
+    assert mock_run.call_count == 2
 
 
 def test_run_new_invalid_name(tmp_path: Path) -> None:
@@ -278,6 +348,7 @@ def test_cli_new_dispatches(tmp_path: Path) -> None:
         mock_run.return_value = MagicMock(returncode=0)
         result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj")])
     assert result == 0
+    assert mock_run.call_count == 2
 
 
 def test_cli_invalid_archetype_rejected() -> None:
@@ -301,3 +372,32 @@ def test_cli_python_version_passed_through(tmp_path: Path) -> None:
         result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj"), "--python-version", "3.13"])
     assert result == 0
     assert (tmp_path / "test-proj" / ".python-version").read_text().strip() == "3.13"
+
+
+def test_cli_invalid_install_mode_rejected() -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        cli_main(["new", "my-app", "--install", "bad"])
+    assert exc_info.value.code == 2
+
+
+def test_run_new_install_none_only_sync(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = run_new("cool-tool", at=str(tmp_path / "cool-tool"), cwd=tmp_path, install_mode="none")
+    assert result == 0
+    mock_run.assert_called_once_with(["uv", "sync"], cwd=tmp_path / "cool-tool", check=False)
+
+
+def test_cli_install_command_only(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj"), "--install", "command-only"])
+    assert result == 0
+    mock_run.assert_called_once_with(["uv", "sync"], cwd=tmp_path / "test-proj", check=False)
+    assert "uv tool install --editable" in capsys.readouterr().out

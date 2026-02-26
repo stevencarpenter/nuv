@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = []
 
+[project.scripts]
+{name} = "main:main"
+
 [dependency-groups]
 dev = [
     "pytest>=8",
@@ -32,3 +35,10 @@ branch = true
 
 [tool.coverage.report]
 exclude_lines = ["if __name__ == .__main__.:"]
+
+[tool.hatch.build.targets.wheel]
+include = ["main.py", "_logging.py"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

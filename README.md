@@ -23,8 +23,10 @@ uvx --from git+https://github.com/stevencarpenter/nuv nuv new my-tool
 ## Usage
 
 ```
-nuv new <name>              # creates ./<name>/ in cwd
-nuv new <name> --at <path>  # creates at an explicit path
+nuv new <name>                              # creates ./<name>/, syncs deps, installs tool editable
+nuv new <name> --at <path>                  # creates at an explicit path
+nuv new <name> --install none               # scaffold + sync, skip tool install
+nuv new <name> --install command-only       # print install command, do not execute
 ```
 
 ### What you get
@@ -38,6 +40,8 @@ my-tool/
     ├── __init__.py
     └── test_main.py  # passing test from day one
 ```
+
+By default, `nuv new` now also runs `uv tool install --editable <project-path>` so the generated command is immediately available on your PATH.
 
 After `nuv new`, all of these pass immediately:
 
@@ -67,3 +71,12 @@ The `--archetype` flag is reserved for upcoming project types:
 nuv new my-api --archetype fastapi   # coming soon
 nuv new my-job --archetype spark     # coming soon
 ```
+
+## Two-layer installation roadmap
+
+We are evolving `nuv` toward two explicit layers:
+
+1. **Install `nuv` anywhere** via `uv tool install` (or run without install using `uvx`).
+2. **Install generated projects** with optional automation for editable tool installs, while keeping default scaffolding conservative.
+
+See the design brainstorm and phased proposal in `docs/plans/2026-02-26-two-layer-installation.md`.

@@ -6,6 +6,8 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
+INSTALL_MODES = ("editable", "none", "command-only")
+
 
 def validate_name(name: str) -> str:
     if not name:
@@ -27,6 +29,12 @@ def validate_python_version(version: str) -> str:
     if not re.fullmatch(r"\d+\.\d+", version):
         raise ValueError(f"Python version must be MAJOR.MINOR (e.g. 3.14), got: {version!r}")
     return version
+
+
+def validate_install_mode(mode: str) -> str:
+    if mode not in INSTALL_MODES:
+        raise ValueError(f"Install mode must be one of {INSTALL_MODES}, got: {mode!r}")
+    return mode
 
 
 def render_template(
@@ -84,6 +92,28 @@ def run_uv_sync(target: Path) -> None:
         raise RuntimeError(f"uv sync failed (exit {result.returncode})")
 
 
+def build_tool_install_command(target: Path) -> list[str]:
+    return ["uv", "tool", "install", "--editable", str(target)]
+
+
+def run_tool_install(target: Path, *, mode: str) -> None:
+    validated_mode = validate_install_mode(mode)
+    if validated_mode == "none":
+        return
+
+    command = build_tool_install_command(target)
+    if validated_mode == "command-only":
+        print("Run this to install the generated tool:")
+        print(" ".join(command))
+        return
+
+    if shutil.which("uv") is None:
+        raise RuntimeError("uv not found in PATH. Install uv: https://docs.astral.sh/uv/")
+    result = subprocess.run(command, cwd=target, check=False)
+    if result.returncode != 0:
+        raise RuntimeError(f"uv tool install failed (exit {result.returncode})")
+
+
 def resolve_target(name: str, *, at: str | None, cwd: Path) -> Path:
     target = Path(at) if at else cwd / name
     if target.exists():
@@ -98,6 +128,7 @@ def run_new(
     cwd: Path | None = None,
     archetype: str = "script",
     python_version: str = DEFAULT_PYTHON_VERSION,
+    install_mode: str = "editable",
 ) -> int:
     if cwd is None:
         cwd = Path.cwd()
@@ -114,6 +145,7 @@ def run_new(
             python_version=python_version,
         )
         run_uv_sync(target)
+        run_tool_install(target, mode=install_mode)
     except (ValueError, RuntimeError, FileNotFoundError) as exc:
         log.error("%s", exc)
         return 1
