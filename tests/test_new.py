@@ -5,12 +5,14 @@ import pytest
 
 from nuv.cli import main as cli_main
 from nuv.commands.new import (
+    DEFAULT_PYTHON_VERSION,
     render_template,
     resolve_target,
     run_new,
     run_uv_sync,
     scaffold_files,
     validate_name,
+    validate_python_version,
 )
 
 
@@ -52,6 +54,25 @@ def test_validate_name_invalid_chars() -> None:
 
 
 # ---------------------------------------------------------------------------
+# validate_python_version
+# ---------------------------------------------------------------------------
+
+
+def test_validate_python_version_valid() -> None:
+    assert validate_python_version("3.14") == "3.14"
+
+
+def test_validate_python_version_invalid_patch() -> None:
+    with pytest.raises(ValueError, match="MAJOR.MINOR"):
+        validate_python_version("3.14.1")
+
+
+def test_validate_python_version_invalid_bare() -> None:
+    with pytest.raises(ValueError, match="MAJOR.MINOR"):
+        validate_python_version("3")
+
+
+# ---------------------------------------------------------------------------
 # resolve_target
 # ---------------------------------------------------------------------------
 
@@ -84,7 +105,7 @@ def test_render_template_substitutes_name() -> None:
     assert "hello-world" in result
 
 
-def test_render_template_substitutes_module_name() -> None:
+def test_render_template_pyproject_uses_name() -> None:
     result = render_template("pyproject.toml.tpl", name="hello-world", module_name="hello_world")
     assert "hello-world" in result
 
@@ -117,7 +138,7 @@ def test_scaffold_files_python_version_content(tmp_path: Path) -> None:
     target = tmp_path / "my-project"
     target.mkdir()
     scaffold_files(target, name="my-project", module_name="my_project")
-    assert (target / ".python-version").read_text().strip() == "3.14"
+    assert (target / ".python-version").read_text().strip() == DEFAULT_PYTHON_VERSION
 
 
 def test_scaffold_files_custom_python_version(tmp_path: Path) -> None:
@@ -128,6 +149,13 @@ def test_scaffold_files_custom_python_version(tmp_path: Path) -> None:
     pyproject = (target / "pyproject.toml").read_text()
     assert ">=3.13" in pyproject
     assert "py313" in pyproject
+
+
+def test_scaffold_files_invalid_python_version(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    with pytest.raises(ValueError, match="MAJOR.MINOR"):
+        scaffold_files(target, name="my-project", module_name="my_project", python_version="3.14.1")
 
 
 def test_scaffold_files_substitutes_name(tmp_path: Path) -> None:
