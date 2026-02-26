@@ -51,7 +51,7 @@ def build_parser() -> argparse.ArgumentParser:
             "Install behavior for the generated project (default: editable). "
             "editable: run `uv tool install --editable`; "
             "none: skip tool installation; "
-            "command-only: print the install command without running it."
+            "command-only: log the install command without running it (use `--log-level INFO` to display)."
         ),
     )
 

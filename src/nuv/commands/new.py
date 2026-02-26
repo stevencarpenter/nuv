@@ -103,8 +103,8 @@ def run_tool_install(target: Path, *, mode: str) -> None:
 
     command = build_tool_install_command(target)
     if validated_mode == "command-only":
-        print("Run this to install the generated tool:")
-        print(" ".join(command))
+        log.info("Run this to install the generated tool:")
+        log.info("%s", " ".join(command))
         return
 
     if shutil.which("uv") is None:
@@ -112,6 +112,7 @@ def run_tool_install(target: Path, *, mode: str) -> None:
     result = subprocess.run(command, cwd=target, check=False)
     if result.returncode != 0:
         raise RuntimeError(f"uv tool install failed (exit {result.returncode})")
+    log.info("installed tool in editable mode at %s", target)
 
 
 def resolve_target(name: str, *, at: str | None, cwd: Path) -> Path:

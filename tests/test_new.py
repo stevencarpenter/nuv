@@ -98,10 +98,10 @@ def test_run_tool_install_none(tmp_path: Path) -> None:
     run_tool_install(tmp_path, mode="none")
 
 
-def test_run_tool_install_command_only(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    run_tool_install(tmp_path, mode="command-only")
-    output = capsys.readouterr().out
-    assert "uv tool install --editable" in output
+def test_run_tool_install_command_only(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level("INFO", logger="nuv.commands.new"):
+        run_tool_install(tmp_path, mode="command-only")
+    assert "uv tool install --editable" in caplog.text
 
 
 def test_run_tool_install_editable_calls_uv(tmp_path: Path) -> None:
@@ -116,6 +116,17 @@ def test_run_tool_install_editable_calls_uv(tmp_path: Path) -> None:
         cwd=tmp_path,
         check=False,
     )
+
+
+def test_run_tool_install_editable_logs_success(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+        caplog.at_level("INFO", logger="nuv.commands.new"),
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        run_tool_install(tmp_path, mode="editable")
+    assert "installed tool in editable mode at" in caplog.text
 
 
 def test_run_tool_install_editable_uv_not_found(tmp_path: Path) -> None:
@@ -389,13 +400,14 @@ def test_run_new_install_none_only_sync(tmp_path: Path) -> None:
     mock_run.assert_called_once_with(["uv", "sync"], cwd=tmp_path / "cool-tool", check=False)
 
 
-def test_cli_install_command_only(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_cli_install_command_only(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     with (
         patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
         patch("nuv.commands.new.subprocess.run") as mock_run,
     ):
         mock_run.return_value = MagicMock(returncode=0)
-        result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj"), "--install", "command-only"])
+        with caplog.at_level("INFO", logger="nuv.commands.new"):
+            result = cli_main(["--log-level", "INFO", "new", "test-proj", "--at", str(tmp_path / "test-proj"), "--install", "command-only"])
     assert result == 0
     mock_run.assert_called_once_with(["uv", "sync"], cwd=tmp_path / "test-proj", check=False)
-    assert "uv tool install --editable" in capsys.readouterr().out
+    assert "uv tool install --editable" in caplog.text
