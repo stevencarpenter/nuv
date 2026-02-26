@@ -3,8 +3,29 @@ name = "nuv"
 version = "0.1.0"
 description = "Scaffold opinionated uv Python projects"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Steven Carpenter" }]
+keywords = ["uv", "cli", "scaffold", "project-template"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Code Generators",
+]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/stevencarpenter/nuv"
+Repository = "https://github.com/stevencarpenter/nuv"
+Issues = "https://github.com/stevencarpenter/nuv/issues"
 
 [project.scripts]
 nuv = "nuv.cli:main"
@@ -24,7 +45,7 @@ managed = true
 addopts = "--cov=nuv --cov-report=term-missing --cov-fail-under=100"
 
 [tool.ruff]
-target-version = "py314"
+target-version = "py311"
 line-length = 180
 
 [tool.ruff.lint]
