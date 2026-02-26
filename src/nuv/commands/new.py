@@ -18,6 +18,7 @@ def validate_name(name: str) -> str:
 
 
 _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
+_PYTHON_VERSION = "3.14"
 
 
 def render_template(
@@ -37,7 +38,7 @@ def scaffold_files(
 ) -> None:
     vars = {"name": name, "module_name": module_name, "archetype": archetype}
 
-    (target / ".python-version").write_text("3.14\n", encoding="utf-8")
+    (target / ".python-version").write_text(f"{_PYTHON_VERSION}\n", encoding="utf-8")
     (target / ".gitignore").write_text(
         render_template("gitignore.tpl", **vars), encoding="utf-8"
     )

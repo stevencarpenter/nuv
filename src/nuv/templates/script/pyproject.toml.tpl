@@ -19,7 +19,6 @@ managed = true
 
 [tool.pytest.ini_options]
 addopts = "--cov=main --cov-report=term-missing --cov-fail-under=100"
-pythonpath = ["."]
 
 [tool.ruff]
 target-version = "py314"
