@@ -49,7 +49,7 @@ uv run ty check src/
 
 - All source lives under `src/nuv/`; tests live under `tests/`.
 - 100% branch coverage is enforced — every new code path must have a corresponding test.
-- Use `string.Template` (not f-strings or Jinja) for file templates stored in `src/nuv/templates/`.
+- Use `str.format()` (not f-strings or Jinja) for file templates stored in `src/nuv/templates/`; placeholders use `{name}` syntax, and literal `{`/`}` must be written as `{{`/`}}`.
 - Public functions are typed with PEP 604 union syntax (`X | None`) and return types annotated.
 - Errors are surfaced by raising `ValueError`, `RuntimeError`, or `FileNotFoundError` (for missing templates); the CLI entry point catches these, logs them at ERROR level, and returns exit code 1.
 - Logging is configured once via `_logging.configure()` (defined in `src/nuv/_logging.py`). Each module uses `log = logging.getLogger(__name__)`. `cli.main()` calls `configure(args.log_level)` with a `--log-level` flag (default `WARNING`). Scaffolded projects include an identical `_logging.py` module so the pattern carries forward.
