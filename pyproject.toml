@@ -25,6 +25,7 @@ addopts = "--cov=nuv --cov-report=term-missing --cov-fail-under=100"
 
 [tool.ruff]
 target-version = "py314"
+line-length = 180
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
