@@ -18,7 +18,7 @@ dev = [
 managed = true
 
 [tool.pytest.ini_options]
-addopts = "--cov=main --cov-report=term-missing --cov-fail-under=100"
+addopts = "--cov=main --cov=_logging --cov-report=term-missing --cov-fail-under=100"
 
 [tool.ruff]
 target-version = "py{python_version_nodot}"

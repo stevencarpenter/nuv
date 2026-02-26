@@ -1,7 +1,8 @@
 import argparse
 import logging
-import sys
 from collections.abc import Sequence
+
+from _logging import configure
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -42,11 +43,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    logging.basicConfig(
-        level=args.log_level,
-        format="%(levelname)s %(name)s: %(message)s",
-        stream=sys.stderr,
-    )
+    configure(args.log_level)
     log.debug("Starting %s", PROJECT_NAME)
     return 0
 

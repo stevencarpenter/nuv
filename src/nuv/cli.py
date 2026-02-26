@@ -1,8 +1,7 @@
 import argparse
-import logging
-import sys
 from collections.abc import Sequence
 
+from nuv._logging import configure
 from nuv.commands.new import DEFAULT_PYTHON_VERSION, validate_python_version
 
 
@@ -52,11 +51,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     parser = build_parser()
     args = parser.parse_args(argv)
-    logging.basicConfig(
-        level=args.log_level,
-        format="%(levelname)s %(name)s: %(message)s",
-        stream=sys.stderr,
-    )
+    configure(args.log_level)
 
     if args.command == "new":
         return run_new(
