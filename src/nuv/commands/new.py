@@ -1,9 +1,11 @@
+import logging
 import re
 import shutil
 import subprocess
-import sys
 from pathlib import Path
 from string import Template
+
+log = logging.getLogger(__name__)
 
 
 def validate_name(name: str) -> str:
@@ -90,8 +92,8 @@ def run_new(
             target, name=validated, module_name=module_name, archetype=archetype
         )
         run_uv_sync(target)
-    except (ValueError, RuntimeError) as exc:
-        print(f"Error: {exc}", file=sys.stderr)
+    except (ValueError, RuntimeError, FileNotFoundError) as exc:
+        log.error("%s", exc)
         return 1
-    print(f"created {target}/")
+    log.info("created %s/", target)
     return 0

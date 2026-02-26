@@ -1,4 +1,6 @@
 import argparse
+import logging
+import sys
 from collections.abc import Sequence
 
 
@@ -6,6 +8,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="nuv",
         description="Scaffold opinionated uv Python projects.",
+    )
+    parser.add_argument(
+        "--log-level",
+        default="WARNING",
+        choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
+        help="Logging level (default: WARNING).",
     )
     subparsers = parser.add_subparsers(dest="command", metavar="<command>")
 
@@ -29,6 +37,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     parser = build_parser()
     args = parser.parse_args(argv)
+    logging.basicConfig(
+        level=args.log_level,
+        format="%(levelname)s %(name)s: %(message)s",
+        stream=sys.stderr,
+    )
 
     if args.command == "new":
         return run_new(args.name, at=args.at, archetype=args.archetype)
