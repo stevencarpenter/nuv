@@ -75,8 +75,6 @@ def test_validate_python_version_invalid_bare() -> None:
         validate_python_version("3")
 
 
-
-
 # ---------------------------------------------------------------------------
 # install mode
 # ---------------------------------------------------------------------------
@@ -120,14 +118,13 @@ def test_run_tool_install_editable_calls_uv(tmp_path: Path) -> None:
     )
 
 
-
-
 def test_run_tool_install_editable_uv_not_found(tmp_path: Path) -> None:
     with (
         patch("nuv.commands.new.shutil.which", return_value=None),
         pytest.raises(RuntimeError, match="uv not found"),
     ):
         run_tool_install(tmp_path, mode="editable")
+
 
 def test_run_tool_install_editable_nonzero_exit(tmp_path: Path) -> None:
     with (
@@ -137,6 +134,7 @@ def test_run_tool_install_editable_nonzero_exit(tmp_path: Path) -> None:
     ):
         mock_run.return_value = MagicMock(returncode=1)
         run_tool_install(tmp_path, mode="editable")
+
 
 # ---------------------------------------------------------------------------
 # resolve_target
@@ -217,7 +215,7 @@ def test_scaffold_files_custom_python_version(tmp_path: Path) -> None:
     assert ">=3.13" in pyproject
     assert "py313" in pyproject
     assert "[project.scripts]" in pyproject
-    assert "build-backend = \"hatchling.build\"" in pyproject
+    assert 'build-backend = "hatchling.build"' in pyproject
     assert "setuptools" not in pyproject
 
 
