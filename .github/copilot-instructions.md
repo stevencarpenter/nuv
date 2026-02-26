@@ -50,7 +50,9 @@ uv run ty check src/
 - 100% branch coverage is enforced — every new code path must have a corresponding test.
 - Use `string.Template` (not f-strings or Jinja) for file templates stored in `src/nuv/templates/`.
 - Public functions are typed with PEP 604 union syntax (`X | None`) and return types annotated.
-- Errors are surfaced by raising `ValueError` or `RuntimeError`; callers catch and print to stderr, returning exit code 1.
+- Errors are surfaced by raising `ValueError`, `RuntimeError`, or `FileNotFoundError` (for missing templates); the CLI entry point catches these, logs them at ERROR level, and returns exit code 1.
+- Use `log = logging.getLogger(__name__)` in each module. `cli.main()` calls `logging.basicConfig()` with format `"%(levelname)s %(name)s: %(message)s"`, `stream=sys.stderr`, and a `--log-level` flag (default `WARNING`) — matching the pattern in the scaffolded template.
+- Do not use `print()` for user-facing output — use `log.info()` for success messages and `log.error()` for errors.
 - Do not introduce new runtime dependencies without updating `pyproject.toml` and `uv.lock`.
 - Follow ruff lint rules: `E`, `F`, `I`, `UP`, `B`, `SIM`.
 
