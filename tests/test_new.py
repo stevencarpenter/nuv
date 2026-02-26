@@ -12,6 +12,7 @@ from nuv.commands.new import (
     run_uv_sync,
     scaffold_files,
     validate_name,
+    validate_python_version,
 )
 
 
@@ -50,6 +51,25 @@ def test_validate_name_leading_hyphen() -> None:
 def test_validate_name_invalid_chars() -> None:
     with pytest.raises(ValueError, match="invalid"):
         validate_name("bad/name")
+
+
+# ---------------------------------------------------------------------------
+# validate_python_version
+# ---------------------------------------------------------------------------
+
+
+def test_validate_python_version_valid() -> None:
+    assert validate_python_version("3.14") == "3.14"
+
+
+def test_validate_python_version_invalid_patch() -> None:
+    with pytest.raises(ValueError, match="MAJOR.MINOR"):
+        validate_python_version("3.14.1")
+
+
+def test_validate_python_version_invalid_bare() -> None:
+    with pytest.raises(ValueError, match="MAJOR.MINOR"):
+        validate_python_version("3")
 
 
 # ---------------------------------------------------------------------------

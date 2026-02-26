@@ -23,6 +23,12 @@ _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
 DEFAULT_PYTHON_VERSION = "3.14"
 
 
+def validate_python_version(version: str) -> str:
+    if not re.fullmatch(r"\d+\.\d+", version):
+        raise ValueError(f"Python version must be MAJOR.MINOR (e.g. 3.14), got: {version!r}")
+    return version
+
+
 def render_template(
     tpl_name: str,
     *,
@@ -50,8 +56,7 @@ def scaffold_files(
     archetype: str = "script",
     python_version: str = DEFAULT_PYTHON_VERSION,
 ) -> None:
-    if not re.fullmatch(r"\d+\.\d+", python_version):
-        raise ValueError(f"Python version must be MAJOR.MINOR (e.g. 3.14), got: {python_version!r}")
+    validate_python_version(python_version)
     template_vars = {
         "name": name,
         "module_name": module_name,

@@ -1,16 +1,16 @@
 import argparse
 import logging
-import re
 import sys
 from collections.abc import Sequence
 
-from nuv.commands.new import DEFAULT_PYTHON_VERSION
+from nuv.commands.new import DEFAULT_PYTHON_VERSION, validate_python_version
 
 
 def _parse_python_version(value: str) -> str:
-    if not re.fullmatch(r"\d+\.\d+", value):
-        raise argparse.ArgumentTypeError(f"Python version must be MAJOR.MINOR (e.g. 3.14), got: {value!r}")
-    return value
+    try:
+        return validate_python_version(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from exc
 
 
 def build_parser() -> argparse.ArgumentParser:
