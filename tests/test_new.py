@@ -5,12 +5,14 @@ import pytest
 
 from nuv.cli import main as cli_main
 from nuv.commands.new import (
+    DEFAULT_PYTHON_VERSION,
     render_template,
     resolve_target,
     run_new,
     run_uv_sync,
     scaffold_files,
     validate_name,
+    validate_python_version,
 )
 
 
@@ -52,6 +54,25 @@ def test_validate_name_invalid_chars() -> None:
 
 
 # ---------------------------------------------------------------------------
+# validate_python_version
+# ---------------------------------------------------------------------------
+
+
+def test_validate_python_version_valid() -> None:
+    assert validate_python_version("3.14") == "3.14"
+
+
+def test_validate_python_version_invalid_patch() -> None:
+    with pytest.raises(ValueError, match="MAJOR.MINOR"):
+        validate_python_version("3.14.1")
+
+
+def test_validate_python_version_invalid_bare() -> None:
+    with pytest.raises(ValueError, match="MAJOR.MINOR"):
+        validate_python_version("3")
+
+
+# ---------------------------------------------------------------------------
 # resolve_target
 # ---------------------------------------------------------------------------
 
@@ -80,16 +101,12 @@ def test_resolve_target_already_exists(tmp_path: Path) -> None:
 
 
 def test_render_template_substitutes_name() -> None:
-    result = render_template(
-        "readme.md.tpl", name="hello-world", module_name="hello_world"
-    )
+    result = render_template("readme.md.tpl", name="hello-world", module_name="hello_world")
     assert "hello-world" in result
 
 
-def test_render_template_substitutes_module_name() -> None:
-    result = render_template(
-        "pyproject.toml.tpl", name="hello-world", module_name="hello_world"
-    )
+def test_render_template_pyproject_uses_name() -> None:
+    result = render_template("pyproject.toml.tpl", name="hello-world", module_name="hello_world")
     assert "hello-world" in result
 
 
@@ -108,11 +125,37 @@ def test_scaffold_files_creates_expected_files(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-project", module_name="my_project")
 
+    assert (target / ".python-version").exists()
+    assert (target / ".gitignore").exists()
     assert (target / "main.py").exists()
     assert (target / "pyproject.toml").exists()
     assert (target / "README.md").exists()
     assert (target / "tests" / "test_main.py").exists()
     assert (target / "tests" / "__init__.py").exists()
+
+
+def test_scaffold_files_python_version_content(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    scaffold_files(target, name="my-project", module_name="my_project")
+    assert (target / ".python-version").read_text().strip() == DEFAULT_PYTHON_VERSION
+
+
+def test_scaffold_files_custom_python_version(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    scaffold_files(target, name="my-project", module_name="my_project", python_version="3.13")
+    assert (target / ".python-version").read_text().strip() == "3.13"
+    pyproject = (target / "pyproject.toml").read_text()
+    assert ">=3.13" in pyproject
+    assert "py313" in pyproject
+
+
+def test_scaffold_files_invalid_python_version(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    with pytest.raises(ValueError, match="MAJOR.MINOR"):
+        scaffold_files(target, name="my-project", module_name="my_project", python_version="3.14.1")
 
 
 def test_scaffold_files_substitutes_name(tmp_path: Path) -> None:
@@ -225,3 +268,26 @@ def test_cli_new_dispatches(tmp_path: Path) -> None:
         mock_run.return_value = MagicMock(returncode=0)
         result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj")])
     assert result == 0
+
+
+def test_cli_invalid_archetype_rejected() -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        cli_main(["new", "my-app", "--archetype", "invalid"])
+    assert exc_info.value.code == 2
+
+
+def test_cli_invalid_python_version_rejected() -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        cli_main(["new", "my-app", "--python-version", "3.14.1"])
+    assert exc_info.value.code == 2
+
+
+def test_cli_python_version_passed_through(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj"), "--python-version", "3.13"])
+    assert result == 0
+    assert (tmp_path / "test-proj" / ".python-version").read_text().strip() == "3.13"

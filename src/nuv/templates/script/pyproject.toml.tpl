@@ -1,9 +1,9 @@
 [project]
-name = "$name"
+name = "{name}"
 version = "0.1.0"
 description = ""
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">={python_version}"
 dependencies = []
 
 [dependency-groups]
@@ -14,11 +14,15 @@ dev = [
     "ty>=0.0.1a1",
 ]
 
+[tool.uv]
+managed = true
+
 [tool.pytest.ini_options]
-addopts = "--cov=. --cov-report=term-missing --cov-fail-under=100"
+addopts = "--cov=main --cov-report=term-missing --cov-fail-under=100"
 
 [tool.ruff]
-target-version = "py314"
+target-version = "py{python_version_nodot}"
+line-length = 180
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
