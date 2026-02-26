@@ -93,7 +93,7 @@ After scaffold:
 - Add `--no-sync` for fast offline scaffolding.
 - Add `--frozen` for reproducible lockfile-first setup in CI.
 
-### Option 2B — optional editable tool install for generated project (recommended opt-in)
+### Option 2B — editable tool install for generated project (implemented default today)
 
 Add a `--install` mode to `nuv new`:
 
@@ -105,10 +105,10 @@ Suggested implementation contract:
 2. Run `uv sync`.
 3. Run `uv tool install --editable <target>` (or emit exact command if policy is "no global side effects by default").
 
-**Why opt-in**
+**Why this can still work as a default in the current implementation**
 
-- Global tool installs modify user environment; doing this silently by default is surprising.
-- Keeps existing `nuv new` deterministic and conservative.
+- Global tool installs modify user environment, so the command remains explicit and configurable via `--install`.
+- `nuv` still offers conservative alternatives (`--install none` and `--install command-only`) for CI and dry-run style workflows.
 
 ### Option 2C — always global-install generated tool (not recommended default)
 
@@ -149,8 +149,8 @@ Testing updates:
 ### Phase 2
 
 - Add `--install` flag with values:
-  - `none` (default)
-  - `editable` (attempt `uv tool install --editable <target>`)
+  - `editable` (default today; runs `uv tool install --editable <target>`)
+  - `none` (skip tool install)
   - `command-only` (print command without executing)
 
 ### Phase 3
@@ -183,8 +183,8 @@ my-tool --help
 
 ## Decision summary
 
-- **Default**: conservative scaffolding + `uv sync` (already aligned with `uv` workflows).
-- **Opt-in**: global editable install mode for users who want immediate command availability.
+- **Default**: scaffold + `uv sync` + editable tool install for immediate command availability.
+- **Alternatives**: conservative modes remain available via `--install none` and `--install command-only`.
 - **Architecture**: introduce package-first template path to make install behavior robust.
 
 This balances ease-of-use, explicitness, and predictable side effects while staying idiomatic with `uv` conventions.

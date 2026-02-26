@@ -41,7 +41,7 @@ my-tool/
     └── test_main.py  # passing test from day one
 ```
 
-By default, `nuv new` now also runs `uv tool install --editable <project-path>` so the generated command is immediately available on your PATH.
+By default, `nuv new` now also runs `uv tool install --editable <project-path>`, so the `<name>` command (derived from the `{name}` argument, for example `my-tool`) is immediately available on your PATH.
 
 After `nuv new`, all of these pass immediately:
 
@@ -77,6 +77,6 @@ nuv new my-job --archetype spark     # coming soon
 We are evolving `nuv` toward two explicit layers:
 
 1. **Install `nuv` anywhere** via `uv tool install` (or run without install using `uvx`).
-2. **Install generated projects** with optional automation for editable tool installs, while keeping default scaffolding conservative.
+2. **Install generated projects** with optional automation for tool installs (editable by default today, with a longer-term goal of keeping scaffolding defaults conservative).
 
 See the design brainstorm and phased proposal in `docs/plans/2026-02-26-two-layer-installation.md`.
