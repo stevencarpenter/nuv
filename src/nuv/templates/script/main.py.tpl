@@ -7,7 +7,7 @@ from collections.abc import Sequence
 # Constants
 # ---------------------------------------------------------------------------
 
-PROJECT_NAME = "$name"
+PROJECT_NAME = "{name}"
 
 # ---------------------------------------------------------------------------
 # Logging

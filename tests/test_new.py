@@ -108,11 +108,20 @@ def test_scaffold_files_creates_expected_files(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-project", module_name="my_project")
 
+    assert (target / ".python-version").exists()
+    assert (target / ".gitignore").exists()
     assert (target / "main.py").exists()
     assert (target / "pyproject.toml").exists()
     assert (target / "README.md").exists()
     assert (target / "tests" / "test_main.py").exists()
     assert (target / "tests" / "__init__.py").exists()
+
+
+def test_scaffold_files_python_version_content(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    scaffold_files(target, name="my-project", module_name="my_project")
+    assert (target / ".python-version").read_text().strip() == "3.14"
 
 
 def test_scaffold_files_substitutes_name(tmp_path: Path) -> None:
@@ -216,3 +225,9 @@ def test_cli_new_dispatches(tmp_path: Path) -> None:
         mock_run.return_value = MagicMock(returncode=0)
         result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj")])
     assert result == 0
+
+
+def test_cli_invalid_archetype_rejected() -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        cli_main(["new", "my-app", "--archetype", "invalid"])
+    assert exc_info.value.code == 2

@@ -17,6 +17,7 @@ def build_parser() -> argparse.ArgumentParser:
     new_parser.add_argument(
         "--archetype",
         default="script",
+        choices=["script"],
         metavar="TYPE",
         help="Project archetype (default: script).",
     )

@@ -3,7 +3,6 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from string import Template
 
 
 def validate_name(name: str) -> str:
@@ -27,7 +26,7 @@ def render_template(
     tpl_path = _TEMPLATES_ROOT / archetype / tpl_name
     if not tpl_path.exists():
         raise FileNotFoundError(f"Template not found: {archetype}/{tpl_name}")
-    return Template(tpl_path.read_text(encoding="utf-8")).substitute(
+    return tpl_path.read_text(encoding="utf-8").format(
         name=name,
         module_name=module_name,
     )
@@ -38,6 +37,10 @@ def scaffold_files(
 ) -> None:
     vars = {"name": name, "module_name": module_name, "archetype": archetype}
 
+    (target / ".python-version").write_text("3.14\n", encoding="utf-8")
+    (target / ".gitignore").write_text(
+        render_template("gitignore.tpl", **vars), encoding="utf-8"
+    )
     (target / "main.py").write_text(
         render_template("main.py.tpl", **vars), encoding="utf-8"
     )
