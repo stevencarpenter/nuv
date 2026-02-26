@@ -22,6 +22,7 @@ addopts = "--cov=main --cov-report=term-missing --cov-fail-under=100"
 
 [tool.ruff]
 target-version = "py{python_version_nodot}"
+line-length = 180
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
