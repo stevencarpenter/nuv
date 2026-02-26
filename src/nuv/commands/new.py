@@ -18,10 +18,16 @@ def validate_name(name: str) -> str:
 
 
 _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
+_PYTHON_VERSION = "3.14"
 
 
 def render_template(
-    tpl_name: str, *, archetype: str = "script", name: str, module_name: str
+    tpl_name: str,
+    *,
+    archetype: str = "script",
+    name: str,
+    module_name: str,
+    python_version: str = _PYTHON_VERSION,
 ) -> str:
     tpl_path = _TEMPLATES_ROOT / archetype / tpl_name
     if not tpl_path.exists():
@@ -29,15 +35,27 @@ def render_template(
     return tpl_path.read_text(encoding="utf-8").format(
         name=name,
         module_name=module_name,
+        python_version=python_version,
+        python_version_nodot=python_version.replace(".", ""),
     )
 
 
 def scaffold_files(
-    target: Path, *, name: str, module_name: str, archetype: str = "script"
+    target: Path,
+    *,
+    name: str,
+    module_name: str,
+    archetype: str = "script",
+    python_version: str = _PYTHON_VERSION,
 ) -> None:
-    vars = {"name": name, "module_name": module_name, "archetype": archetype}
+    vars = {
+        "name": name,
+        "module_name": module_name,
+        "archetype": archetype,
+        "python_version": python_version,
+    }
 
-    (target / ".python-version").write_text("3.14\n", encoding="utf-8")
+    (target / ".python-version").write_text(f"{python_version}\n", encoding="utf-8")
     (target / ".gitignore").write_text(
         render_template("gitignore.tpl", **vars), encoding="utf-8"
     )
@@ -81,6 +99,7 @@ def run_new(
     at: str | None = None,
     cwd: Path | None = None,
     archetype: str = "script",
+    python_version: str = _PYTHON_VERSION,
 ) -> int:
     if cwd is None:
         cwd = Path.cwd()
@@ -90,7 +109,11 @@ def run_new(
         module_name = validated.replace("-", "_")
         target.mkdir(parents=True)
         scaffold_files(
-            target, name=validated, module_name=module_name, archetype=archetype
+            target,
+            name=validated,
+            module_name=module_name,
+            archetype=archetype,
+            python_version=python_version,
         )
         run_uv_sync(target)
     except (ValueError, RuntimeError) as exc:

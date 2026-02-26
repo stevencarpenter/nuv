@@ -49,4 +49,4 @@ jobs:
       - name: Integration smoke test
         run: |
           uv run --frozen nuv new smoke-test --at /tmp/smoke-test
-          cd /tmp/smoke-test && uv sync && uv run pytest
+          cd /tmp/smoke-test && uv sync --frozen && uv run --frozen pytest

@@ -124,6 +124,16 @@ def test_scaffold_files_python_version_content(tmp_path: Path) -> None:
     assert (target / ".python-version").read_text().strip() == "3.14"
 
 
+def test_scaffold_files_custom_python_version(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    scaffold_files(target, name="my-project", module_name="my_project", python_version="3.13")
+    assert (target / ".python-version").read_text().strip() == "3.13"
+    pyproject = (target / "pyproject.toml").read_text()
+    assert ">=3.13" in pyproject
+    assert "py313" in pyproject
+
+
 def test_scaffold_files_substitutes_name(tmp_path: Path) -> None:
     target = tmp_path / "my-project"
     target.mkdir()
@@ -231,3 +241,16 @@ def test_cli_invalid_archetype_rejected() -> None:
     with pytest.raises(SystemExit) as exc_info:
         cli_main(["new", "my-app", "--archetype", "invalid"])
     assert exc_info.value.code == 2
+
+
+def test_cli_python_version_passed_through(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(
+            ["new", "test-proj", "--at", str(tmp_path / "test-proj"), "--python-version", "3.13"]
+        )
+    assert result == 0
+    assert (tmp_path / "test-proj" / ".python-version").read_text().strip() == "3.13"
