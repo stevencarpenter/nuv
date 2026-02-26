@@ -27,6 +27,7 @@ nuv new <name>                              # creates ./<name>/, syncs deps, ins
 nuv new <name> --at <path>                  # creates at an explicit path
 nuv new <name> --install none               # scaffold + sync, skip tool install
 nuv new <name> --install command-only       # log install command, do not execute (use --log-level INFO)
+nuv new <name> --keep-on-failure            # keep generated files if sync/install fails
 ```
 
 ### What you get
