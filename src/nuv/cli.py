@@ -1,6 +1,8 @@
 import argparse
 from collections.abc import Sequence
 
+from nuv.commands.new import _PYTHON_VERSION
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -21,6 +23,12 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="TYPE",
         help="Project archetype (default: script).",
     )
+    new_parser.add_argument(
+        "--python-version",
+        default=_PYTHON_VERSION,
+        metavar="VERSION",
+        help=f"Python version for the generated project (default: {_PYTHON_VERSION}).",
+    )
 
     return parser
 
@@ -32,7 +40,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "new":
-        return run_new(args.name, at=args.at, archetype=args.archetype)
+        return run_new(
+            args.name,
+            at=args.at,
+            archetype=args.archetype,
+            python_version=args.python_version,
+        )
 
     parser.print_help()
     return 1

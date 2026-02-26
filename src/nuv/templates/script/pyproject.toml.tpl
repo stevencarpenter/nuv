@@ -3,7 +3,7 @@ name = "{name}"
 version = "0.1.0"
 description = ""
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">={python_version}"
 dependencies = []
 
 [dependency-groups]
@@ -21,7 +21,7 @@ managed = true
 addopts = "--cov=main --cov-report=term-missing --cov-fail-under=100"
 
 [tool.ruff]
-target-version = "py314"
+target-version = "py{python_version_nodot}"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
