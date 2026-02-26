@@ -218,6 +218,15 @@ def test_run_new_uv_not_found(tmp_path: Path) -> None:
     assert result == 1
 
 
+def test_run_new_missing_template(tmp_path: Path) -> None:
+    with patch(
+        "nuv.commands.new.scaffold_files",
+        side_effect=FileNotFoundError("template not found"),
+    ):
+        result = run_new("my-project", cwd=tmp_path)
+    assert result == 1
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
