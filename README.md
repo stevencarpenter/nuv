@@ -11,6 +11,12 @@ That's it. You get a working project with argparse, logging, 100% test coverage,
 ## Install
 
 ```bash
+uv tool install nuv
+```
+
+Until the first PyPI release is published, use:
+
+```bash
 uv tool install git+https://github.com/stevencarpenter/nuv
 ```
 
@@ -81,3 +87,18 @@ We are evolving `nuv` toward two explicit layers:
 2. **Install generated projects** with optional automation for tool installs (editable by default today, with a longer-term goal of keeping scaffolding defaults conservative).
 
 See the design brainstorm and phased proposal in `docs/plans/2026-02-26-two-layer-installation.md`.
+
+
+## Publishing to PyPI
+
+This project is configured for trusted publishing from GitHub Actions.
+
+1. Create a [PyPI project](https://pypi.org/manage/projects/) named `nuv` and add the GitHub OIDC publisher for this repository.
+2. Push a version tag (for example, `v0.1.0`).
+3. The `publish-pypi` workflow will build and upload the distribution to PyPI.
+
+After release, install with:
+
+```bash
+uv tool install nuv
+```
