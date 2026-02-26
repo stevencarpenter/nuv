@@ -42,6 +42,18 @@ def build_parser() -> argparse.ArgumentParser:
         type=_parse_python_version,
         help=f"Python version for the generated project (default: {DEFAULT_PYTHON_VERSION}). Must be MAJOR.MINOR format.",
     )
+    new_parser.add_argument(
+        "--install",
+        default="editable",
+        choices=["editable", "none", "command-only"],
+        metavar="MODE",
+        help=(
+            "Install behavior for the generated project (default: editable). "
+            "editable: run `uv tool install --editable`; "
+            "none: skip tool installation; "
+            "command-only: log the install command without running it (use `--log-level INFO` to display)."
+        ),
+    )
 
     return parser
 
@@ -59,6 +71,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             at=args.at,
             archetype=args.archetype,
             python_version=args.python_version,
+            install_mode=args.install,
         )
 
     parser.print_help()
