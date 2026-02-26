@@ -127,6 +127,7 @@ def test_scaffold_files_creates_expected_files(tmp_path: Path) -> None:
 
     assert (target / ".python-version").exists()
     assert (target / ".gitignore").exists()
+    assert (target / "_logging.py").exists()
     assert (target / "main.py").exists()
     assert (target / "pyproject.toml").exists()
     assert (target / "README.md").exists()
@@ -163,6 +164,15 @@ def test_scaffold_files_substitutes_name(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-project", module_name="my_project")
     assert "my-project" in (target / "README.md").read_text()
+
+
+def test_scaffold_files_logging_module_created(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    scaffold_files(target, name="my-project", module_name="my_project")
+    content = (target / "_logging.py").read_text()
+    assert "LOG_FORMAT" in content
+    assert "def configure(" in content
 
 
 def test_scaffold_files_main_has_project_name(tmp_path: Path) -> None:

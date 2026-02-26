@@ -66,6 +66,7 @@ def scaffold_files(
 
     (target / ".python-version").write_text(f"{python_version}\n", encoding="utf-8")
     (target / ".gitignore").write_text(render_template("gitignore.tpl", **template_vars), encoding="utf-8")
+    (target / "_logging.py").write_text(render_template("_logging.py.tpl", **template_vars), encoding="utf-8")
     (target / "main.py").write_text(render_template("main.py.tpl", **template_vars), encoding="utf-8")
     (target / "pyproject.toml").write_text(render_template("pyproject.toml.tpl", **template_vars), encoding="utf-8")
     (target / "README.md").write_text(render_template("readme.md.tpl", **template_vars), encoding="utf-8")

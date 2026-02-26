@@ -16,11 +16,12 @@
 
 ```
 src/nuv/
+  _logging.py       # LOG_FORMAT + configure(); single source of logging config
   cli.py            # argparse entry point; routes subcommands
   commands/
     new.py          # logic for `nuv new`: validate, scaffold, uv sync
   templates/
-    script/         # *.tpl files rendered via string.Template
+    script/         # *.tpl files rendered via str.format()
 tests/
   test_new.py       # unit tests (100% coverage required)
 ```
@@ -48,10 +49,10 @@ uv run ty check src/
 
 - All source lives under `src/nuv/`; tests live under `tests/`.
 - 100% branch coverage is enforced — every new code path must have a corresponding test.
-- Use `string.Template` (not f-strings or Jinja) for file templates stored in `src/nuv/templates/`.
+- Use `str.format()` (not f-strings or Jinja) for file templates stored in `src/nuv/templates/`; placeholders use `{name}` syntax, and literal `{`/`}` must be written as `{{`/`}}`.
 - Public functions are typed with PEP 604 union syntax (`X | None`) and return types annotated.
 - Errors are surfaced by raising `ValueError`, `RuntimeError`, or `FileNotFoundError` (for missing templates); the CLI entry point catches these, logs them at ERROR level, and returns exit code 1.
-- Use `log = logging.getLogger(__name__)` in each module. `cli.main()` calls `logging.basicConfig()` with format `"%(levelname)s %(name)s: %(message)s"`, `stream=sys.stderr`, and a `--log-level` flag (default `WARNING`) — matching the pattern in the scaffolded template.
+- Logging is configured once via `_logging.configure()` (defined in `src/nuv/_logging.py`). Each module uses `log = logging.getLogger(__name__)`. `cli.main()` calls `configure(args.log_level)` with a `--log-level` flag (default `WARNING`). Scaffolded projects include an identical `_logging.py` module so the pattern carries forward.
 - Do not use `print()` for user-facing output — use `log.info()` for success messages and `log.error()` for errors.
 - Do not introduce new runtime dependencies without updating `pyproject.toml` and `uv.lock`.
 - Follow ruff lint rules: `E`, `F`, `I`, `UP`, `B`, `SIM`.
