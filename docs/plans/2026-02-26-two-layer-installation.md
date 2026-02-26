@@ -78,7 +78,7 @@ There are two fundamentally different interpretations of "installed":
 
 A good strategy is to support both, with explicit defaults.
 
-### Option 2A — development install by default (recommended default)
+### Option 2A — development install by default (recommended future default)
 
 After scaffold:
 

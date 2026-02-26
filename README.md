@@ -26,7 +26,7 @@ uvx --from git+https://github.com/stevencarpenter/nuv nuv new my-tool
 nuv new <name>                              # creates ./<name>/, syncs deps, installs tool editable
 nuv new <name> --at <path>                  # creates at an explicit path
 nuv new <name> --install none               # scaffold + sync, skip tool install
-nuv new <name> --install command-only       # print install command, do not execute
+nuv new <name> --install command-only       # log install command, do not execute (use --log-level INFO)
 ```
 
 ### What you get
@@ -41,7 +41,7 @@ my-tool/
     └── test_main.py  # passing test from day one
 ```
 
-By default, `nuv new` now also runs `uv tool install --editable <project-path>`, so the `<name>` command (derived from the `{name}` argument, for example `my-tool`) is immediately available on your PATH.
+By default, `nuv new` now also runs `uv tool install --editable <project-path>`, so the `<name>` command (derived from the `<name>` argument, for example `my-tool`) is immediately available on your PATH.
 
 After `nuv new`, all of these pass immediately:
 
