@@ -1,9 +1,16 @@
 import argparse
 import logging
+import re
 import sys
 from collections.abc import Sequence
 
-from nuv.commands.new import _PYTHON_VERSION
+from nuv.commands.new import DEFAULT_PYTHON_VERSION
+
+
+def _parse_python_version(value: str) -> str:
+    if not re.fullmatch(r"\d+\.\d+", value):
+        raise argparse.ArgumentTypeError(f"Python version must be MAJOR.MINOR (e.g. 3.14), got: {value!r}")
+    return value
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -21,9 +28,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     new_parser = subparsers.add_parser("new", help="Create a new project.")
     new_parser.add_argument("name", help="Project name.")
-    new_parser.add_argument(
-        "--at", metavar="PATH", help="Target directory (default: ./<name>)."
-    )
+    new_parser.add_argument("--at", metavar="PATH", help="Target directory (default: ./<name>).")
     new_parser.add_argument(
         "--archetype",
         default="script",
@@ -33,9 +38,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     new_parser.add_argument(
         "--python-version",
-        default=_PYTHON_VERSION,
+        default=DEFAULT_PYTHON_VERSION,
         metavar="VERSION",
-        help=f"Python version for the generated project (default: {_PYTHON_VERSION}).",
+        type=_parse_python_version,
+        help=f"Python version for the generated project (default: {DEFAULT_PYTHON_VERSION}). Must be MAJOR.MINOR format.",
     )
 
     return parser

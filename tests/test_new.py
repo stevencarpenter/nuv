@@ -80,16 +80,12 @@ def test_resolve_target_already_exists(tmp_path: Path) -> None:
 
 
 def test_render_template_substitutes_name() -> None:
-    result = render_template(
-        "readme.md.tpl", name="hello-world", module_name="hello_world"
-    )
+    result = render_template("readme.md.tpl", name="hello-world", module_name="hello_world")
     assert "hello-world" in result
 
 
 def test_render_template_substitutes_module_name() -> None:
-    result = render_template(
-        "pyproject.toml.tpl", name="hello-world", module_name="hello_world"
-    )
+    result = render_template("pyproject.toml.tpl", name="hello-world", module_name="hello_world")
     assert "hello-world" in result
 
 
@@ -252,14 +248,18 @@ def test_cli_invalid_archetype_rejected() -> None:
     assert exc_info.value.code == 2
 
 
+def test_cli_invalid_python_version_rejected() -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        cli_main(["new", "my-app", "--python-version", "3.14.1"])
+    assert exc_info.value.code == 2
+
+
 def test_cli_python_version_passed_through(tmp_path: Path) -> None:
     with (
         patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
         patch("nuv.commands.new.subprocess.run") as mock_run,
     ):
         mock_run.return_value = MagicMock(returncode=0)
-        result = cli_main(
-            ["new", "test-proj", "--at", str(tmp_path / "test-proj"), "--python-version", "3.13"]
-        )
+        result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj"), "--python-version", "3.13"])
     assert result == 0
     assert (tmp_path / "test-proj" / ".python-version").read_text().strip() == "3.13"

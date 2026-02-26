@@ -20,7 +20,7 @@ def validate_name(name: str) -> str:
 
 
 _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
-_PYTHON_VERSION = "3.14"
+DEFAULT_PYTHON_VERSION = "3.14"
 
 
 def render_template(
@@ -29,7 +29,7 @@ def render_template(
     archetype: str = "script",
     name: str,
     module_name: str,
-    python_version: str = _PYTHON_VERSION,
+    python_version: str = DEFAULT_PYTHON_VERSION,
 ) -> str:
     tpl_path = _TEMPLATES_ROOT / archetype / tpl_name
     if not tpl_path.exists():
@@ -48,9 +48,9 @@ def scaffold_files(
     name: str,
     module_name: str,
     archetype: str = "script",
-    python_version: str = _PYTHON_VERSION,
+    python_version: str = DEFAULT_PYTHON_VERSION,
 ) -> None:
-    vars = {
+    template_vars = {
         "name": name,
         "module_name": module_name,
         "archetype": archetype,
@@ -58,31 +58,19 @@ def scaffold_files(
     }
 
     (target / ".python-version").write_text(f"{python_version}\n", encoding="utf-8")
-    (target / ".gitignore").write_text(
-        render_template("gitignore.tpl", **vars), encoding="utf-8"
-    )
-    (target / "main.py").write_text(
-        render_template("main.py.tpl", **vars), encoding="utf-8"
-    )
-    (target / "pyproject.toml").write_text(
-        render_template("pyproject.toml.tpl", **vars), encoding="utf-8"
-    )
-    (target / "README.md").write_text(
-        render_template("readme.md.tpl", **vars), encoding="utf-8"
-    )
+    (target / ".gitignore").write_text(render_template("gitignore.tpl", **template_vars), encoding="utf-8")
+    (target / "main.py").write_text(render_template("main.py.tpl", **template_vars), encoding="utf-8")
+    (target / "pyproject.toml").write_text(render_template("pyproject.toml.tpl", **template_vars), encoding="utf-8")
+    (target / "README.md").write_text(render_template("readme.md.tpl", **template_vars), encoding="utf-8")
     tests_dir = target / "tests"
     tests_dir.mkdir()
     (tests_dir / "__init__.py").write_text("", encoding="utf-8")
-    (tests_dir / "test_main.py").write_text(
-        render_template("test_main.py.tpl", **vars), encoding="utf-8"
-    )
+    (tests_dir / "test_main.py").write_text(render_template("test_main.py.tpl", **template_vars), encoding="utf-8")
 
 
 def run_uv_sync(target: Path) -> None:
     if shutil.which("uv") is None:
-        raise RuntimeError(
-            "uv not found in PATH. Install uv: https://docs.astral.sh/uv/"
-        )
+        raise RuntimeError("uv not found in PATH. Install uv: https://docs.astral.sh/uv/")
     result = subprocess.run(["uv", "sync"], cwd=target, check=False)
     if result.returncode != 0:
         raise RuntimeError(f"uv sync failed (exit {result.returncode})")
@@ -101,7 +89,7 @@ def run_new(
     at: str | None = None,
     cwd: Path | None = None,
     archetype: str = "script",
-    python_version: str = _PYTHON_VERSION,
+    python_version: str = DEFAULT_PYTHON_VERSION,
 ) -> int:
     if cwd is None:
         cwd = Path.cwd()
