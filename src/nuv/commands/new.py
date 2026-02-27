@@ -56,6 +56,11 @@ def render_template(
     )
 
 
+def write_with_trailing_newline(path: Path, content: str) -> None:
+    normalized = content if content.endswith("\n") else f"{content}\n"
+    path.write_text(normalized, encoding="utf-8")
+
+
 def scaffold_files(
     target: Path,
     *,
@@ -72,16 +77,16 @@ def scaffold_files(
         "python_version": python_version,
     }
 
-    (target / ".python-version").write_text(f"{python_version}\n", encoding="utf-8")
-    (target / ".gitignore").write_text(render_template("gitignore.tpl", **template_vars), encoding="utf-8")
-    (target / "_logging.py").write_text(render_template("_logging.py.tpl", **template_vars), encoding="utf-8")
-    (target / "main.py").write_text(render_template("main.py.tpl", **template_vars), encoding="utf-8")
-    (target / "pyproject.toml").write_text(render_template("pyproject.toml.tpl", **template_vars), encoding="utf-8")
-    (target / "README.md").write_text(render_template("readme.md.tpl", **template_vars), encoding="utf-8")
+    write_with_trailing_newline(target / ".python-version", python_version)
+    write_with_trailing_newline(target / ".gitignore", render_template("gitignore.tpl", **template_vars))
+    write_with_trailing_newline(target / "_logging.py", render_template("_logging.py.tpl", **template_vars))
+    write_with_trailing_newline(target / "main.py", render_template("main.py.tpl", **template_vars))
+    write_with_trailing_newline(target / "pyproject.toml", render_template("pyproject.toml.tpl", **template_vars))
+    write_with_trailing_newline(target / "README.md", render_template("readme.md.tpl", **template_vars))
     tests_dir = target / "tests"
     tests_dir.mkdir()
-    (tests_dir / "__init__.py").write_text("", encoding="utf-8")
-    (tests_dir / "test_main.py").write_text(render_template("test_main.py.tpl", **template_vars), encoding="utf-8")
+    write_with_trailing_newline(tests_dir / "__init__.py", "")
+    write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
 
 
 def run_uv_sync(target: Path) -> None:
@@ -103,8 +108,8 @@ def run_tool_install(target: Path, *, mode: str) -> None:
 
     command = build_tool_install_command(target)
     if validated_mode == "command-only":
-        log.info("Run this to install the generated tool:")
-        log.info("%s", " ".join(command))
+        log.warning("Run this to install the generated tool:")
+        log.warning("%s", " ".join(command))
         return
 
     if shutil.which("uv") is None:
@@ -129,7 +134,7 @@ def run_new(
     cwd: Path | None = None,
     archetype: str = "script",
     python_version: str = DEFAULT_PYTHON_VERSION,
-    install_mode: str = "editable",
+    install_mode: str = "command-only",
     keep_on_failure: bool = False,
 ) -> int:
     if cwd is None:

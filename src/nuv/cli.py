@@ -44,14 +44,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     new_parser.add_argument(
         "--install",
-        default="editable",
+        default="command-only",
         choices=["editable", "none", "command-only"],
         metavar="MODE",
         help=(
-            "Install behavior for the generated project (default: editable). "
+            "Install behavior for the generated project (default: command-only). "
             "editable: run `uv tool install --editable`; "
             "none: skip tool installation; "
-            "command-only: log the install command without running it (use `--log-level INFO` to display)."
+            "command-only: log the install command without running it."
         ),
     )
     new_parser.add_argument(

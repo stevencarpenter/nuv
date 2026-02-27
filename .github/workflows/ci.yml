@@ -31,13 +31,17 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.14"]
     steps:
       - uses: actions/checkout@v4
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
-          python-version: "3.14"
+          python-version: ${{ matrix.python-version }}
           enable-cache: true
 
       - name: Sync dependencies
@@ -47,6 +51,21 @@ jobs:
         run: uv run --frozen pytest
 
       - name: Integration smoke test
+        if: matrix.python-version == '3.14'
         run: |
           uv run --frozen nuv new smoke-test --at /tmp/smoke-test
           cd /tmp/smoke-test && uv sync --frozen && uv run --frozen pytest
+
+      - name: Build wheel for distribution smoke tests
+        if: matrix.python-version == '3.14'
+        run: uv build
+
+      - name: Tool install smoke test from wheel
+        if: matrix.python-version == '3.14'
+        run: |
+          uv tool install --force-reinstall dist/*.whl
+          nuv --help
+
+      - name: uvx smoke test from wheel
+        if: matrix.python-version == '3.14'
+        run: uvx --from dist/*.whl nuv --help
