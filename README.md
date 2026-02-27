@@ -1,6 +1,19 @@
 # nuv
 
+[![PyPI version](https://img.shields.io/pypi/v/nuv?logo=pypi&logoColor=white)](https://pypi.org/project/nuv/)
+[![Python versions](https://img.shields.io/pypi/pyversions/nuv?logo=python&logoColor=white)](https://pypi.org/project/nuv/)
+[![License](https://img.shields.io/pypi/l/nuv)](https://github.com/stevencarpenter/nuv/blob/main/LICENSE)
+[![PyPI downloads](https://img.shields.io/pypi/dt/nuv?logo=pypi&logoColor=white)](https://pypi.org/project/nuv/)
+[![Wheel](https://img.shields.io/pypi/wheel/nuv)](https://pypi.org/project/nuv/#files)
+[![CI](https://img.shields.io/github/actions/workflow/status/stevencarpenter/nuv/ci.yml?branch=main&label=CI)](https://github.com/stevencarpenter/nuv/actions/workflows/ci.yml)
+[![Publish to PyPI](https://img.shields.io/github/actions/workflow/status/stevencarpenter/nuv/publish-pypi.yml?label=publish)](https://github.com/stevencarpenter/nuv/actions/workflows/publish-pypi.yml)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/stevencarpenter/nuv/actions/workflows/ci.yml)
+[![Lint: Ruff](https://img.shields.io/badge/lint-ruff-46A2F1?logo=ruff&logoColor=white)](https://docs.astral.sh/ruff/)
+[![Types: ty](https://img.shields.io/badge/types-ty-0F766E)](https://github.com/astral-sh/ty)
+
 Scaffold opinionated uv Python projects — tests passing, quality tooling green, out of the box.
+
+Links: [PyPI](https://pypi.org/project/nuv/) | [Repository](https://github.com/stevencarpenter/nuv) | [Issues](https://github.com/stevencarpenter/nuv/issues)
 
 ```
 nuv new my-tool
@@ -18,13 +31,6 @@ uv tool install nuv
 
 ```bash
 uvx nuv new my-tool
-```
-
-### Pre-release fallback (before first PyPI release)
-
-```bash
-uv tool install git+https://github.com/stevencarpenter/nuv
-uvx --from git+https://github.com/stevencarpenter/nuv nuv new my-tool
 ```
 
 ## Usage
