@@ -14,25 +14,26 @@ That's it. You get a working project with argparse, logging, 100% test coverage,
 uv tool install nuv
 ```
 
-Until the first PyPI release is published, use:
+## Run without installing
+
+```bash
+uvx nuv new my-tool
+```
+
+### Pre-release fallback (before first PyPI release)
 
 ```bash
 uv tool install git+https://github.com/stevencarpenter/nuv
-```
-
-Or run without installing:
-
-```bash
 uvx --from git+https://github.com/stevencarpenter/nuv nuv new my-tool
 ```
 
 ## Usage
 
 ```
-nuv new <name>                              # creates ./<name>/, syncs deps, installs tool editable
+nuv new <name>                              # creates ./<name>/, syncs deps, prints tool install command
 nuv new <name> --at <path>                  # creates at an explicit path
 nuv new <name> --install none               # scaffold + sync, skip tool install
-nuv new <name> --install command-only       # log install command, do not execute (use --log-level INFO)
+nuv new <name> --install command-only       # log install command, do not execute
 nuv new <name> --keep-on-failure            # keep generated files if sync/install fails
 ```
 
@@ -48,7 +49,11 @@ my-tool/
     └── test_main.py  # passing test from day one
 ```
 
-By default, `nuv new` now also runs `uv tool install --editable <project-path>`, so the `<name>` command (derived from the `<name>` argument, for example `my-tool`) is immediately available on your PATH.
+By default, `nuv new` logs the command you can run to install the generated project as a tool:
+
+```bash
+uv tool install --editable <project-path>
+```
 
 After `nuv new`, all of these pass immediately:
 
@@ -84,7 +89,7 @@ nuv new my-job --archetype spark     # coming soon
 We are evolving `nuv` toward two explicit layers:
 
 1. **Install `nuv` anywhere** via `uv tool install` (or run without install using `uvx`).
-2. **Install generated projects** with optional automation for tool installs (editable by default today, with a longer-term goal of keeping scaffolding defaults conservative).
+2. **Install generated projects** explicitly when you want a tool install (`nuv new` now defaults to command-only guidance).
 
 See the design brainstorm and phased proposal in `docs/plans/2026-02-26-two-layer-installation.md`.
 
@@ -96,6 +101,16 @@ This project is configured for trusted publishing from GitHub Actions.
 1. Create a [PyPI project](https://pypi.org/manage/projects/) named `nuv` and add the GitHub OIDC publisher for this repository.
 2. Push a version tag (for example, `v0.1.0`).
 3. The `publish-pypi` workflow will build and upload the distribution to PyPI.
+
+### Release checklist
+
+1. Bump `[project].version` in `pyproject.toml` using semver (`X.Y.Z`).
+2. Create and push a matching tag: `vX.Y.Z`.
+3. Confirm GitHub Actions `publish-pypi` succeeds.
+4. Verify install paths:
+   - `uv tool install nuv && nuv --help`
+   - `uvx nuv --help`
+   - `uvx nuv new smoke --at /tmp/nuv-smoke && cd /tmp/nuv-smoke && uv run pytest`
 
 After release, install with:
 

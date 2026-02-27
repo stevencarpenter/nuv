@@ -32,7 +32,7 @@ nuv = "nuv.cli:main"
 
 [dependency-groups]
 dev = [
-    "pytest>=8",
+    "pytest>=9.0.2",
     "pytest-cov>=6",
     "ruff>=0.9",
     "ty>=0.0.1a1",

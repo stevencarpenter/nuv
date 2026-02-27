@@ -12,6 +12,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate semver version and tag match
+        if: github.ref_type == 'tag'
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import tomllib
+          from pathlib import Path
+
+          version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]
+          if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+              raise SystemExit(f"pyproject version must be semver X.Y.Z, got: {version}")
+
+          tag = os.environ["GITHUB_REF_NAME"]
+          if not tag.startswith("v"):
+              raise SystemExit(f"release tag must start with 'v', got: {tag}")
+
+          if tag[1:] != version:
+              raise SystemExit(f"tag {tag} does not match project version {version}")
+          PY
+
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:

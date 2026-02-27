@@ -260,6 +260,27 @@ def test_scaffold_files_main_has_project_name(tmp_path: Path) -> None:
     assert 'PROJECT_NAME = "cool-tool"' in (target / "main.py").read_text()
 
 
+def test_scaffold_files_end_with_trailing_newline(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    scaffold_files(target, name="my-project", module_name="my_project")
+
+    generated_files = [
+        ".python-version",
+        ".gitignore",
+        "_logging.py",
+        "main.py",
+        "pyproject.toml",
+        "README.md",
+        "tests/__init__.py",
+        "tests/test_main.py",
+    ]
+
+    for rel_path in generated_files:
+        content = (target / rel_path).read_text()
+        assert content.endswith("\n"), f"Expected trailing newline in {rel_path}"
+
+
 # ---------------------------------------------------------------------------
 # run_uv_sync
 # ---------------------------------------------------------------------------
@@ -311,7 +332,7 @@ def test_run_new_success(tmp_path: Path) -> None:
         result = run_new("cool-tool", at=str(tmp_path / "cool-tool"), cwd=tmp_path)
     assert result == 0
     assert (tmp_path / "cool-tool" / "main.py").exists()
-    assert mock_run.call_count == 2
+    mock_run.assert_called_once_with(["uv", "sync"], cwd=tmp_path / "cool-tool", check=False)
 
 
 def test_run_new_invalid_name(tmp_path: Path) -> None:
@@ -365,7 +386,19 @@ def test_cli_new_dispatches(tmp_path: Path) -> None:
         mock_run.return_value = MagicMock(returncode=0)
         result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj")])
     assert result == 0
-    assert mock_run.call_count == 2
+    mock_run.assert_called_once_with(["uv", "sync"], cwd=tmp_path / "test-proj", check=False)
+
+
+def test_cli_new_default_install_logs_command(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+        caplog.at_level("WARNING", logger="nuv.commands.new"),
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "test-proj", "--at", str(tmp_path / "test-proj")])
+    assert result == 0
+    assert "uv tool install --editable" in caplog.text
 
 
 def test_cli_invalid_archetype_rejected() -> None:
