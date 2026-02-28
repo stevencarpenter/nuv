@@ -217,6 +217,33 @@ def test_scaffold_files_python_version_content(tmp_path: Path) -> None:
     assert (target / ".python-version").read_text().strip() == DEFAULT_PYTHON_VERSION
 
 
+def test_scaffold_files_gitignore_includes_common_dev_tooling(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    scaffold_files(target, name="my-project", module_name="my_project")
+    content = (target / ".gitignore").read_text()
+
+    expected_entries = [
+        ".idea/",
+        ".vscode/",
+        ".DS_Store",
+        ".directory",
+        "*.swp",
+        ".claude/",
+        ".codex/",
+        ".copilot/",
+        ".amp/",
+        ".opencode/",
+        ".venv/",
+        ".uv/",
+        ".uvx/",
+        ".ruff_cache/",
+    ]
+
+    for entry in expected_entries:
+        assert entry in content
+
+
 def test_scaffold_files_custom_python_version(tmp_path: Path) -> None:
     target = tmp_path / "my-project"
     target.mkdir()
