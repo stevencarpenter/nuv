@@ -1,3 +1,16 @@
+.idea/
+*.iml
+.vscode/
+.DS_Store
+.directory
+*.swp
+*.swo
+*~
+.claude/
+.codex/
+.copilot/
+.amp/
+.opencode/
 .venv/
 __pycache__/
 *.pyc
@@ -7,3 +20,6 @@ __pycache__/
 htmlcov/
 dist/
 *.egg-info/
+.uv/
+.uvx/
+.ruff_cache/
