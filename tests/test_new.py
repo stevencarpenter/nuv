@@ -641,7 +641,7 @@ def test_scaffold_files_spark_test_uses_chispa(tmp_path: Path) -> None:
     scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
     test_content = (target / "tests" / "test_example.py").read_text()
     assert "from chispa import assert_df_equality" in test_content
-    assert "from my_spark_app.jobs.example import transform" in test_content
+    assert "from my_spark_app.jobs.example import run, transform" in test_content
 
 
 def test_scaffold_files_spark_notebook_valid_json(tmp_path: Path) -> None:
