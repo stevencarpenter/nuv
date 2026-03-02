@@ -685,6 +685,38 @@ def test_scaffold_files_spark_end_with_trailing_newline(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# spark archetype — integration (run_new → scaffold_files → _scaffold_spark)
+# ---------------------------------------------------------------------------
+
+
+def test_run_new_spark_success(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = run_new("my-spark-app", at=str(tmp_path / "my-spark-app"), cwd=tmp_path, archetype="spark")
+    assert result == 0
+    assert (tmp_path / "my-spark-app" / "main.py").exists()
+    assert (tmp_path / "my-spark-app" / "src" / "my_spark_app" / "config.py").exists()
+    assert (tmp_path / "my-spark-app" / "notebooks" / "explore.ipynb").exists()
+
+
+def test_run_new_spark_cleanup_on_failure(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = run_new("my-spark-app", cwd=tmp_path, archetype="spark")
+    assert result == 1
+    assert not (tmp_path / "my-spark-app").exists()
+
+
+def test_run_new_spark_keep_on_failure(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = run_new("my-spark-app", cwd=tmp_path, archetype="spark", keep_on_failure=True)
+    assert result == 1
+    assert (tmp_path / "my-spark-app").exists()
+
+
+# ---------------------------------------------------------------------------
 # spark archetype — CLI
 # ---------------------------------------------------------------------------
 
