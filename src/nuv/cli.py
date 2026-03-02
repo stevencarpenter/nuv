@@ -33,7 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
         default="script",
         choices=["script", "spark"],
         metavar="TYPE",
-        help="Project archetype (default: script).",
+        help="Project archetype (script, or spark).",
     )
     new_parser.add_argument(
         "--python-version",
