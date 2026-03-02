@@ -28,7 +28,7 @@ notebooks = [
 managed = true
 
 [tool.pytest.ini_options]
-addopts = "--cov={module_name} --cov-report=term-missing --cov-fail-under=100"
+addopts = "--cov=main --cov={module_name} --cov-report=term-missing --cov-fail-under=100"
 
 [tool.ruff]
 target-version = "py{python_version_nodot}"
@@ -42,6 +42,12 @@ branch = true
 
 [tool.coverage.report]
 exclude_lines = ["if __name__ == .__main__.:"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{module_name}"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"main.py" = "main.py"
 
 [build-system]
 requires = ["hatchling"]

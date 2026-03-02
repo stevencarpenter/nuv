@@ -174,7 +174,7 @@ def scaffold_files(
     if archetype == "script":
         write_with_trailing_newline(target / "_logging.py", render_template("_logging.py.tpl", **template_vars))
         write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
-    else:
+    else:  # spark — validated by VALID_ARCHETYPES above
         _scaffold_spark(target, template_vars=template_vars, name=name, module_name=module_name)
 
 

@@ -1,4 +1,5 @@
 import logging
+from unittest.mock import MagicMock, patch
 
 from chispa import assert_df_equality
 
@@ -6,6 +7,22 @@ from {module_name}._logging import configure
 from {module_name}.config import resolve_params
 from {module_name}.jobs.example import run, transform
 from {module_name}.session import create_spark_session
+
+
+# --- Main ---
+
+
+def test_main_returns_zero():
+    from main import main
+
+    mock_spark = MagicMock()
+    with (
+        patch("main.create_spark_session", return_value=mock_spark),
+        patch("main.example") as mock_example,
+    ):
+        result = main([])
+    assert result == 0
+    mock_spark.stop.assert_called_once()
 
 
 # --- Jobs ---
