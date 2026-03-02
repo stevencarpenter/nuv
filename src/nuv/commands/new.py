@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import shutil
@@ -23,6 +24,7 @@ def validate_name(name: str) -> str:
 
 _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
 DEFAULT_PYTHON_VERSION = "3.14"
+DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13"}
 
 
 def validate_python_version(version: str) -> str:
@@ -61,6 +63,85 @@ def write_with_trailing_newline(path: Path, content: str) -> None:
     path.write_text(normalized, encoding="utf-8")
 
 
+def generate_jupyter_notebook(name: str, *, python_version: str = DEFAULT_PYTHON_VERSION) -> str:
+    """Build a starter Jupyter notebook as JSON.
+
+    Generated programmatically instead of via .tpl because .ipynb JSON
+    braces conflict with str.format() placeholders.
+    """
+
+    def _code_cell(source: list[str]) -> dict:
+        return {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": source,
+        }
+
+    def _md_cell(source: list[str]) -> dict:
+        return {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": source,
+        }
+
+    cells = [
+        _md_cell([f"# {name} — Exploration Notebook"]),
+        _code_cell(
+            [
+                "from pyspark.sql import SparkSession\n",
+                "\n",
+                f'spark = SparkSession.builder.master("local[*]").appName("{name}").getOrCreate()\n',
+                "spark",
+            ]
+        ),
+        _md_cell(["## Create a sample DataFrame"]),
+        _code_cell(
+            [
+                'data = [("alice", 1), ("bob", 2), ("charlie", 3)]\n',
+                'df = spark.createDataFrame(data, ["name", "value"])\n',
+                "df.show()",
+            ]
+        ),
+        _md_cell(["## Filter"]),
+        _code_cell(
+            [
+                "filtered = df.filter(df.value > 1)\n",
+                "filtered.show()",
+            ]
+        ),
+        _md_cell(["## Group By"]),
+        _code_cell(
+            [
+                'grouped = df.groupBy("name").sum("value")\n',
+                "grouped.show()",
+            ]
+        ),
+    ]
+
+    notebook = {
+        "cells": cells,
+        "metadata": {
+            "kernelspec": {
+                "display_name": "Python 3",
+                "language": "python",
+                "name": "python3",
+            },
+            "language_info": {
+                "name": "python",
+                "version": f"{python_version}.0",
+            },
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    return json.dumps(notebook, indent=1) + "\n"
+
+
+VALID_ARCHETYPES = ("script", "spark")
+
+
 def scaffold_files(
     target: Path,
     *,
@@ -69,6 +150,8 @@ def scaffold_files(
     archetype: str = "script",
     python_version: str = DEFAULT_PYTHON_VERSION,
 ) -> None:
+    if archetype not in VALID_ARCHETYPES:
+        raise ValueError(f"Unknown archetype: {archetype!r}")
     validate_python_version(python_version)
     template_vars = {
         "name": name,
@@ -77,16 +160,55 @@ def scaffold_files(
         "python_version": python_version,
     }
 
+    # Shared files
     write_with_trailing_newline(target / ".python-version", python_version)
     write_with_trailing_newline(target / ".gitignore", render_template("gitignore.tpl", **template_vars))
-    write_with_trailing_newline(target / "_logging.py", render_template("_logging.py.tpl", **template_vars))
-    write_with_trailing_newline(target / "main.py", render_template("main.py.tpl", **template_vars))
     write_with_trailing_newline(target / "pyproject.toml", render_template("pyproject.toml.tpl", **template_vars))
     write_with_trailing_newline(target / "README.md", render_template("readme.md.tpl", **template_vars))
+    write_with_trailing_newline(target / "main.py", render_template("main.py.tpl", **template_vars))
+
     tests_dir = target / "tests"
     tests_dir.mkdir()
     write_with_trailing_newline(tests_dir / "__init__.py", "")
-    write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
+
+    if archetype == "script":
+        write_with_trailing_newline(target / "_logging.py", render_template("_logging.py.tpl", **template_vars))
+        write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
+    else:  # spark — validated by VALID_ARCHETYPES above
+        _scaffold_spark(target, template_vars=template_vars, name=name, module_name=module_name)
+
+
+def _scaffold_spark(
+    target: Path,
+    *,
+    template_vars: dict[str, str],
+    name: str,
+    module_name: str,
+) -> None:
+    # src/<module_name>/ package
+    pkg_dir = target / "src" / module_name
+    pkg_dir.mkdir(parents=True)
+    write_with_trailing_newline(pkg_dir / "__init__.py", render_template("init.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "_logging.py", render_template("_logging.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "config.py", render_template("config.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "session.py", render_template("session.py.tpl", **template_vars))
+
+    # src/<module_name>/jobs/
+    jobs_dir = pkg_dir / "jobs"
+    jobs_dir.mkdir()
+    write_with_trailing_newline(jobs_dir / "__init__.py", render_template("jobs_init.py.tpl", **template_vars))
+    write_with_trailing_newline(jobs_dir / "example.py", render_template("example_job.py.tpl", **template_vars))
+
+    # tests/
+    tests_dir = target / "tests"
+    write_with_trailing_newline(tests_dir / "conftest.py", render_template("conftest.py.tpl", **template_vars))
+    write_with_trailing_newline(tests_dir / "test_example.py", render_template("test_example.py.tpl", **template_vars))
+
+    # notebooks/
+    notebooks_dir = target / "notebooks"
+    notebooks_dir.mkdir()
+    write_with_trailing_newline(notebooks_dir / "explore.ipynb", generate_jupyter_notebook(name, python_version=template_vars["python_version"]))
+    write_with_trailing_newline(notebooks_dir / "explore_marimo.py", render_template("explore_marimo.py.tpl", **template_vars))
 
 
 def run_uv_sync(target: Path) -> None:
@@ -133,10 +255,12 @@ def run_new(
     at: str | None = None,
     cwd: Path | None = None,
     archetype: str = "script",
-    python_version: str = DEFAULT_PYTHON_VERSION,
+    python_version: str | None = None,
     install_mode: str = "command-only",
     keep_on_failure: bool = False,
 ) -> int:
+    if python_version is None:
+        python_version = DEFAULT_PYTHON_VERSIONS.get(archetype, DEFAULT_PYTHON_VERSION)
     if cwd is None:
         cwd = Path.cwd()
     target: Path | None = None

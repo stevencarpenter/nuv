@@ -39,16 +39,27 @@ uvx nuv new my-tool
 ```
 nuv new <name>                              # creates ./<name>/, syncs deps, prints tool install command
 nuv new <name> --at <path>                  # creates at an explicit path
+nuv new <name> --archetype spark            # PySpark 4 project with notebooks
+nuv new <name> --python-version 3.13        # override default Python version
 nuv new <name> --install none               # scaffold + sync, skip tool install
 nuv new <name> --install command-only       # log install command, do not execute
 nuv new <name> --keep-on-failure            # keep generated files if sync/install fails
 ```
 
-### What you get
+## Archetypes
+
+### script (default)
+
+A single-file CLI tool with argparse and logging.
+
+```bash
+nuv new my-tool
+```
 
 ```
 my-tool/
 ├── main.py          # argparse + logging + PROJECT_NAME constant
+├── _logging.py
 ├── pyproject.toml   # pytest (100% cov), ruff, ty, uv dev deps
 ├── README.md
 └── tests/
@@ -56,21 +67,57 @@ my-tool/
     └── test_main.py  # passing test from day one
 ```
 
-By default, `nuv new` logs the command you can run to install the generated project as a tool:
+### spark
+
+A PySpark 4 project with src-layout package, chispa testing, and dual notebooks (Jupyter + marimo).
 
 ```bash
-uv tool install --editable <project-path>
+nuv new my-spark-app --archetype spark
 ```
 
-After `nuv new`, all of these pass immediately:
+```
+my-spark-app/
+├── main.py                          # entry point: parse args, create session, run job
+├── pyproject.toml                   # pyspark 4, chispa, pytest, ruff, ty, notebooks
+├── README.md
+├── src/my_spark_app/
+│   ├── __init__.py
+│   ├── _logging.py                  # suppresses noisy Spark/Py4J loggers
+│   ├── config.py                    # CLI args > env vars > defaults
+│   ├── session.py                   # SparkSession factory
+│   └── jobs/
+│       ├── __init__.py
+│       └── example.py               # example transform (filter, tested with chispa)
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py                  # session-scoped SparkSession fixture
+│   └── test_example.py              # 8 tests, 100% coverage
+└── notebooks/
+    ├── explore.ipynb                # Jupyter notebook
+    └── explore_marimo.py            # marimo reactive notebook
+```
+
+Default Python version: 3.13 (configurable with `--python-version`).
+
+After `nuv new --archetype spark`, all of these pass immediately:
 
 ```bash
-uv run pytest       # 1 test, 100% coverage
-uv run ruff check . # clean
-uv run ty check     # clean
+uv run pytest          # 8 tests, 100% coverage
+uv run ruff check .    # clean
+uv run ty check        # clean
 ```
 
-## Project quality
+Notebooks are an optional dependency group:
+
+```bash
+uv sync --group notebooks
+uv run jupyter lab notebooks/
+uv run marimo run notebooks/explore_marimo.py
+```
+
+## Quality out of the box
+
+Every generated project ships with these tools configured and green:
 
 | Tool | Config |
 |---|---|
@@ -78,17 +125,20 @@ uv run ty check     # clean
 | ruff | lint + format |
 | ty | type checking |
 
+By default, `nuv new` logs the command you can run to install the generated project as a tool:
+
+```bash
+uv tool install --editable <project-path>
+```
+
 ## Why
 
 `uv init` produces a stub. The gap between that and "actually writing code" is annoying when you create projects frequently. `nuv` closes it.
 
 ## Future archetypes
 
-The `--archetype` flag is reserved for upcoming project types:
-
 ```bash
 nuv new my-api --archetype fastapi   # coming soon
-nuv new my-job --archetype spark     # coming soon
 ```
 
 ## Two-layer installation roadmap
