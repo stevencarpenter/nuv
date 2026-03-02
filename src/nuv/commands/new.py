@@ -24,6 +24,7 @@ def validate_name(name: str) -> str:
 
 _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
 DEFAULT_PYTHON_VERSION = "3.14"
+DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13"}
 
 
 def validate_python_version(version: str) -> str:
@@ -87,28 +88,36 @@ def generate_jupyter_notebook(name: str) -> str:
 
     cells = [
         _md_cell([f"# {name} — Exploration Notebook"]),
-        _code_cell([
-            "from pyspark.sql import SparkSession\n",
-            "\n",
-            f'spark = SparkSession.builder.master("local[*]").appName("{name}").getOrCreate()\n',
-            "spark",
-        ]),
+        _code_cell(
+            [
+                "from pyspark.sql import SparkSession\n",
+                "\n",
+                f'spark = SparkSession.builder.master("local[*]").appName("{name}").getOrCreate()\n',
+                "spark",
+            ]
+        ),
         _md_cell(["## Create a sample DataFrame"]),
-        _code_cell([
-            'data = [("alice", 1), ("bob", 2), ("charlie", 3)]\n',
-            'df = spark.createDataFrame(data, ["name", "value"])\n',
-            "df.show()",
-        ]),
+        _code_cell(
+            [
+                'data = [("alice", 1), ("bob", 2), ("charlie", 3)]\n',
+                'df = spark.createDataFrame(data, ["name", "value"])\n',
+                "df.show()",
+            ]
+        ),
         _md_cell(["## Filter"]),
-        _code_cell([
-            "filtered = df.filter(df.value > 1)\n",
-            "filtered.show()",
-        ]),
+        _code_cell(
+            [
+                "filtered = df.filter(df.value > 1)\n",
+                "filtered.show()",
+            ]
+        ),
         _md_cell(["## Group By"]),
-        _code_cell([
-            'grouped = df.groupBy("name").sum("value")\n',
-            "grouped.show()",
-        ]),
+        _code_cell(
+            [
+                'grouped = df.groupBy("name").sum("value")\n',
+                "grouped.show()",
+            ]
+        ),
     ]
 
     notebook = {
@@ -202,10 +211,12 @@ def run_new(
     at: str | None = None,
     cwd: Path | None = None,
     archetype: str = "script",
-    python_version: str = DEFAULT_PYTHON_VERSION,
+    python_version: str | None = None,
     install_mode: str = "command-only",
     keep_on_failure: bool = False,
 ) -> int:
+    if python_version is None:
+        python_version = DEFAULT_PYTHON_VERSIONS.get(archetype, DEFAULT_PYTHON_VERSION)
     if cwd is None:
         cwd = Path.cwd()
     target: Path | None = None

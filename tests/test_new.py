@@ -6,6 +6,7 @@ import pytest
 from nuv.cli import main as cli_main
 from nuv.commands.new import (
     DEFAULT_PYTHON_VERSION,
+    DEFAULT_PYTHON_VERSIONS,
     build_tool_install_command,
     generate_jupyter_notebook,
     render_template,
@@ -426,6 +427,34 @@ def test_run_new_missing_template(tmp_path: Path) -> None:
     ):
         result = run_new("my-project", cwd=tmp_path)
     assert result == 1
+
+
+# ---------------------------------------------------------------------------
+# archetype-aware default Python versions
+# ---------------------------------------------------------------------------
+
+
+def test_default_python_versions_script() -> None:
+    assert DEFAULT_PYTHON_VERSIONS["script"] == "3.14"
+
+
+def test_default_python_versions_spark() -> None:
+    assert DEFAULT_PYTHON_VERSIONS["spark"] == "3.13"
+
+
+def test_run_new_spark_uses_default_python_313(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+        patch("nuv.commands.new.scaffold_files") as mock_scaffold,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = run_new("my-spark-app", at=str(tmp_path / "my-spark-app"), cwd=tmp_path, archetype="spark")
+    assert result == 0
+    mock_scaffold.assert_called_once()
+    call_kwargs = mock_scaffold.call_args[1]
+    assert call_kwargs["python_version"] == "3.13"
+    assert call_kwargs["archetype"] == "spark"
 
 
 # ---------------------------------------------------------------------------
