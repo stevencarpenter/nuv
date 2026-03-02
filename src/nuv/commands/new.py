@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import shutil
@@ -59,6 +60,74 @@ def render_template(
 def write_with_trailing_newline(path: Path, content: str) -> None:
     normalized = content if content.endswith("\n") else f"{content}\n"
     path.write_text(normalized, encoding="utf-8")
+
+
+def generate_jupyter_notebook(name: str) -> str:
+    """Build a starter Jupyter notebook as JSON.
+
+    Generated programmatically instead of via .tpl because .ipynb JSON
+    braces conflict with str.format() placeholders.
+    """
+
+    def _code_cell(source: list[str]) -> dict:
+        return {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": source,
+        }
+
+    def _md_cell(source: list[str]) -> dict:
+        return {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": source,
+        }
+
+    cells = [
+        _md_cell([f"# {name} — Exploration Notebook"]),
+        _code_cell([
+            "from pyspark.sql import SparkSession\n",
+            "\n",
+            f'spark = SparkSession.builder.master("local[*]").appName("{name}").getOrCreate()\n',
+            "spark",
+        ]),
+        _md_cell(["## Create a sample DataFrame"]),
+        _code_cell([
+            'data = [("alice", 1), ("bob", 2), ("charlie", 3)]\n',
+            'df = spark.createDataFrame(data, ["name", "value"])\n',
+            "df.show()",
+        ]),
+        _md_cell(["## Filter"]),
+        _code_cell([
+            "filtered = df.filter(df.value > 1)\n",
+            "filtered.show()",
+        ]),
+        _md_cell(["## Group By"]),
+        _code_cell([
+            'grouped = df.groupBy("name").sum("value")\n',
+            "grouped.show()",
+        ]),
+    ]
+
+    notebook = {
+        "cells": cells,
+        "metadata": {
+            "kernelspec": {
+                "display_name": "Python 3",
+                "language": "python",
+                "name": "python3",
+            },
+            "language_info": {
+                "name": "python",
+                "version": "3.13.0",
+            },
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    return json.dumps(notebook, indent=1) + "\n"
 
 
 def scaffold_files(

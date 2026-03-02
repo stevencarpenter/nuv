@@ -7,6 +7,7 @@ from nuv.cli import main as cli_main
 from nuv.commands.new import (
     DEFAULT_PYTHON_VERSION,
     build_tool_install_command,
+    generate_jupyter_notebook,
     render_template,
     resolve_target,
     run_new,
@@ -188,6 +189,28 @@ def test_render_template_pyproject_uses_name() -> None:
 def test_render_template_unknown_raises() -> None:
     with pytest.raises(FileNotFoundError):
         render_template("nonexistent.tpl", name="x", module_name="x")
+
+
+# ---------------------------------------------------------------------------
+# generate_jupyter_notebook
+# ---------------------------------------------------------------------------
+
+
+def test_generate_jupyter_notebook_valid_json() -> None:
+    import json
+
+    result = generate_jupyter_notebook("my-spark-app")
+    notebook = json.loads(result)
+    assert notebook["nbformat"] == 4
+    assert len(notebook["cells"]) == 8
+    assert notebook["cells"][0]["cell_type"] == "markdown"
+    assert "my-spark-app" in notebook["cells"][0]["source"][0]
+
+
+def test_generate_jupyter_notebook_contains_spark_session() -> None:
+    result = generate_jupyter_notebook("my-spark-app")
+    assert "SparkSession" in result
+    assert "my-spark-app" in result
 
 
 # ---------------------------------------------------------------------------
