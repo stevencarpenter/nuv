@@ -2,7 +2,7 @@ import argparse
 from collections.abc import Sequence
 
 from nuv._logging import configure
-from nuv.commands.new import DEFAULT_PYTHON_VERSION, validate_python_version
+from nuv.commands.new import validate_python_version
 
 
 def _parse_python_version(value: str) -> str:
@@ -31,16 +31,16 @@ def build_parser() -> argparse.ArgumentParser:
     new_parser.add_argument(
         "--archetype",
         default="script",
-        choices=["script"],
+        choices=["script", "spark"],
         metavar="TYPE",
-        help="Project archetype (default: script).",
+        help="Project archetype (script, or spark).",
     )
     new_parser.add_argument(
         "--python-version",
-        default=DEFAULT_PYTHON_VERSION,
+        default=None,
         metavar="VERSION",
         type=_parse_python_version,
-        help=f"Python version for the generated project (default: {DEFAULT_PYTHON_VERSION}). Must be MAJOR.MINOR format.",
+        help="Python version (default depends on archetype — script=3.14, spark=3.13). Must be MAJOR.MINOR format.",
     )
     new_parser.add_argument(
         "--install",
