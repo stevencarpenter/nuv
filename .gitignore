@@ -763,3 +763,4 @@ cython_debug/
 .junie
 .agents
 .opencode
+.worktrees
