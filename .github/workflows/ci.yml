@@ -50,11 +50,17 @@ jobs:
       - name: Test
         run: uv run --frozen pytest
 
-      - name: Integration smoke test
+      - name: Integration smoke test (script)
         if: matrix.python-version == '3.14'
         run: |
           uv run --frozen nuv new smoke-test --at /tmp/smoke-test
           cd /tmp/smoke-test && uv sync --frozen && uv run --frozen pytest
+
+      - name: Integration smoke test (spark)
+        if: matrix.python-version == '3.14'
+        run: |
+          uv run --frozen nuv new spark-smoke --at /tmp/spark-smoke --archetype spark --python-version 3.13
+          cd /tmp/spark-smoke && uv sync --frozen && uv run --frozen pytest
 
       - name: Build wheel for distribution smoke tests
         if: matrix.python-version == '3.14'
