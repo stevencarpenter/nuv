@@ -341,6 +341,14 @@ def test_scaffold_files_end_with_trailing_newline(tmp_path: Path) -> None:
         assert content.endswith("\n"), f"Expected trailing newline in {rel_path}"
 
 
+def test_scaffold_files_unknown_archetype_raises(tmp_path: Path) -> None:
+    """An unrecognised archetype raises ValueError."""
+    target = tmp_path / "my-project"
+    target.mkdir()
+    with pytest.raises(ValueError, match="Unknown archetype"):
+        scaffold_files(target, name="my-project", module_name="my_project", archetype="unknown")
+
+
 # ---------------------------------------------------------------------------
 # run_uv_sync
 # ---------------------------------------------------------------------------
@@ -557,3 +565,148 @@ def test_cli_new_unexpected_error_returns_1(capsys: pytest.CaptureFixture[str]) 
         cli_main(["new", "my-project"])
     assert exc_info.value.code == 1
     assert "ERROR unexpected failure" in capsys.readouterr().err
+
+
+# ---------------------------------------------------------------------------
+# spark archetype — scaffold_files
+# ---------------------------------------------------------------------------
+
+
+def test_scaffold_files_spark_creates_expected_files(tmp_path: Path) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+
+    assert (target / ".python-version").exists()
+    assert (target / ".gitignore").exists()
+    assert (target / "main.py").exists()
+    assert (target / "pyproject.toml").exists()
+    assert (target / "README.md").exists()
+    assert (target / "src" / "my_spark_app" / "__init__.py").exists()
+    assert (target / "src" / "my_spark_app" / "_logging.py").exists()
+    assert (target / "src" / "my_spark_app" / "config.py").exists()
+    assert (target / "src" / "my_spark_app" / "session.py").exists()
+    assert (target / "src" / "my_spark_app" / "jobs" / "__init__.py").exists()
+    assert (target / "src" / "my_spark_app" / "jobs" / "example.py").exists()
+    assert (target / "tests" / "__init__.py").exists()
+    assert (target / "tests" / "conftest.py").exists()
+    assert (target / "tests" / "test_example.py").exists()
+    assert (target / "notebooks" / "explore.ipynb").exists()
+    assert (target / "notebooks" / "explore_marimo.py").exists()
+
+
+def test_scaffold_files_spark_python_version_content(tmp_path: Path) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+    assert (target / ".python-version").read_text().strip() == "3.13"
+
+
+def test_scaffold_files_spark_pyproject_has_pyspark(tmp_path: Path) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+    pyproject = (target / "pyproject.toml").read_text()
+    assert "pyspark>=4,<5" in pyproject
+    assert "chispa>=0.11" in pyproject
+    assert "jupyterlab>=4" in pyproject
+    assert "marimo>=0.10" in pyproject
+    assert "py313" in pyproject
+
+
+def test_scaffold_files_spark_gitignore_has_spark_entries(tmp_path: Path) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+    content = (target / ".gitignore").read_text()
+    assert "derby.log" in content
+    assert "metastore_db/" in content
+    assert "spark-warehouse/" in content
+    assert ".ipynb_checkpoints/" in content
+
+
+def test_scaffold_files_spark_main_imports_package(tmp_path: Path) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+    main_content = (target / "main.py").read_text()
+    assert "from my_spark_app._logging import configure" in main_content
+    assert "from my_spark_app.config import resolve_params" in main_content
+    assert "from my_spark_app.session import create_spark_session" in main_content
+
+
+def test_scaffold_files_spark_test_uses_chispa(tmp_path: Path) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+    test_content = (target / "tests" / "test_example.py").read_text()
+    assert "from chispa import assert_df_equality" in test_content
+    assert "from my_spark_app.jobs.example import transform" in test_content
+
+
+def test_scaffold_files_spark_notebook_valid_json(tmp_path: Path) -> None:
+    import json as json_mod
+
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+    notebook = json_mod.loads((target / "notebooks" / "explore.ipynb").read_text())
+    assert notebook["nbformat"] == 4
+    assert "SparkSession" in str(notebook["cells"])
+
+
+def test_scaffold_files_spark_end_with_trailing_newline(tmp_path: Path) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+
+    generated_files = [
+        ".python-version",
+        ".gitignore",
+        "main.py",
+        "pyproject.toml",
+        "README.md",
+        "src/my_spark_app/__init__.py",
+        "src/my_spark_app/_logging.py",
+        "src/my_spark_app/config.py",
+        "src/my_spark_app/session.py",
+        "src/my_spark_app/jobs/__init__.py",
+        "src/my_spark_app/jobs/example.py",
+        "tests/__init__.py",
+        "tests/conftest.py",
+        "tests/test_example.py",
+        "notebooks/explore.ipynb",
+        "notebooks/explore_marimo.py",
+    ]
+
+    for rel_path in generated_files:
+        content = (target / rel_path).read_text()
+        assert content.endswith("\n"), f"Expected trailing newline in {rel_path}"
+
+
+# ---------------------------------------------------------------------------
+# spark archetype — CLI
+# ---------------------------------------------------------------------------
+
+
+def test_cli_new_spark_archetype(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "my-spark-app", "--at", str(tmp_path / "my-spark-app"), "--archetype", "spark"])
+    assert result == 0
+    assert (tmp_path / "my-spark-app" / "src" / "my_spark_app" / "__init__.py").exists()
+    assert (tmp_path / "my-spark-app" / "notebooks" / "explore.ipynb").exists()
+
+
+def test_cli_spark_default_python_version(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "my-spark-app", "--at", str(tmp_path / "my-spark-app"), "--archetype", "spark"])
+    assert result == 0
+    assert (tmp_path / "my-spark-app" / ".python-version").read_text().strip() == "3.13"

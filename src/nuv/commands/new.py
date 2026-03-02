@@ -139,6 +139,9 @@ def generate_jupyter_notebook(name: str) -> str:
     return json.dumps(notebook, indent=1) + "\n"
 
 
+VALID_ARCHETYPES = ("script", "spark")
+
+
 def scaffold_files(
     target: Path,
     *,
@@ -147,6 +150,8 @@ def scaffold_files(
     archetype: str = "script",
     python_version: str = DEFAULT_PYTHON_VERSION,
 ) -> None:
+    if archetype not in VALID_ARCHETYPES:
+        raise ValueError(f"Unknown archetype: {archetype!r}")
     validate_python_version(python_version)
     template_vars = {
         "name": name,
@@ -155,16 +160,55 @@ def scaffold_files(
         "python_version": python_version,
     }
 
+    # Shared files
     write_with_trailing_newline(target / ".python-version", python_version)
     write_with_trailing_newline(target / ".gitignore", render_template("gitignore.tpl", **template_vars))
-    write_with_trailing_newline(target / "_logging.py", render_template("_logging.py.tpl", **template_vars))
-    write_with_trailing_newline(target / "main.py", render_template("main.py.tpl", **template_vars))
     write_with_trailing_newline(target / "pyproject.toml", render_template("pyproject.toml.tpl", **template_vars))
     write_with_trailing_newline(target / "README.md", render_template("readme.md.tpl", **template_vars))
+    write_with_trailing_newline(target / "main.py", render_template("main.py.tpl", **template_vars))
+
     tests_dir = target / "tests"
     tests_dir.mkdir()
     write_with_trailing_newline(tests_dir / "__init__.py", "")
-    write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
+
+    if archetype == "script":
+        write_with_trailing_newline(target / "_logging.py", render_template("_logging.py.tpl", **template_vars))
+        write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
+    else:
+        _scaffold_spark(target, template_vars=template_vars, name=name, module_name=module_name)
+
+
+def _scaffold_spark(
+    target: Path,
+    *,
+    template_vars: dict[str, str],
+    name: str,
+    module_name: str,
+) -> None:
+    # src/<module_name>/ package
+    pkg_dir = target / "src" / module_name
+    pkg_dir.mkdir(parents=True)
+    write_with_trailing_newline(pkg_dir / "__init__.py", render_template("init.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "_logging.py", render_template("_logging.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "config.py", render_template("config.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "session.py", render_template("session.py.tpl", **template_vars))
+
+    # src/<module_name>/jobs/
+    jobs_dir = pkg_dir / "jobs"
+    jobs_dir.mkdir()
+    write_with_trailing_newline(jobs_dir / "__init__.py", render_template("jobs_init.py.tpl", **template_vars))
+    write_with_trailing_newline(jobs_dir / "example.py", render_template("example_job.py.tpl", **template_vars))
+
+    # tests/
+    tests_dir = target / "tests"
+    write_with_trailing_newline(tests_dir / "conftest.py", render_template("conftest.py.tpl", **template_vars))
+    write_with_trailing_newline(tests_dir / "test_example.py", render_template("test_example.py.tpl", **template_vars))
+
+    # notebooks/
+    notebooks_dir = target / "notebooks"
+    notebooks_dir.mkdir()
+    write_with_trailing_newline(notebooks_dir / "explore.ipynb", generate_jupyter_notebook(name))
+    write_with_trailing_newline(notebooks_dir / "explore_marimo.py", render_template("explore_marimo.py.tpl", **template_vars))
 
 
 def run_uv_sync(target: Path) -> None:
