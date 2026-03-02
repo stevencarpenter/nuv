@@ -214,6 +214,22 @@ def test_generate_jupyter_notebook_contains_spark_session() -> None:
     assert "my-spark-app" in result
 
 
+def test_generate_jupyter_notebook_python_version_default() -> None:
+    import json
+
+    result = generate_jupyter_notebook("my-spark-app")
+    notebook = json.loads(result)
+    assert notebook["metadata"]["language_info"]["version"] == f"{DEFAULT_PYTHON_VERSION}.0"
+
+
+def test_generate_jupyter_notebook_python_version_custom() -> None:
+    import json
+
+    result = generate_jupyter_notebook("my-spark-app", python_version="3.13")
+    notebook = json.loads(result)
+    assert notebook["metadata"]["language_info"]["version"] == "3.13.0"
+
+
 # ---------------------------------------------------------------------------
 # scaffold_files
 # ---------------------------------------------------------------------------
@@ -612,6 +628,8 @@ def test_scaffold_files_spark_pyproject_has_pyspark(tmp_path: Path) -> None:
     assert "jupyterlab>=4" in pyproject
     assert "marimo>=0.10" in pyproject
     assert "py313" in pyproject
+    assert 'packages = ["src/my_spark_app"]' in pyproject
+    assert 'build-backend = "hatchling.build"' in pyproject
 
 
 def test_scaffold_files_spark_gitignore_has_spark_entries(tmp_path: Path) -> None:
@@ -653,6 +671,7 @@ def test_scaffold_files_spark_notebook_valid_json(tmp_path: Path) -> None:
     notebook = json_mod.loads((target / "notebooks" / "explore.ipynb").read_text())
     assert notebook["nbformat"] == 4
     assert "SparkSession" in str(notebook["cells"])
+    assert notebook["metadata"]["language_info"]["version"] == "3.13.0"
 
 
 def test_scaffold_files_spark_end_with_trailing_newline(tmp_path: Path) -> None:

@@ -45,9 +45,7 @@ exclude_lines = ["if __name__ == .__main__.:"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/{module_name}"]
-
-[tool.hatch.build.targets.wheel.force-include]
-"main.py" = "main.py"
+include = ["main.py", "_logging.py"]
 
 [build-system]
 requires = ["hatchling"]
