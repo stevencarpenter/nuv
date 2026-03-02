@@ -63,7 +63,7 @@ def write_with_trailing_newline(path: Path, content: str) -> None:
     path.write_text(normalized, encoding="utf-8")
 
 
-def generate_jupyter_notebook(name: str) -> str:
+def generate_jupyter_notebook(name: str, *, python_version: str = DEFAULT_PYTHON_VERSION) -> str:
     """Build a starter Jupyter notebook as JSON.
 
     Generated programmatically instead of via .tpl because .ipynb JSON
@@ -130,7 +130,7 @@ def generate_jupyter_notebook(name: str) -> str:
             },
             "language_info": {
                 "name": "python",
-                "version": "3.13.0",
+                "version": f"{python_version}.0",
             },
         },
         "nbformat": 4,
@@ -207,7 +207,7 @@ def _scaffold_spark(
     # notebooks/
     notebooks_dir = target / "notebooks"
     notebooks_dir.mkdir()
-    write_with_trailing_newline(notebooks_dir / "explore.ipynb", generate_jupyter_notebook(name))
+    write_with_trailing_newline(notebooks_dir / "explore.ipynb", generate_jupyter_notebook(name, python_version=template_vars["python_version"]))
     write_with_trailing_newline(notebooks_dir / "explore_marimo.py", render_template("explore_marimo.py.tpl", **template_vars))
 
 

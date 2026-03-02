@@ -43,6 +43,10 @@ branch = true
 [tool.coverage.report]
 exclude_lines = ["if __name__ == .__main__.:"]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/{module_name}"]
+include = ["main.py", "_logging.py"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
