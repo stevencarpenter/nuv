@@ -24,7 +24,7 @@ def validate_name(name: str) -> str:
 
 _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
 DEFAULT_PYTHON_VERSION = "3.14"
-DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13"}
+DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14"}
 
 
 def validate_python_version(version: str) -> str:
@@ -139,7 +139,7 @@ def generate_jupyter_notebook(name: str, *, python_version: str = DEFAULT_PYTHON
     return json.dumps(notebook, indent=1) + "\n"
 
 
-VALID_ARCHETYPES = ("script", "spark")
+VALID_ARCHETYPES = ("script", "spark", "fastapi")
 
 
 def scaffold_files(
@@ -174,8 +174,10 @@ def scaffold_files(
     if archetype == "script":
         write_with_trailing_newline(target / "_logging.py", render_template("_logging.py.tpl", **template_vars))
         write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
-    else:  # spark — validated by VALID_ARCHETYPES above
+    elif archetype == "spark":
         _scaffold_spark(target, template_vars=template_vars, name=name, module_name=module_name)
+    else:  # fastapi — validated by VALID_ARCHETYPES above
+        _scaffold_fastapi(target, template_vars=template_vars, name=name, module_name=module_name)
 
 
 def _scaffold_spark(
@@ -209,6 +211,38 @@ def _scaffold_spark(
     notebooks_dir.mkdir()
     write_with_trailing_newline(notebooks_dir / "explore.ipynb", generate_jupyter_notebook(name, python_version=template_vars["python_version"]))
     write_with_trailing_newline(notebooks_dir / "explore_marimo.py", render_template("explore_marimo.py.tpl", **template_vars))
+
+
+def _scaffold_fastapi(
+    target: Path,
+    *,
+    template_vars: dict[str, str],
+    name: str,
+    module_name: str,
+) -> None:
+    # src/<module_name>/ package
+    pkg_dir = target / "src" / module_name
+    pkg_dir.mkdir(parents=True)
+    write_with_trailing_newline(pkg_dir / "__init__.py", render_template("init.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "app.py", render_template("app.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "config.py", render_template("config.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "_logging.py", render_template("_logging.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "dependencies.py", render_template("dependencies.py.tpl", **template_vars))
+
+    # src/<module_name>/routes/
+    routes_dir = pkg_dir / "routes"
+    routes_dir.mkdir()
+    write_with_trailing_newline(routes_dir / "__init__.py", render_template("routes_init.py.tpl", **template_vars))
+    write_with_trailing_newline(routes_dir / "health.py", render_template("health.py.tpl", **template_vars))
+
+    # tests/
+    tests_dir = target / "tests"
+    write_with_trailing_newline(tests_dir / "conftest.py", render_template("conftest.py.tpl", **template_vars))
+    write_with_trailing_newline(tests_dir / "test_health.py", render_template("test_health.py.tpl", **template_vars))
+
+    # Docker
+    write_with_trailing_newline(target / "Dockerfile", render_template("dockerfile.tpl", **template_vars))
+    write_with_trailing_newline(target / ".dockerignore", render_template("dockerignore.tpl", **template_vars))
 
 
 def run_uv_sync(target: Path) -> None:

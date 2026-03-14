@@ -31,16 +31,16 @@ def build_parser() -> argparse.ArgumentParser:
     new_parser.add_argument(
         "--archetype",
         default="script",
-        choices=["script", "spark"],
+        choices=["script", "spark", "fastapi"],
         metavar="TYPE",
-        help="Project archetype (script, or spark).",
+        help="Project archetype (script, spark, or fastapi).",
     )
     new_parser.add_argument(
         "--python-version",
         default=None,
         metavar="VERSION",
         type=_parse_python_version,
-        help="Python version (default depends on archetype — script=3.14, spark=3.13). Must be MAJOR.MINOR format.",
+        help="Python version (default depends on archetype — script=3.14, spark=3.13, fastapi=3.14). Must be MAJOR.MINOR format.",
     )
     new_parser.add_argument(
         "--install",

@@ -1,6 +1,6 @@
 [project]
 name = "nuv"
-version = "0.2.1"
+version = "0.3.0"
 description = "Scaffold opinionated uv Python projects"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -20,7 +20,6 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Code Generators",
 ]
-dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/stevencarpenter/nuv"
@@ -33,9 +32,9 @@ nuv = "nuv.cli:main"
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
-    "pytest-cov>=6",
-    "ruff>=0.9",
-    "ty>=0.0.1a1",
+    "pytest-cov>=7",
+    "ruff>=0.15",
+    "ty>=0.0.23",
 ]
 
 [tool.uv]
