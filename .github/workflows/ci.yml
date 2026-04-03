@@ -69,6 +69,12 @@ jobs:
           uv run --frozen nuv new spark-smoke --at /tmp/spark-smoke --archetype spark --python-version 3.13
           cd /tmp/spark-smoke && uv sync --frozen && uv run --frozen pytest
 
+      - name: Integration smoke test (fastapi)
+        if: matrix.python-version == '3.14'
+        run: |
+          uv run --frozen nuv new api-smoke --at /tmp/api-smoke --archetype fastapi
+          cd /tmp/api-smoke && uv sync --frozen && uv run --frozen pytest
+
       - name: Build wheel for distribution smoke tests
         if: matrix.python-version == '3.14'
         run: uv build

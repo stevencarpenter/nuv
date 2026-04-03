@@ -8,19 +8,16 @@
 [![Wheel](https://img.shields.io/pypi/wheel/nuv)](https://pypi.org/project/nuv/#files)
 [![CI](https://img.shields.io/github/actions/workflow/status/stevencarpenter/nuv/ci.yml?branch=main&label=CI)](https://github.com/stevencarpenter/nuv/actions/workflows/ci.yml)
 [![Publish to PyPI](https://img.shields.io/github/actions/workflow/status/stevencarpenter/nuv/publish-pypi.yml?label=publish)](https://github.com/stevencarpenter/nuv/actions/workflows/publish-pypi.yml)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/stevencarpenter/nuv/actions/workflows/ci.yml)
 [![Lint: Ruff](https://img.shields.io/badge/lint-ruff-46A2F1?logo=ruff&logoColor=white)](https://docs.astral.sh/ruff/)
 [![Types: ty](https://img.shields.io/badge/types-ty-0F766E)](https://github.com/astral-sh/ty)
 
-Scaffold opinionated uv Python projects — tests passing, quality tooling green, out of the box.
-
-Links: [PyPI](https://pypi.org/project/nuv/) | [Repository](https://github.com/stevencarpenter/nuv) | [Issues](https://github.com/stevencarpenter/nuv/issues)
+Scaffold opinionated [uv](https://docs.astral.sh/uv/) Python projects — tests passing, linting green, out of the box.
 
 ```
 nuv new my-tool
 ```
 
-That's it. You get a working project with argparse, logging, 100% test coverage, ruff, and ty all green from commit zero.
+That's it. You get a working project with argparse, logging, test coverage, ruff, and ty — all green from commit zero.
 
 ## Install
 
@@ -40,9 +37,10 @@ uvx nuv new my-tool
 nuv new <name>                              # creates ./<name>/, syncs deps, prints tool install command
 nuv new <name> --at <path>                  # creates at an explicit path
 nuv new <name> --archetype spark            # PySpark 4 project with notebooks
+nuv new <name> --archetype fastapi          # FastAPI + Granian + Docker
 nuv new <name> --python-version 3.13        # override default Python version
 nuv new <name> --install none               # scaffold + sync, skip tool install
-nuv new <name> --install command-only       # log install command, do not execute
+nuv new <name> --install command-only       # log install command, do not execute (default)
 nuv new <name> --keep-on-failure            # keep generated files if sync/install fails
 ```
 
@@ -58,18 +56,18 @@ nuv new my-tool
 
 ```
 my-tool/
-├── main.py          # argparse + logging + PROJECT_NAME constant
+├── main.py          # argparse + logging
 ├── _logging.py
-├── pyproject.toml   # pytest (100% cov), ruff, ty, uv dev deps
+├── pyproject.toml   # pytest, ruff, ty, uv
 ├── README.md
 └── tests/
     ├── __init__.py
-    └── test_main.py  # passing test from day one
+    └── test_main.py
 ```
 
 ### spark
 
-A PySpark 4 project with src-layout package, chispa testing, and dual notebooks (Jupyter + marimo).
+A PySpark 4 project with src-layout, chispa testing, and dual notebooks (Jupyter + marimo).
 
 ```bash
 nuv new my-spark-app --archetype spark
@@ -77,32 +75,30 @@ nuv new my-spark-app --archetype spark
 
 ```
 my-spark-app/
-├── main.py                          # entry point: parse args, create session, run job
-├── pyproject.toml                   # pyspark 4, chispa, pytest, ruff, ty, notebooks
+├── main.py
+├── pyproject.toml
 ├── README.md
 ├── src/my_spark_app/
 │   ├── __init__.py
-│   ├── _logging.py                  # suppresses noisy Spark/Py4J loggers
-│   ├── config.py                    # CLI args > env vars > defaults
-│   ├── session.py                   # SparkSession factory
+│   ├── _logging.py
+│   ├── config.py
+│   ├── session.py
 │   └── jobs/
 │       ├── __init__.py
-│       └── example.py               # example transform (filter, tested with chispa)
+│       └── example.py
 ├── tests/
 │   ├── __init__.py
-│   ├── conftest.py                  # session-scoped SparkSession fixture
-│   └── test_example.py              # 8 tests, 100% coverage
+│   ├── conftest.py
+│   └── test_example.py
 └── notebooks/
-    ├── explore.ipynb                # Jupyter notebook
-    └── explore_marimo.py            # marimo reactive notebook
+    ├── explore.ipynb
+    └── explore_marimo.py
 ```
 
-Default Python version: 3.13 (configurable with `--python-version`).
-
-After `nuv new --archetype spark`, all of these pass immediately:
+Default Python version: 3.13 (PySpark 4 compatibility).
 
 ```bash
-uv run pytest          # 8 tests, 100% coverage
+uv run pytest          # 8 tests, passing
 uv run ruff check .    # clean
 uv run ty check        # clean
 ```
@@ -115,13 +111,65 @@ uv run jupyter lab notebooks/
 uv run marimo run notebooks/explore_marimo.py
 ```
 
+### fastapi
+
+A production-ready FastAPI project with Granian ASGI server, Pydantic settings, and a multi-stage Dockerfile.
+
+```bash
+nuv new my-api --archetype fastapi
+```
+
+```
+my-api/
+├── main.py                         # Granian server entry point
+├── pyproject.toml
+├── README.md
+├── Dockerfile                      # multi-stage build
+├── .dockerignore
+├── src/my_api/
+│   ├── __init__.py
+│   ├── app.py                      # FastAPI factory with lifespan
+│   ├── config.py                   # Pydantic settings from env vars
+│   ├── _logging.py
+│   ├── dependencies.py             # shared FastAPI deps
+│   └── routes/
+│       ├── __init__.py
+│       └── health.py               # /healthz endpoint
+└── tests/
+    ├── __init__.py
+    ├── conftest.py                  # async httpx client fixture
+    └── test_health.py
+```
+
+Default Python version: 3.14.
+
+```bash
+uv run pytest          # passing
+uv run ruff check .    # clean
+uv run ty check        # clean
+```
+
+Run locally:
+
+```bash
+uv run python main.py
+uv run python main.py --host 0.0.0.0 --port 8000
+```
+
+Docker:
+
+```bash
+docker build -t my-api .
+docker run -p 8000:8000 my-api
+```
+
 ## Quality out of the box
 
 Every generated project ships with these tools configured and green:
 
 | Tool | Config |
 |---|---|
-| pytest | 100% branch coverage enforced |
+| pytest | branch coverage enforced |
 | ruff | lint + format |
 | ty | type checking |
 
@@ -135,41 +183,15 @@ uv tool install --editable <project-path>
 
 `uv init` produces a stub. The gap between that and "actually writing code" is annoying when you create projects frequently. `nuv` closes it.
 
-## Future archetypes
-
-```bash
-nuv new my-api --archetype fastapi   # coming soon
-```
-
-## Two-layer installation roadmap
-
-We are evolving `nuv` toward two explicit layers:
-
-1. **Install `nuv` anywhere** via `uv tool install` (or run without install using `uvx`).
-2. **Install generated projects** explicitly when you want a tool install (`nuv new` now defaults to command-only guidance).
-
-See the design brainstorm and phased proposal in `docs/plans/2026-02-26-two-layer-installation.md`.
-
-
 ## Publishing to PyPI
 
-This project is configured for trusted publishing from GitHub Actions.
+This project uses trusted publishing from GitHub Actions.
 
-1. Create a [PyPI project](https://pypi.org/manage/projects/) named `nuv` and add the GitHub OIDC publisher for this repository.
-2. Push a version tag (for example, `v0.1.0`).
-3. The `publish-pypi` workflow will build and upload the distribution to PyPI.
+1. Bump `[project].version` in `pyproject.toml`.
+2. Push a matching tag: `vX.Y.Z`.
+3. GitHub Actions builds and publishes to PyPI.
 
-### Release checklist
-
-1. Bump `[project].version` in `pyproject.toml` using semver (`X.Y.Z`).
-2. Create and push a matching tag: `vX.Y.Z`.
-3. Confirm GitHub Actions `publish-pypi` succeeds.
-4. Verify install paths:
-   - `uv tool install nuv && nuv --help`
-   - `uvx nuv --help`
-   - `uvx nuv new smoke --at /tmp/nuv-smoke && cd /tmp/nuv-smoke && uv run pytest`
-
-After release, install with:
+After release:
 
 ```bash
 uv tool install nuv
