@@ -833,7 +833,7 @@ def test_scaffold_files_fastapi_dockerfile_multi_stage(tmp_path: Path) -> None:
     scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
     dockerfile = (target / "Dockerfile").read_text()
     assert "AS builder" in dockerfile
-    assert "python:3.14-slim-bookworm" in dockerfile
+    assert "python:3.14-slim-bookworm" in dockerfile  # default python_version
     assert "USER app" in dockerfile
     assert "my_api.app:create_app" in dockerfile
 
