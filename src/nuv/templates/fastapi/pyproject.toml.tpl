@@ -5,10 +5,11 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "fastapi>=0.115",
-    "granian>=2",
-    "orjson>=3",
-    "pydantic-settings>=2",
+    "fastapi>=0.135",
+    "granian>=2.7",
+    "orjson>=3.11",
+    "pydantic>=2.12",
+    "pydantic-settings>=2.13",
 ]
 
 [project.scripts]
@@ -17,11 +18,11 @@ dependencies = [
 [dependency-groups]
 dev = [
     "httpx>=0.28",
-    "pytest>=9",
-    "pytest-asyncio>=0.25",
-    "pytest-cov>=6",
-    "ruff>=0.9",
-    "ty>=0.0.1a1",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7",
+    "ruff>=0.15.6",
+    "ty>=0.0.23",
 ]
 
 [tool.uv]
