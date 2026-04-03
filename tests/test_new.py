@@ -797,12 +797,12 @@ def test_scaffold_files_fastapi_pyproject_has_deps(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "fastapi>=0.115" in pyproject
+    assert "fastapi>=0.135" in pyproject
     assert "granian>=2" in pyproject
     assert "orjson>=3" in pyproject
     assert "pydantic-settings>=2" in pyproject
     assert "httpx>=0.28" in pyproject
-    assert "pytest-asyncio>=0.25" in pyproject
+    assert "pytest-asyncio>=1.3" in pyproject
     assert "py314" in pyproject
     assert 'packages = ["src/my_api"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
