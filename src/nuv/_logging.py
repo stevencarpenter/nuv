@@ -10,3 +10,4 @@ def configure(level: str = "WARNING") -> None:
         format=LOG_FORMAT,
         stream=sys.stderr,
     )
+    logging.getLogger().setLevel(level)
