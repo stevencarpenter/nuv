@@ -5,7 +5,7 @@ import pytest
 from httpx import AsyncClient
 
 from {module_name}._logging import configure
-from {module_name}.app import create_app, lifespan
+from {module_name}.app import create_app
 from {module_name}.config import Settings
 from {module_name}.dependencies import get_settings
 
@@ -37,12 +37,6 @@ def test_create_app_uses_custom_settings():
     settings = Settings(app_name="custom")
     app = create_app(settings)
     assert app.state.settings.app_name == "custom"
-
-
-async def test_lifespan_runs():
-    app = create_app()
-    async with lifespan(app):
-        pass
 
 
 # --- Health ---

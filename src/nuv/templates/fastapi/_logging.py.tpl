@@ -9,4 +9,5 @@ def configure(level: str = "WARNING") -> None:
         level=level,
         format=LOG_FORMAT,
         stream=sys.stderr,
+        force=True,
     )

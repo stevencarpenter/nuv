@@ -799,7 +799,6 @@ def test_scaffold_files_fastapi_pyproject_has_deps(tmp_path: Path) -> None:
     pyproject = (target / "pyproject.toml").read_text()
     assert "fastapi>=0.135" in pyproject
     assert "granian>=2" in pyproject
-    assert "orjson>=3" in pyproject
     assert "pydantic-settings>=2" in pyproject
     assert "httpx>=0.28" in pyproject
     assert "pytest-asyncio>=1.3" in pyproject
@@ -823,7 +822,6 @@ def test_scaffold_files_fastapi_app_factory(tmp_path: Path) -> None:
     scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
     app_content = (target / "src" / "my_api" / "app.py").read_text()
     assert "def create_app" in app_content
-    assert "ORJSONResponse" in app_content
     assert "lifespan" in app_content
 
 

@@ -7,7 +7,6 @@ requires-python = ">={python_version}"
 dependencies = [
     "fastapi>=0.135",
     "granian>=2.7",
-    "orjson>=3.11",
     "pydantic>=2.12",
     "pydantic-settings>=2.13",
 ]
