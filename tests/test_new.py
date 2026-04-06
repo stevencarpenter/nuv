@@ -761,3 +761,194 @@ def test_cli_spark_default_python_version(tmp_path: Path) -> None:
         result = cli_main(["new", "my-spark-app", "--at", str(tmp_path / "my-spark-app"), "--archetype", "spark"])
     assert result == 0
     assert (tmp_path / "my-spark-app" / ".python-version").read_text().strip() == "3.13"
+
+
+# ---------------------------------------------------------------------------
+# fastapi archetype — scaffold_files
+# ---------------------------------------------------------------------------
+
+
+def test_scaffold_files_fastapi_creates_expected_files(tmp_path: Path) -> None:
+    target = tmp_path / "my-api"
+    target.mkdir()
+    scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
+
+    assert (target / ".python-version").exists()
+    assert (target / ".gitignore").exists()
+    assert (target / "main.py").exists()
+    assert (target / "pyproject.toml").exists()
+    assert (target / "README.md").exists()
+    assert (target / "Dockerfile").exists()
+    assert (target / ".dockerignore").exists()
+    assert (target / "src" / "my_api" / "__init__.py").exists()
+    assert (target / "src" / "my_api" / "app.py").exists()
+    assert (target / "src" / "my_api" / "config.py").exists()
+    assert (target / "src" / "my_api" / "_logging.py").exists()
+    assert (target / "src" / "my_api" / "dependencies.py").exists()
+    assert (target / "src" / "my_api" / "routes" / "__init__.py").exists()
+    assert (target / "src" / "my_api" / "routes" / "health.py").exists()
+    assert (target / "tests" / "__init__.py").exists()
+    assert (target / "tests" / "conftest.py").exists()
+    assert (target / "tests" / "test_health.py").exists()
+
+
+def test_scaffold_files_fastapi_pyproject_has_deps(tmp_path: Path) -> None:
+    target = tmp_path / "my-api"
+    target.mkdir()
+    scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
+    pyproject = (target / "pyproject.toml").read_text()
+    assert "fastapi>=0.135" in pyproject
+    assert "granian>=2" in pyproject
+    assert "pydantic-settings>=2" in pyproject
+    assert "httpx>=0.28" in pyproject
+    assert "pytest-asyncio>=1.3" in pyproject
+    assert "py314" in pyproject
+    assert 'packages = ["src/my_api"]' in pyproject
+    assert 'build-backend = "hatchling.build"' in pyproject
+
+
+def test_scaffold_files_fastapi_main_imports_package(tmp_path: Path) -> None:
+    target = tmp_path / "my-api"
+    target.mkdir()
+    scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
+    main_content = (target / "main.py").read_text()
+    assert "from my_api._logging import configure" in main_content
+    assert "from granian import Granian" in main_content
+
+
+def test_scaffold_files_fastapi_app_factory(tmp_path: Path) -> None:
+    target = tmp_path / "my-api"
+    target.mkdir()
+    scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
+    app_content = (target / "src" / "my_api" / "app.py").read_text()
+    assert "def create_app" in app_content
+    assert "lifespan" in app_content
+
+
+def test_scaffold_files_fastapi_dockerfile_multi_stage(tmp_path: Path) -> None:
+    target = tmp_path / "my-api"
+    target.mkdir()
+    scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
+    dockerfile = (target / "Dockerfile").read_text()
+    assert "AS builder" in dockerfile
+    assert "python:3.14-slim-bookworm" in dockerfile  # default python_version
+    assert "USER app" in dockerfile
+    assert "my_api.app:create_app" in dockerfile
+
+
+def test_scaffold_files_fastapi_test_uses_httpx(tmp_path: Path) -> None:
+    target = tmp_path / "my-api"
+    target.mkdir()
+    scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
+    test_content = (target / "tests" / "test_health.py").read_text()
+    assert "from httpx import AsyncClient" in test_content
+    assert "from my_api.app import create_app" in test_content
+
+
+def test_scaffold_files_fastapi_end_with_trailing_newline(tmp_path: Path) -> None:
+    target = tmp_path / "my-api"
+    target.mkdir()
+    scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
+
+    generated_files = [
+        ".python-version",
+        ".gitignore",
+        "main.py",
+        "pyproject.toml",
+        "README.md",
+        "Dockerfile",
+        ".dockerignore",
+        "src/my_api/__init__.py",
+        "src/my_api/app.py",
+        "src/my_api/config.py",
+        "src/my_api/_logging.py",
+        "src/my_api/dependencies.py",
+        "src/my_api/routes/__init__.py",
+        "src/my_api/routes/health.py",
+        "tests/__init__.py",
+        "tests/conftest.py",
+        "tests/test_health.py",
+    ]
+
+    for rel_path in generated_files:
+        content = (target / rel_path).read_text()
+        assert content.endswith("\n"), f"Expected trailing newline in {rel_path}"
+
+
+# ---------------------------------------------------------------------------
+# fastapi archetype — integration (run_new → scaffold_files → _scaffold_fastapi)
+# ---------------------------------------------------------------------------
+
+
+def test_run_new_fastapi_success(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = run_new("my-api", at=str(tmp_path / "my-api"), cwd=tmp_path, archetype="fastapi")
+    assert result == 0
+    assert (tmp_path / "my-api" / "main.py").exists()
+    assert (tmp_path / "my-api" / "src" / "my_api" / "app.py").exists()
+    assert (tmp_path / "my-api" / "Dockerfile").exists()
+
+
+def test_run_new_fastapi_cleanup_on_failure(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = run_new("my-api", cwd=tmp_path, archetype="fastapi")
+    assert result == 1
+    assert not (tmp_path / "my-api").exists()
+
+
+def test_run_new_fastapi_keep_on_failure(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = run_new("my-api", cwd=tmp_path, archetype="fastapi", keep_on_failure=True)
+    assert result == 1
+    assert (tmp_path / "my-api").exists()
+
+
+# ---------------------------------------------------------------------------
+# fastapi archetype — CLI
+# ---------------------------------------------------------------------------
+
+
+def test_cli_new_fastapi_archetype(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "my-api", "--at", str(tmp_path / "my-api"), "--archetype", "fastapi"])
+    assert result == 0
+    assert (tmp_path / "my-api" / "src" / "my_api" / "__init__.py").exists()
+    assert (tmp_path / "my-api" / "Dockerfile").exists()
+
+
+def test_cli_fastapi_default_python_version(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "my-api", "--at", str(tmp_path / "my-api"), "--archetype", "fastapi"])
+    assert result == 0
+    assert (tmp_path / "my-api" / ".python-version").read_text().strip() == "3.14"
+
+
+def test_default_python_versions_fastapi() -> None:
+    assert DEFAULT_PYTHON_VERSIONS["fastapi"] == "3.14"
+
+
+def test_run_new_fastapi_uses_default_python_314(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+        patch("nuv.commands.new.scaffold_files") as mock_scaffold,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = run_new("my-api", at=str(tmp_path / "my-api"), cwd=tmp_path, archetype="fastapi")
+    assert result == 0
+    mock_scaffold.assert_called_once()
+    call_kwargs = mock_scaffold.call_args[1]
+    assert call_kwargs["python_version"] == "3.14"
+    assert call_kwargs["archetype"] == "fastapi"
