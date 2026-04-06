@@ -1,7 +1,6 @@
 import logging
 from unittest.mock import MagicMock, patch
 
-import pytest
 from httpx import AsyncClient
 
 from {module_name}._logging import configure
