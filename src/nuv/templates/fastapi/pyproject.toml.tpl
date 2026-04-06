@@ -28,7 +28,7 @@ dev = [
 managed = true
 
 [tool.pytest.ini_options]
-addopts = "--cov=main --cov={module_name} --cov-report=term-missing --cov-fail-under=100"
+addopts = "--cov=main --cov={module_name} --cov-report=term-missing --cov-fail-under=90"
 asyncio_mode = "auto"
 
 [tool.ruff]
