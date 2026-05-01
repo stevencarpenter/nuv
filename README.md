@@ -38,6 +38,7 @@ nuv new <name>                              # creates ./<name>/, syncs deps, pri
 nuv new <name> --at <path>                  # creates at an explicit path
 nuv new <name> --archetype spark            # PySpark 4 project with notebooks
 nuv new <name> --archetype fastapi          # FastAPI + Granian + Docker
+nuv new <name> --archetype polars           # Polars + DuckDB + Delta Lake for local data work
 nuv new <name> --python-version 3.13        # override default Python version
 nuv new <name> --install none               # scaffold + sync, skip tool install
 nuv new <name> --install command-only       # log install command, do not execute (default)
@@ -162,6 +163,67 @@ Docker:
 docker build -t my-api .
 docker run -p 8000:8000 my-api
 ```
+
+### polars
+
+A single-node data project with Polars, DuckDB, and Delta Lake. For local analysis, ETL, and feature engineering when Spark is overkill.
+
+```bash
+nuv new my-pipeline --archetype polars
+```
+
+```
+my-pipeline/
+├── main.py                          # Click CLI entry point
+├── pyproject.toml
+├── README.md
+├── data/
+│   ├── raw/                         # input datasets (gitignored)
+│   └── features/                    # derived datasets (gitignored)
+├── src/my_pipeline/
+│   ├── __init__.py
+│   ├── _logging.py
+│   ├── _io.py                       # read/write CSV, Parquet, JSON, Delta + show/glimpse helpers
+│   ├── _db.py                       # DuckDB SQL → Polars DataFrame
+│   ├── config.py                    # Pydantic settings
+│   └── main.py
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py
+│   └── test_io.py                   # roundtrip tests for every supported format
+└── notebooks/
+    └── explore.py                   # marimo
+```
+
+Default Python version: 3.14.
+
+```bash
+uv run pytest          # passing, ≥90% branch coverage enforced
+uv run ruff check .    # clean
+uv run ty check        # clean
+```
+
+Run locally:
+
+```bash
+uv run python main.py --help
+uv run python main.py --log-level INFO
+```
+
+Notebooks are an optional dependency group:
+
+```bash
+uv sync --group notebooks
+uv run marimo edit notebooks/explore.py
+```
+
+**Use this when:**
+- You want fast single-node dataframes without the JVM (Polars instead of PySpark).
+- You want to mix Polars expressions with SQL on the same data — `_db.sql("...")` returns a Polars DataFrame via DuckDB.
+- You're reading or writing Parquet, CSV, JSON, or Delta Lake tables.
+- You want a marimo notebook for exploration with the I/O helpers pre-wired.
+
+**Pick `spark` instead when** the dataset doesn't fit on one machine, or you need a long-running cluster.
 
 ## Quality out of the box
 
