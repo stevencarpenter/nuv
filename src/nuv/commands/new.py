@@ -171,15 +171,16 @@ def scaffold_files(
     tests_dir.mkdir()
     write_with_trailing_newline(tests_dir / "__init__.py", "")
 
-    if archetype == "script":
-        write_with_trailing_newline(target / "_logging.py", render_template("_logging.py.tpl", **template_vars))
-        write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
-    elif archetype == "spark":
-        _scaffold_spark(target, template_vars=template_vars, name=name, module_name=module_name)
-    elif archetype == "polars":
-        _scaffold_polars(target, template_vars=template_vars, module_name=module_name)
-    else:  # fastapi — validated by VALID_ARCHETYPES above
-        _scaffold_fastapi(target, template_vars=template_vars, name=name, module_name=module_name)
+    match archetype:
+        case "script":
+            write_with_trailing_newline(target / "_logging.py", render_template("_logging.py.tpl", **template_vars))
+            write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
+        case "spark":
+            _scaffold_spark(target, template_vars=template_vars, name=name, module_name=module_name)
+        case "polars":
+            _scaffold_polars(target, template_vars=template_vars, module_name=module_name)
+        case _:  # fastapi — validated by VALID_ARCHETYPES above
+            _scaffold_fastapi(target, template_vars=template_vars, module_name=module_name)
 
 
 def _scaffold_spark(
@@ -219,7 +220,6 @@ def _scaffold_fastapi(
     target: Path,
     *,
     template_vars: dict[str, str],
-    name: str,
     module_name: str,
 ) -> None:
     # src/<module_name>/ package
