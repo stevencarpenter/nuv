@@ -5,11 +5,11 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "polars>=1",
-    "duckdb>=1",
-    "deltalake>=0.20",
-    "pydantic-settings>=2",
-    "click>=8",
+    "polars>=1.40.1",
+    "duckdb>=1.5.2",
+    "deltalake>=1.5.1",
+    "pydantic-settings>=2.14.0",
+    "click>=8.3.3",
 ]
 
 [project.scripts]
@@ -17,13 +17,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pytest>=8",
-    "pytest-cov>=6",
-    "ruff>=0.9",
-    "ty>=0.0.1a1",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.12",
+    "ty>=0.0.33",
 ]
 notebooks = [
-    "marimo>=0.10",
+    "marimo>=0.23.4",
 ]
 
 [tool.uv]
@@ -50,5 +50,5 @@ packages = ["src/{module_name}"]
 include = ["main.py"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.29.0"]
 build-backend = "hatchling.build"

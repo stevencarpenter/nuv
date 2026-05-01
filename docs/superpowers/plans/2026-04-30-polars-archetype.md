@@ -77,11 +77,11 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "polars>=1",
-    "duckdb>=1",
-    "deltalake>=0.20",
-    "pydantic-settings>=2",
-    "click>=8",
+    "polars>=1.40.1",
+    "duckdb>=1.5.2",
+    "deltalake>=1.5.1",
+    "pydantic-settings>=2.14.0",
+    "click>=8.3.3",
 ]
 
 [project.scripts]
@@ -89,13 +89,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pytest>=8",
-    "pytest-cov>=6",
-    "ruff>=0.9",
-    "ty>=0.0.1a1",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.12",
+    "ty>=0.0.33",
 ]
 notebooks = [
-    "marimo>=0.10",
+    "marimo>=0.23.4",
 ]
 
 [tool.uv]
@@ -335,7 +335,7 @@ def sql(query: str) -> pl.DataFrame:
 ```python
 import marimo
 
-__generated_with = "0.10.0"
+__generated_with = "0.23.4"
 app = marimo.App(width="medium")
 
 
@@ -447,9 +447,11 @@ def test_read_json_roundtrip(tmp_path):
 
 
 def test_write_unsupported_format(sample_df, tmp_path):
+    import pytest
+
     path = tmp_path / "test.xyz"
-    result = write(sample_df, path)
-    assert result is None
+    with pytest.raises(ValueError, match="Unsupported format"):
+        write(sample_df, path)
 
 
 def test_read_delta_roundtrip(tmp_path):
@@ -614,12 +616,12 @@ def test_scaffold_files_polars_pyproject_has_deps(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-polars-app", module_name="my_polars_app", archetype="polars")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "polars>=1" in pyproject
-    assert "duckdb>=1" in pyproject
-    assert "deltalake>=0.20" in pyproject
-    assert "pydantic-settings>=2" in pyproject
-    assert "click>=8" in pyproject
-    assert "marimo>=0.10" in pyproject
+    assert "polars>=1.40.1" in pyproject
+    assert "duckdb>=1.5.2" in pyproject
+    assert "deltalake>=1.5.1" in pyproject
+    assert "pydantic-settings>=2.14.0" in pyproject
+    assert "click>=8.3.3" in pyproject
+    assert "marimo>=0.23.4" in pyproject
     assert "py314" in pyproject
     assert 'packages = ["src/my_polars_app"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject

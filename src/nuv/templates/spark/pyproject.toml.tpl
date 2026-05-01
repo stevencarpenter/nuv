@@ -5,7 +5,7 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "pyspark>=4,<5",
+    "pyspark>=4.1.1,<5",
 ]
 
 [project.scripts]
@@ -13,15 +13,15 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "chispa>=0.11",
-    "pytest>=9",
-    "pytest-cov>=6",
-    "ruff>=0.9",
-    "ty>=0.0.1a1",
+    "chispa>=0.12.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.12",
+    "ty>=0.0.33",
 ]
 notebooks = [
-    "jupyterlab>=4",
-    "marimo>=0.10",
+    "jupyterlab>=4.5.7",
+    "marimo>=0.23.4",
 ]
 
 [tool.uv]
@@ -48,5 +48,5 @@ packages = ["src/{module_name}"]
 include = ["main.py", "_logging.py"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.29.0"]
 build-backend = "hatchling.build"

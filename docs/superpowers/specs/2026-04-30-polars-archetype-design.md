@@ -30,8 +30,7 @@ A new `polars` archetype for `nuv new` that scaffolds an opinionated local data 
 │   └── main.py
 ├── data/
 │   ├── raw/
-│   ├── features/
-│   └── warehouse.db
+│   └── features/
 ├── notebooks/
 │   └── explore.py
 ├── tests/
@@ -64,15 +63,14 @@ glimpse(df)                                 # columns/count/dtypes summary
 ### `_db.py` — DuckDB Bridge
 
 ```
-attach(path, name="lake")                   # attach a Delta directory
 sql(query) -> pl.DataFrame                  # run SQL, return Polars
 ```
 
 ### `config.py` — Pydantic Settings
 
 ```
+app_name: str        # defaults to the scaffolded project name
 data_root: Path      # defaults to project_root / "data"
-warehouse: Path      # defaults to data_root / "warehouse.db"
 log_level: str       # defaults to "INFO"
 ```
 
@@ -93,21 +91,21 @@ A marimo notebook scaffold with a default cell importing the project's modules a
 ### Runtime requirements
 
 ```
-polars>=1
-duckdb>=1
-deltalake>=0.20
-pydantic-settings>=2
-click>=8
+polars>=1.40.1
+duckdb>=1.5.2
+deltalake>=1.5.1
+pydantic-settings>=2.14.0
+click>=8.3.3
 ```
 
 ### Dev requirements
 
 ```
-pytest>=8
-pytest-cov>=6
-ruff>=0.9
-ty>=1
-marimo>=0.11
+pytest>=9.0.3
+pytest-cov>=7.1.0
+ruff>=0.15.12
+ty>=0.0.33
+marimo>=0.23.4
 ```
 
 ### Python
@@ -119,7 +117,6 @@ marimo>=0.11
 ### conftest.py fixtures
 
 ```
-delta_path(tmp_path)       # temp directory for Delta I/O
 sample_df()                # pl.DataFrame({"x": [1,2,3], "y": ["a","b","c"]})
 ```
 
@@ -153,11 +150,12 @@ src/nuv/templates/polars/
   config.py.tpl
   main.py.tpl
   pyproject.toml.tpl
-  .gitignore.tpl
+  gitignore.tpl
+  readme.md.tpl
   notebooks/explore.py.tpl
-  tests/__init__.py.tpl
-  tests/conftest.py.tpl
-  tests/test_io.py.tpl
+  init.py.tpl
+  conftest.py.tpl
+  test_io.py.tpl
 ```
 
 All `.tpl` files rendered with `str.format()` using `{name}` and `{module_name}` variables, matching existing convention.

@@ -623,10 +623,10 @@ def test_scaffold_files_spark_pyproject_has_pyspark(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "pyspark>=4,<5" in pyproject
-    assert "chispa>=0.11" in pyproject
-    assert "jupyterlab>=4" in pyproject
-    assert "marimo>=0.10" in pyproject
+    assert "pyspark>=4.1.1,<5" in pyproject
+    assert "chispa>=0.12.0" in pyproject
+    assert "jupyterlab>=4.5.7" in pyproject
+    assert "marimo>=0.23.4" in pyproject
     assert "py313" in pyproject
     assert 'packages = ["src/my_spark_app"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
@@ -797,11 +797,11 @@ def test_scaffold_files_fastapi_pyproject_has_deps(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "fastapi>=0.135" in pyproject
-    assert "granian>=2" in pyproject
-    assert "pydantic-settings>=2" in pyproject
-    assert "httpx>=0.28" in pyproject
-    assert "pytest-asyncio>=1.3" in pyproject
+    assert "fastapi>=0.136.1" in pyproject
+    assert "granian>=2.7.4" in pyproject
+    assert "pydantic-settings>=2.14.0" in pyproject
+    assert "httpx>=0.28.1" in pyproject
+    assert "pytest-asyncio>=1.3.0" in pyproject
     assert "py314" in pyproject
     assert 'packages = ["src/my_api"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
@@ -992,12 +992,12 @@ def test_scaffold_files_polars_pyproject_has_deps(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-polars-app", module_name="my_polars_app", archetype="polars")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "polars>=1" in pyproject
-    assert "duckdb>=1" in pyproject
-    assert "deltalake>=0.20" in pyproject
-    assert "pydantic-settings>=2" in pyproject
-    assert "click>=8" in pyproject
-    assert "marimo>=0.10" in pyproject
+    assert "polars>=1.40.1" in pyproject
+    assert "duckdb>=1.5.2" in pyproject
+    assert "deltalake>=1.5.1" in pyproject
+    assert "pydantic-settings>=2.14.0" in pyproject
+    assert "click>=8.3.3" in pyproject
+    assert "marimo>=0.23.4" in pyproject
     assert "py314" in pyproject
     assert 'packages = ["src/my_polars_app"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
@@ -1024,10 +1024,8 @@ def test_scaffold_files_polars_package_modules(tmp_path: Path) -> None:
     db_content = (target / "src" / "my_polars_app" / "_db.py").read_text()
     assert "import duckdb" in db_content
     assert "def sql" in db_content
-    ns = ["polars", "duckdb", "deltalake"]
     config = (target / "src" / "my_polars_app" / "config.py").read_text()
-    for lib in ns:
-        assert lib in config or "pydantic_settings" in config
+    assert "pydantic_settings" in config
 
 
 def test_scaffold_files_polars_end_with_trailing_newline(tmp_path: Path) -> None:
