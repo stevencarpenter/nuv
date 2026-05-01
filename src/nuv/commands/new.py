@@ -24,7 +24,7 @@ def validate_name(name: str) -> str:
 
 _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
 DEFAULT_PYTHON_VERSION = "3.14"
-DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14"}
+DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14", "polars": "3.14"}
 
 
 def validate_python_version(version: str) -> str:
@@ -139,7 +139,7 @@ def generate_jupyter_notebook(name: str, *, python_version: str = DEFAULT_PYTHON
     return json.dumps(notebook, indent=1) + "\n"
 
 
-VALID_ARCHETYPES = ("script", "spark", "fastapi")
+VALID_ARCHETYPES = ("script", "spark", "fastapi", "polars")
 
 
 def scaffold_files(
@@ -176,6 +176,8 @@ def scaffold_files(
         write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
     elif archetype == "spark":
         _scaffold_spark(target, template_vars=template_vars, name=name, module_name=module_name)
+    elif archetype == "polars":
+        _scaffold_polars(target, template_vars=template_vars, module_name=module_name)
     else:  # fastapi — validated by VALID_ARCHETYPES above
         _scaffold_fastapi(target, template_vars=template_vars, name=name, module_name=module_name)
 
@@ -243,6 +245,33 @@ def _scaffold_fastapi(
     # Docker
     write_with_trailing_newline(target / "Dockerfile", render_template("dockerfile.tpl", **template_vars))
     write_with_trailing_newline(target / ".dockerignore", render_template("dockerignore.tpl", **template_vars))
+
+
+def _scaffold_polars(
+    target: Path,
+    *,
+    template_vars: dict[str, str],
+    module_name: str,
+) -> None:
+    pkg_dir = target / "src" / module_name
+    pkg_dir.mkdir(parents=True)
+    write_with_trailing_newline(pkg_dir / "__init__.py", render_template("init.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "_logging.py", render_template("_logging.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "_io.py", render_template("_io.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "_db.py", render_template("_db.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "config.py", render_template("config.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "main.py", render_template("main.py.tpl", **template_vars))
+
+    tests_dir = target / "tests"
+    write_with_trailing_newline(tests_dir / "conftest.py", render_template("conftest.py.tpl", **template_vars))
+    write_with_trailing_newline(tests_dir / "test_io.py", render_template("test_io.py.tpl", **template_vars))
+
+    notebooks_dir = target / "notebooks"
+    notebooks_dir.mkdir()
+    write_with_trailing_newline(notebooks_dir / "explore.py", render_template("notebooks/explore.py.tpl", **template_vars))
+
+    (target / "data" / "raw").mkdir(parents=True)
+    (target / "data" / "features").mkdir(parents=True)
 
 
 def run_uv_sync(target: Path) -> None:
