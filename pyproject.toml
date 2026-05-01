@@ -1,6 +1,6 @@
 [project]
 name = "nuv"
-version = "0.3.0"
+version = "0.4.0"
 description = "Scaffold opinionated uv Python projects"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -31,10 +31,10 @@ nuv = "nuv.cli:main"
 
 [dependency-groups]
 dev = [
-    "pytest>=9",
-    "pytest-cov>=7",
-    "ruff>=0.15",
-    "ty>=0.0.28",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.12",
+    "ty>=0.0.33",
 ]
 
 [tool.uv]
@@ -61,5 +61,5 @@ packages = ["src/nuv"]
 include = ["src/nuv/**/*.tpl"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.29.0"]
 build-backend = "hatchling.build"

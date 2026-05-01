@@ -11,10 +11,10 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-    "pytest>=8",
-    "pytest-cov>=6",
-    "ruff>=0.9",
-    "ty>=0.0.1a1",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.12",
+    "ty>=0.0.33",
 ]
 
 [tool.uv]
@@ -40,5 +40,5 @@ exclude_lines = ["if __name__ == .__main__.:"]
 include = ["main.py", "_logging.py"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.29.0"]
 build-backend = "hatchling.build"

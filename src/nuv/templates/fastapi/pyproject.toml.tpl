@@ -5,10 +5,10 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "fastapi>=0.135",
-    "granian>=2.7",
-    "pydantic>=2.12",
-    "pydantic-settings>=2.13",
+    "fastapi>=0.136.1",
+    "granian>=2.7.4",
+    "pydantic>=2.13.3",
+    "pydantic-settings>=2.14.0",
 ]
 
 [project.scripts]
@@ -16,12 +16,12 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28",
-    "pytest>=9.0.2",
+    "httpx>=0.28.1",
+    "pytest>=9.0.3",
     "pytest-asyncio>=1.3.0",
-    "pytest-cov>=7",
-    "ruff>=0.15.6",
-    "ty>=0.0.23",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.12",
+    "ty>=0.0.33",
 ]
 
 [tool.uv]
@@ -49,5 +49,5 @@ packages = ["src/{module_name}"]
 include = ["main.py"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.29.0"]
 build-backend = "hatchling.build"

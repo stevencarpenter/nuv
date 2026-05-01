@@ -5,22 +5,24 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "pyspark>=4.1.1,<5",
+    "polars>=1.40.1",
+    "duckdb>=1.5.2",
+    "deltalake>=1.5.1",
+    "pydantic-settings>=2.14.0",
+    "click>=8.3.3",
 ]
 
 [project.scripts]
-{name} = "main:main"
+{name} = "{module_name}.main:main"
 
 [dependency-groups]
 dev = [
-    "chispa>=0.12.0",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
     "ruff>=0.15.12",
     "ty>=0.0.33",
 ]
 notebooks = [
-    "jupyterlab>=4.5.7",
     "marimo>=0.23.4",
 ]
 
@@ -28,7 +30,7 @@ notebooks = [
 managed = true
 
 [tool.pytest.ini_options]
-addopts = "--cov=main --cov={module_name} --cov-report=term-missing --cov-fail-under=100"
+addopts = "--cov=main --cov={module_name} --cov-report=term-missing --cov-fail-under=90"
 
 [tool.ruff]
 target-version = "py{python_version_nodot}"
@@ -45,7 +47,7 @@ exclude_lines = ["if __name__ == .__main__.:"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/{module_name}"]
-include = ["main.py", "_logging.py"]
+include = ["main.py"]
 
 [build-system]
 requires = ["hatchling>=1.29.0"]

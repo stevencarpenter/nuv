@@ -623,10 +623,10 @@ def test_scaffold_files_spark_pyproject_has_pyspark(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "pyspark>=4,<5" in pyproject
-    assert "chispa>=0.11" in pyproject
-    assert "jupyterlab>=4" in pyproject
-    assert "marimo>=0.10" in pyproject
+    assert "pyspark>=4.1.1,<5" in pyproject
+    assert "chispa>=0.12.0" in pyproject
+    assert "jupyterlab>=4.5.7" in pyproject
+    assert "marimo>=0.23.4" in pyproject
     assert "py313" in pyproject
     assert 'packages = ["src/my_spark_app"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
@@ -797,11 +797,11 @@ def test_scaffold_files_fastapi_pyproject_has_deps(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "fastapi>=0.135" in pyproject
-    assert "granian>=2" in pyproject
-    assert "pydantic-settings>=2" in pyproject
-    assert "httpx>=0.28" in pyproject
-    assert "pytest-asyncio>=1.3" in pyproject
+    assert "fastapi>=0.136.1" in pyproject
+    assert "granian>=2.7.4" in pyproject
+    assert "pydantic-settings>=2.14.0" in pyproject
+    assert "httpx>=0.28.1" in pyproject
+    assert "pytest-asyncio>=1.3.0" in pyproject
     assert "py314" in pyproject
     assert 'packages = ["src/my_api"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
@@ -952,3 +952,181 @@ def test_run_new_fastapi_uses_default_python_314(tmp_path: Path) -> None:
     call_kwargs = mock_scaffold.call_args[1]
     assert call_kwargs["python_version"] == "3.14"
     assert call_kwargs["archetype"] == "fastapi"
+
+
+# ---------------------------------------------------------------------------
+# polars archetype — scaffold_files
+# ---------------------------------------------------------------------------
+
+
+def test_default_python_versions_polars() -> None:
+    assert DEFAULT_PYTHON_VERSIONS["polars"] == "3.14"
+
+
+def test_scaffold_files_polars_creates_expected_files(tmp_path: Path) -> None:
+    target = tmp_path / "my-polars-app"
+    target.mkdir()
+    scaffold_files(target, name="my-polars-app", module_name="my_polars_app", archetype="polars")
+
+    assert (target / ".python-version").exists()
+    assert (target / ".gitignore").exists()
+    assert (target / "main.py").exists()
+    assert (target / "pyproject.toml").exists()
+    assert (target / "README.md").exists()
+    assert (target / "src" / "my_polars_app" / "__init__.py").exists()
+    assert (target / "src" / "my_polars_app" / "_logging.py").exists()
+    assert (target / "src" / "my_polars_app" / "_io.py").exists()
+    assert (target / "src" / "my_polars_app" / "_db.py").exists()
+    assert (target / "src" / "my_polars_app" / "config.py").exists()
+    assert (target / "src" / "my_polars_app" / "main.py").exists()
+    assert (target / "tests" / "__init__.py").exists()
+    assert (target / "tests" / "conftest.py").exists()
+    assert (target / "tests" / "test_io.py").exists()
+    assert (target / "notebooks" / "explore.py").exists()
+    assert (target / "data" / "raw").exists()
+    assert (target / "data" / "features").exists()
+
+
+def test_scaffold_files_polars_pyproject_has_deps(tmp_path: Path) -> None:
+    target = tmp_path / "my-polars-app"
+    target.mkdir()
+    scaffold_files(target, name="my-polars-app", module_name="my_polars_app", archetype="polars")
+    pyproject = (target / "pyproject.toml").read_text()
+    assert "polars>=1.40.1" in pyproject
+    assert "duckdb>=1.5.2" in pyproject
+    assert "deltalake>=1.5.1" in pyproject
+    assert "pydantic-settings>=2.14.0" in pyproject
+    assert "click>=8.3.3" in pyproject
+    assert "marimo>=0.23.4" in pyproject
+    assert "py314" in pyproject
+    assert 'packages = ["src/my_polars_app"]' in pyproject
+    assert 'build-backend = "hatchling.build"' in pyproject
+
+
+def test_scaffold_files_polars_main_uses_click(tmp_path: Path) -> None:
+    target = tmp_path / "my-polars-app"
+    target.mkdir()
+    scaffold_files(target, name="my-polars-app", module_name="my_polars_app", archetype="polars")
+    main_content = (target / "main.py").read_text()
+    assert "import click" in main_content
+    assert "@click.command()" in main_content
+
+
+def test_scaffold_files_polars_package_modules(tmp_path: Path) -> None:
+    target = tmp_path / "my-polars-app"
+    target.mkdir()
+    scaffold_files(target, name="my-polars-app", module_name="my_polars_app", archetype="polars")
+    io_content = (target / "src" / "my_polars_app" / "_io.py").read_text()
+    assert "read_csv" in io_content
+    assert "read_parquet" in io_content
+    assert "show" in io_content
+    assert "glimpse" in io_content
+    db_content = (target / "src" / "my_polars_app" / "_db.py").read_text()
+    assert "import duckdb" in db_content
+    assert "def sql" in db_content
+    config = (target / "src" / "my_polars_app" / "config.py").read_text()
+    assert "pydantic_settings" in config
+
+
+def test_scaffold_files_polars_end_with_trailing_newline(tmp_path: Path) -> None:
+    target = tmp_path / "my-polars-app"
+    target.mkdir()
+    scaffold_files(target, name="my-polars-app", module_name="my_polars_app", archetype="polars")
+
+    generated_files = [
+        ".python-version",
+        ".gitignore",
+        "main.py",
+        "pyproject.toml",
+        "README.md",
+        "src/my_polars_app/__init__.py",
+        "src/my_polars_app/_logging.py",
+        "src/my_polars_app/_io.py",
+        "src/my_polars_app/_db.py",
+        "src/my_polars_app/config.py",
+        "src/my_polars_app/main.py",
+        "tests/__init__.py",
+        "tests/conftest.py",
+        "tests/test_io.py",
+        "notebooks/explore.py",
+    ]
+
+    for rel_path in generated_files:
+        content = (target / rel_path).read_text()
+        assert content.endswith("\n"), f"Expected trailing newline in {rel_path}"
+
+
+# ---------------------------------------------------------------------------
+# polars archetype — integration (run_new → scaffold_files → _scaffold_polars)
+# ---------------------------------------------------------------------------
+
+
+def test_run_new_polars_success(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = run_new("my-polars-app", at=str(tmp_path / "my-polars-app"), cwd=tmp_path, archetype="polars")
+    assert result == 0
+    assert (tmp_path / "my-polars-app" / "main.py").exists()
+    assert (tmp_path / "my-polars-app" / "src" / "my_polars_app" / "_io.py").exists()
+    assert (tmp_path / "my-polars-app" / "notebooks" / "explore.py").exists()
+    assert (tmp_path / "my-polars-app" / "data" / "raw").exists()
+
+
+def test_run_new_polars_cleanup_on_failure(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = run_new("my-polars-app", cwd=tmp_path, archetype="polars")
+    assert result == 1
+    assert not (tmp_path / "my-polars-app").exists()
+
+
+def test_run_new_polars_keep_on_failure(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = run_new("my-polars-app", cwd=tmp_path, archetype="polars", keep_on_failure=True)
+    assert result == 1
+    assert (tmp_path / "my-polars-app").exists()
+
+
+# ---------------------------------------------------------------------------
+# polars archetype — CLI
+# ---------------------------------------------------------------------------
+
+
+def test_cli_new_polars_archetype(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "my-polars-app", "--at", str(tmp_path / "my-polars-app"), "--archetype", "polars"])
+    assert result == 0
+    assert (tmp_path / "my-polars-app" / "src" / "my_polars_app" / "__init__.py").exists()
+    assert (tmp_path / "my-polars-app" / "data" / "raw").exists()
+
+
+def test_cli_polars_default_python_version(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "my-polars-app", "--at", str(tmp_path / "my-polars-app"), "--archetype", "polars"])
+    assert result == 0
+    assert (tmp_path / "my-polars-app" / ".python-version").read_text().strip() == "3.14"
+
+
+def test_run_new_polars_uses_default_python_314(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+        patch("nuv.commands.new.scaffold_files") as mock_scaffold,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = run_new("my-polars-app", at=str(tmp_path / "my-polars-app"), cwd=tmp_path, archetype="polars")
+    assert result == 0
+    mock_scaffold.assert_called_once()
+    call_kwargs = mock_scaffold.call_args[1]
+    assert call_kwargs["python_version"] == "3.14"
+    assert call_kwargs["archetype"] == "polars"
