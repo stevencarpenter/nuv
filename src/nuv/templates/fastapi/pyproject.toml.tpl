@@ -5,6 +5,7 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
+    "click>=8.3.3",
     "fastapi>=0.136.1",
     "granian>=2.7.4",
     "pydantic>=2.13.3",
@@ -21,7 +22,7 @@ dev = [
     "pytest-asyncio>=1.3.0",
     "pytest-cov>=7.1.0",
     "ruff>=0.15.12",
-    "ty>=0.0.33",
+    "ty>=0.0.34",
 ]
 
 [tool.uv]
