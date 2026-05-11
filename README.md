@@ -17,7 +17,7 @@ Scaffold opinionated [uv](https://docs.astral.sh/uv/) Python projects — tests 
 nuv new my-tool
 ```
 
-That's it. You get a working project with argparse, logging, test coverage, ruff, and ty — all green from commit zero.
+That's it. You get a working project with click, logging, test coverage, ruff, and ty — all green from commit zero.
 
 ## Install
 
@@ -49,7 +49,7 @@ nuv new <name> --keep-on-failure            # keep generated files if sync/insta
 
 ### script (default)
 
-A single-file CLI tool with argparse and logging.
+A single-file CLI tool with click and logging.
 
 ```bash
 nuv new my-tool
@@ -57,7 +57,7 @@ nuv new my-tool
 
 ```
 my-tool/
-├── main.py          # argparse + logging
+├── main.py          # click + logging
 ├── _logging.py
 ├── pyproject.toml   # pytest, ruff, ty, uv
 ├── README.md

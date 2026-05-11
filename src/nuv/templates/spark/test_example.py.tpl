@@ -1,4 +1,5 @@
 import logging
+import sys
 from unittest.mock import MagicMock, patch
 
 from chispa import assert_df_equality
@@ -23,6 +24,22 @@ def test_main_returns_zero():
         result = main([])
     assert result == 0
     mock_spark.stop.assert_called_once()
+
+
+def test_main_returns_2_for_usage_errors(capsys):
+    from main import main
+
+    result = main(["--bogus"])
+    assert result == 2
+    assert "No such option" in capsys.readouterr().err
+
+
+def test_main_returns_0_for_help(capsys):
+    from main import main
+
+    result = main(["--help"])
+    assert result == 0
+    assert "--env" in capsys.readouterr().out
 
 
 # --- Jobs ---
@@ -66,6 +83,12 @@ def test_resolve_params_env_var(monkeypatch):
     monkeypatch.setenv("SPARK_APP_ENV", "staging")
     params = resolve_params([])
     assert params["env"] == "staging"
+
+
+def test_resolve_params_reads_sys_argv(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["main.py", "--env", "prod", "--job", "etl", "--log-level", "INFO"])
+    params = resolve_params(None)
+    assert params == {{"env": "prod", "job": "etl", "log_level": "INFO"}}
 
 
 # --- Logging ---

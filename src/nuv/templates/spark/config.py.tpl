@@ -1,32 +1,31 @@
 """Resolve parameters from CLI args, environment variables, and defaults."""
 
-import argparse
-import os
 from collections.abc import Sequence
 
-DEFAULTS: dict[str, str] = {{
-    "env": "dev",
-    "job": "example",
-    "log_level": "WARNING",
-}}
+import click
 
 
 def resolve_params(argv: Sequence[str] | None = None) -> dict[str, str]:
-    parser = argparse.ArgumentParser(description="{name}")
-    parser.add_argument("--env", default=None, help="Environment (default: dev).")
-    parser.add_argument("--job", default=None, help="Job to run (default: example).")
-    parser.add_argument(
-        "--log-level",
-        dest="log_level",
-        default=None,
-        choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
-        help="Logging level (default: WARNING).",
-    )
-    parsed = parser.parse_args(argv)
+    captured: dict[str, str] = {{}}
 
-    params: dict[str, str] = {{}}
-    for key, default in DEFAULTS.items():
-        cli_val = getattr(parsed, key, None)
-        env_val = os.environ.get(f"SPARK_APP_{{key.upper()}}")
-        params[key] = cli_val or env_val or default
-    return params
+    @click.command()
+    @click.option("--env", envvar="SPARK_APP_ENV", default="dev", show_default=True, help="Environment.")
+    @click.option("--job", envvar="SPARK_APP_JOB", default="example", show_default=True, help="Job to run.")
+    @click.option(
+        "--log-level",
+        "log_level",
+        envvar="SPARK_APP_LOG_LEVEL",
+        default="WARNING",
+        show_default=True,
+        type=click.Choice(("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")),
+        help="Logging level.",
+    )
+    def _cli(env: str, job: str, log_level: str) -> None:
+        captured["env"] = env
+        captured["job"] = job
+        captured["log_level"] = log_level
+
+    exit_code = _cli.main(args=list(argv) if argv is not None else None, standalone_mode=False)
+    if not captured:
+        raise click.exceptions.Exit(exit_code if isinstance(exit_code, int) else 0)
+    return captured

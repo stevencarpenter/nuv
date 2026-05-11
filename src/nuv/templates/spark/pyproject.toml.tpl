@@ -5,6 +5,7 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
+    "click>=8.3.3",
     "pyspark>=4.1.1,<5",
 ]
 
@@ -17,7 +18,7 @@ dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
     "ruff>=0.15.12",
-    "ty>=0.0.33",
+    "ty>=0.0.34",
 ]
 notebooks = [
     "jupyterlab>=4.5.7",

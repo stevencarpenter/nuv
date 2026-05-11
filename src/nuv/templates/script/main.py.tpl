@@ -1,6 +1,7 @@
-import argparse
 import logging
 from collections.abc import Sequence
+
+import click
 
 from _logging import configure
 
@@ -21,19 +22,17 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="TODO")
-    parser.add_argument(
-        "--log-level",
-        default="WARNING",
-        choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
-        help="Logging level (default: WARNING).",
-    )
-    return parser
-
-
-def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    return build_parser().parse_args(argv)
+@click.command()
+@click.option(
+    "--log-level",
+    default="WARNING",
+    show_default=True,
+    type=click.Choice(("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")),
+    help="Logging level.",
+)
+def _cli(log_level: str) -> None:
+    configure(log_level)
+    log.debug("Starting %s", PROJECT_NAME)
 
 
 # ---------------------------------------------------------------------------
@@ -42,9 +41,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = parse_args(argv)
-    configure(args.log_level)
-    log.debug("Starting %s", PROJECT_NAME)
+    try:
+        _cli.main(args=list(argv) if argv is not None else None, standalone_mode=False)
+    except click.exceptions.UsageError as exc:
+        exc.show()
+        return exc.exit_code
     return 0
 
 
