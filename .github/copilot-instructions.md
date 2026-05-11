@@ -2,7 +2,7 @@
 
 ## Project overview
 
-`nuv` is a CLI tool that scaffolds opinionated uv-based Python projects. Running `nuv new <name>` creates a fully configured project with argparse, logging, 100% test coverage, ruff linting/formatting, and ty type checking — all green from commit zero.
+`nuv` is a CLI tool that scaffolds opinionated uv-based Python projects. Running `nuv new <name>` creates a fully configured project with click, logging, 100% test coverage, ruff linting/formatting, and ty type checking — all green from commit zero.
 
 ## Tech stack
 
@@ -17,7 +17,7 @@
 ```
 src/nuv/
   _logging.py       # LOG_FORMAT + configure(); single source of logging config
-  cli.py            # argparse entry point; routes subcommands
+  cli.py            # click entry point; routes subcommands
   commands/
     new.py          # logic for `nuv new`: validate, scaffold, uv sync
   templates/

@@ -25,5 +25,7 @@ def resolve_params(argv: Sequence[str] | None = None) -> dict[str, str]:
         captured["job"] = job
         captured["log_level"] = log_level
 
-    _cli.main(args=list(argv) if argv is not None else [], standalone_mode=False)
+    exit_code = _cli.main(args=list(argv) if argv is not None else None, standalone_mode=False)
+    if not captured:
+        raise click.exceptions.Exit(exit_code if isinstance(exit_code, int) else 0)
     return captured

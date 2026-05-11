@@ -1,3 +1,6 @@
+import importlib.util
+import sys
+import types
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -19,6 +22,24 @@ from nuv.commands.new import (
     validate_name,
     validate_python_version,
 )
+
+
+def _load_generated_module(path: Path):
+    spec = importlib.util.spec_from_file_location(f"generated_{path.parent.name}_{path.stem}", path)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _install_pyspark_stubs(monkeypatch: pytest.MonkeyPatch) -> None:
+    pyspark = types.ModuleType("pyspark")
+    sql = types.ModuleType("pyspark.sql")
+    sql.DataFrame = type("DataFrame", (), {})
+    sql.SparkSession = type("SparkSession", (), {})
+    monkeypatch.setitem(sys.modules, "pyspark", pyspark)
+    monkeypatch.setitem(sys.modules, "pyspark.sql", sql)
 
 
 def test_no_command_returns_1() -> None:
@@ -651,6 +672,49 @@ def test_scaffold_files_spark_main_imports_package(tmp_path: Path) -> None:
     assert "from my_spark_app._logging import configure" in main_content
     assert "from my_spark_app.config import resolve_params" in main_content
     assert "from my_spark_app.session import create_spark_session" in main_content
+
+
+def test_scaffold_files_spark_resolve_params_reads_sys_argv_when_argv_none(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+    config = _load_generated_module(target / "src" / "my_spark_app" / "config.py")
+
+    monkeypatch.setattr(sys, "argv", ["main.py", "--env", "prod", "--job", "etl", "--log-level", "INFO"])
+
+    assert config.resolve_params(None) == {"env": "prod", "job": "etl", "log_level": "INFO"}
+
+
+def test_scaffold_files_spark_main_returns_2_for_usage_errors(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+    _install_pyspark_stubs(monkeypatch)
+    monkeypatch.syspath_prepend(str(target / "src"))
+    main_module = _load_generated_module(target / "main.py")
+
+    assert main_module.main(["--bogus"]) == 2
+    assert "No such option" in capsys.readouterr().err
+
+
+def test_scaffold_files_spark_main_returns_0_for_help(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+    _install_pyspark_stubs(monkeypatch)
+    monkeypatch.syspath_prepend(str(target / "src"))
+    main_module = _load_generated_module(target / "main.py")
+
+    assert main_module.main(["--help"]) == 0
+    assert "--env" in capsys.readouterr().out
 
 
 def test_scaffold_files_spark_test_uses_chispa(tmp_path: Path) -> None:
