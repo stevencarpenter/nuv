@@ -1,0 +1,994 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "nuv",
+    "languages": [
+      "python",
+      "markdown",
+      "toml",
+      "yaml"
+    ],
+    "frameworks": [
+      "Click",
+      "Hatchling",
+      "pytest",
+      "Ruff",
+      "ty",
+      "uv",
+      "GitHub Actions"
+    ],
+    "description": "A CLI tool that scaffolds opinionated uv-based Python projects from archetypes, producing a ready-to-run project with click, logging, tests, and linting all passing from the first commit.",
+    "analyzedAt": "2026-05-23T21:32:14Z",
+    "gitCommitHash": "7f405890d8878d88ca7a54162506455b08d1d3a4"
+  },
+  "nodes": [
+    {
+      "id": "document:.github/copilot-instructions.md",
+      "type": "document",
+      "name": "copilot-instructions.md",
+      "filePath": ".github/copilot-instructions.md",
+      "summary": "GitHub Copilot guidance describing nuv's project overview, tech stack, repository layout, development commands, coding conventions, and the steps for adding a new archetype.",
+      "tags": [
+        "documentation",
+        "contributor-guide",
+        "conventions",
+        "copilot"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "pipeline:.github/workflows/ci.yml",
+      "type": "pipeline",
+      "name": "ci.yml",
+      "filePath": ".github/workflows/ci.yml",
+      "summary": "GitHub Actions CI workflow that lints, type-checks, and runs the pytest suite for nuv across pushes and pull requests.",
+      "tags": [
+        "ci-cd",
+        "infrastructure",
+        "testing",
+        "github-actions"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "pipeline:.github/workflows/publish-pypi.yml",
+      "type": "pipeline",
+      "name": "publish-pypi.yml",
+      "filePath": ".github/workflows/publish-pypi.yml",
+      "summary": "GitHub Actions workflow that builds the nuv distribution and publishes it to PyPI on tagged releases.",
+      "tags": [
+        "ci-cd",
+        "deployment",
+        "packaging",
+        "github-actions"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:.python-version",
+      "type": "config",
+      "name": ".python-version",
+      "filePath": ".python-version",
+      "summary": "Pins the Python interpreter version used to develop and run the nuv project itself.",
+      "tags": [
+        "configuration",
+        "python",
+        "version-pinning",
+        "build-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Primary project documentation covering installation, usage of the nuv new command, the script, spark, fastapi, and polars archetypes, quality guarantees, and PyPI publishing.",
+      "tags": [
+        "documentation",
+        "entry-point",
+        "overview",
+        "usage-guide"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:docs/superpowers/plans/2026-04-30-polars-archetype.md",
+      "type": "document",
+      "name": "2026-04-30-polars-archetype.md",
+      "filePath": "docs/superpowers/plans/2026-04-30-polars-archetype.md",
+      "summary": "Step-by-step implementation plan for the Polars + DuckDB + Delta local data lake archetype, breaking the work into six tasks spanning CLI registration, template files, the scaffold function, and tests.",
+      "tags": [
+        "documentation",
+        "implementation-plan",
+        "polars-archetype",
+        "design-doc"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/superpowers/specs/2026-04-30-polars-archetype-design.md",
+      "type": "document",
+      "name": "2026-04-30-polars-archetype-design.md",
+      "filePath": "docs/superpowers/specs/2026-04-30-polars-archetype-design.md",
+      "summary": "Design specification for the Polars + DuckDB + Delta archetype detailing the generated project structure, modules, dependencies, testing approach, and nuv template wiring.",
+      "tags": [
+        "documentation",
+        "design-spec",
+        "polars-archetype",
+        "architecture"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:justfile",
+      "type": "config",
+      "name": "justfile",
+      "filePath": "justfile",
+      "summary": "Just task runner recipes providing convenient developer commands for linting, testing, and other common nuv workflows.",
+      "tags": [
+        "configuration",
+        "task-runner",
+        "build-system",
+        "developer-tooling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:pyproject.toml",
+      "type": "config",
+      "name": "pyproject.toml",
+      "filePath": "pyproject.toml",
+      "summary": "Project manifest declaring nuv's metadata, the click dependency, the nuv=nuv.cli:main console entry point, dependency groups, and pytest, ruff, coverage, and hatch build configuration.",
+      "tags": [
+        "configuration",
+        "packaging",
+        "build-system",
+        "dependencies",
+        "entry-point"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Uses PEP 621 [project] metadata with hatchling as the build backend and a [project.scripts] console-script entry point."
+    },
+    {
+      "id": "file:src/nuv/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/nuv/__init__.py",
+      "summary": "Package marker for the top-level nuv package; intentionally empty.",
+      "tags": [
+        "package-marker",
+        "barrel",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/nuv/_logging.py",
+      "type": "file",
+      "name": "_logging.py",
+      "filePath": "src/nuv/_logging.py",
+      "summary": "Small logging helper that configures the root logger format and level for the nuv CLI.",
+      "tags": [
+        "utility",
+        "logging",
+        "configuration",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/nuv/cli.py",
+      "type": "file",
+      "name": "cli.py",
+      "filePath": "src/nuv/cli.py",
+      "summary": "Click-based command-line entry point defining the nuv group and the nuv new command, validating options and delegating scaffolding to commands/new.py.",
+      "tags": [
+        "entry-point",
+        "cli",
+        "api-handler",
+        "click",
+        "python",
+        "tested"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Uses Click decorators (group, command, option) plus a callback for option validation; main() wraps cli.main with standalone_mode disabled to control exit codes."
+    },
+    {
+      "id": "file:src/nuv/commands/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/nuv/commands/__init__.py",
+      "summary": "Package marker for the nuv.commands subpackage; intentionally empty.",
+      "tags": [
+        "package-marker",
+        "barrel",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/nuv/commands/new.py",
+      "type": "file",
+      "name": "new.py",
+      "filePath": "src/nuv/commands/new.py",
+      "summary": "Core scaffolding engine that validates inputs, renders templates, generates a Jupyter notebook, writes archetype-specific files (script, spark, fastapi, polars), runs uv sync, and installs the tool, cleaning up on failure.",
+      "tags": [
+        "service",
+        "scaffolding",
+        "factory",
+        "validation",
+        "python",
+        "tested"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Per-archetype dispatch via dedicated _scaffold_* helpers; templates are loaded as .tpl payloads and rendered with str.format substitution."
+    },
+    {
+      "id": "file:src/nuv/templates/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/nuv/templates/__init__.py",
+      "summary": "Package marker making nuv.templates a locatable package whose subdirectories hold archetype template payloads; intentionally empty.",
+      "tags": [
+        "package-marker",
+        "barrel",
+        "templates",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/nuv/templates/fastapi/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/nuv/templates/fastapi/__init__.py",
+      "summary": "Package marker making the fastapi archetype a locatable package so its .tpl template payloads can be resolved at scaffold time.",
+      "tags": [
+        "package-marker",
+        "templates",
+        "fastapi-archetype",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/nuv/templates/script/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/nuv/templates/script/__init__.py",
+      "summary": "Package marker making the default script archetype a locatable package so its .tpl template payloads can be resolved at scaffold time.",
+      "tags": [
+        "package-marker",
+        "templates",
+        "script-archetype",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/nuv/templates/spark/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "src/nuv/templates/spark/__init__.py",
+      "summary": "Package marker making the spark archetype a locatable package so its .tpl template payloads can be resolved at scaffold time.",
+      "tags": [
+        "package-marker",
+        "templates",
+        "spark-archetype",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "tests/__init__.py",
+      "summary": "Package marker for the tests package; intentionally empty.",
+      "tags": [
+        "package-marker",
+        "test",
+        "python"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_new.py",
+      "type": "file",
+      "name": "test_new.py",
+      "filePath": "tests/test_new.py",
+      "summary": "Exhaustive pytest suite (100+ tests) exercising the CLI and scaffolding engine: input validation, template rendering, notebook generation, uv sync and tool install behavior, and end-to-end scaffolding for the script, spark, fastapi, and polars archetypes.",
+      "tags": [
+        "test",
+        "integration-test",
+        "scaffolding",
+        "click-testing",
+        "python"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Uses pytest fixtures (tmp_path, caplog, capsys, monkeypatch), unittest.mock.patch for subprocess isolation, and importlib to load generated modules for assertion."
+    },
+    {
+      "id": "function:src/nuv/_logging.py:configure",
+      "type": "function",
+      "name": "configure",
+      "filePath": "src/nuv/_logging.py",
+      "lineRange": [
+        7,
+        12
+      ],
+      "summary": "Configures the root logger's format and level via logging.basicConfig for the nuv CLI.",
+      "tags": [
+        "utility",
+        "logging",
+        "configuration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/nuv/cli.py:_validate_python_version",
+      "type": "function",
+      "name": "_validate_python_version",
+      "filePath": "src/nuv/cli.py",
+      "lineRange": [
+        13,
+        19
+      ],
+      "summary": "Click option callback that validates the --python-version value, raising click.BadParameter when the version string is malformed.",
+      "tags": [
+        "validation",
+        "cli",
+        "click-callback"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/nuv/cli.py:cli",
+      "type": "function",
+      "name": "cli",
+      "filePath": "src/nuv/cli.py",
+      "lineRange": [
+        22,
+        40
+      ],
+      "summary": "Top-level Click group callback that configures logging from the --log-level option and shows help (exiting non-zero) when invoked without a subcommand.",
+      "tags": [
+        "entry-point",
+        "cli",
+        "click-group"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/nuv/cli.py:new_cmd",
+      "type": "function",
+      "name": "new_cmd",
+      "filePath": "src/nuv/cli.py",
+      "lineRange": [
+        43,
+        105
+      ],
+      "summary": "Click command implementing nuv new: collects name, archetype, python-version, install-mode, and keep-on-failure options and delegates project creation to run_new, mapping errors to exit codes.",
+      "tags": [
+        "api-handler",
+        "cli",
+        "click-command",
+        "scaffolding"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/nuv/cli.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "src/nuv/cli.py",
+      "lineRange": [
+        108,
+        117
+      ],
+      "summary": "Console-script entry point that invokes the Click group with standalone_mode disabled and translates Click exceptions into proper process exit codes.",
+      "tags": [
+        "entry-point",
+        "cli",
+        "error-handling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:validate_name",
+      "type": "function",
+      "name": "validate_name",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        13,
+        22
+      ],
+      "summary": "Validates a requested project name, rejecting empty, whitespace, leading-hyphen, or otherwise invalid names before scaffolding proceeds.",
+      "tags": [
+        "validation",
+        "scaffolding",
+        "input-check"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:render_template",
+      "type": "function",
+      "name": "render_template",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        42,
+        58
+      ],
+      "summary": "Loads an archetype .tpl template payload and substitutes project name, module name, and python version, raising FileNotFoundError when the template is missing.",
+      "tags": [
+        "serialization",
+        "templating",
+        "scaffolding"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:generate_jupyter_notebook",
+      "type": "function",
+      "name": "generate_jupyter_notebook",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        66,
+        139
+      ],
+      "summary": "Builds a valid Jupyter notebook JSON document with markdown and code cells seeded for the generated project, parameterized by name and python version.",
+      "tags": [
+        "factory",
+        "serialization",
+        "notebook",
+        "scaffolding"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:scaffold_files",
+      "type": "function",
+      "name": "scaffold_files",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        145,
+        183
+      ],
+      "summary": "Writes the shared baseline project files (python-version, gitignore, logging, main, pyproject, README, tests) then dispatches to the archetype-specific scaffolder for spark, fastapi, or polars.",
+      "tags": [
+        "scaffolding",
+        "factory",
+        "dispatch",
+        "file-generation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:_scaffold_spark",
+      "type": "function",
+      "name": "_scaffold_spark",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        186,
+        216
+      ],
+      "summary": "Generates the spark archetype layout, writing the src package, config and session modules, jobs package, tests, and an explore notebook.",
+      "tags": [
+        "scaffolding",
+        "spark-archetype",
+        "file-generation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:_scaffold_fastapi",
+      "type": "function",
+      "name": "_scaffold_fastapi",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        219,
+        247
+      ],
+      "summary": "Generates the fastapi archetype layout, writing the application package, routes, an app factory, a multi-stage Dockerfile, and httpx-based tests.",
+      "tags": [
+        "scaffolding",
+        "fastapi-archetype",
+        "file-generation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:_scaffold_polars",
+      "type": "function",
+      "name": "_scaffold_polars",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        250,
+        274
+      ],
+      "summary": "Generates the polars archetype layout, writing the package modules, an explore notebook, and the data/raw and data/features directories for the local data lake.",
+      "tags": [
+        "scaffolding",
+        "polars-archetype",
+        "file-generation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:run_uv_sync",
+      "type": "function",
+      "name": "run_uv_sync",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        277,
+        282
+      ],
+      "summary": "Runs uv sync in the generated project, raising RuntimeError when uv is not installed or the subprocess exits non-zero.",
+      "tags": [
+        "subprocess",
+        "scaffolding",
+        "dependency-install"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:run_tool_install",
+      "type": "function",
+      "name": "run_tool_install",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        289,
+        305
+      ],
+      "summary": "Optionally installs the freshly scaffolded project as a tool, validating the install mode and invoking uv, with logging and RuntimeError on failure.",
+      "tags": [
+        "subprocess",
+        "scaffolding",
+        "tool-install"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:resolve_target",
+      "type": "function",
+      "name": "resolve_target",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        308,
+        312
+      ],
+      "summary": "Resolves the target directory for a new project from the name and optional --at path, raising when the destination already exists.",
+      "tags": [
+        "path-resolution",
+        "scaffolding",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/nuv/commands/new.py:run_new",
+      "type": "function",
+      "name": "run_new",
+      "filePath": "src/nuv/commands/new.py",
+      "lineRange": [
+        315,
+        352
+      ],
+      "summary": "Top-level orchestrator for nuv new: resolves defaults and target, validates the name, scaffolds files, runs uv sync and tool install, and removes the directory on failure unless keep_on_failure is set.",
+      "tags": [
+        "orchestration",
+        "scaffolding",
+        "entry-point",
+        "error-handling"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/nuv/cli.py",
+      "target": "file:src/nuv/_logging.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/nuv/cli.py",
+      "target": "file:src/nuv/commands/new.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_new.py",
+      "target": "file:src/nuv/cli.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_new.py",
+      "target": "file:src/nuv/commands/new.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/nuv/_logging.py",
+      "target": "function:src/nuv/_logging.py:configure",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/_logging.py",
+      "target": "function:src/nuv/_logging.py:configure",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/nuv/cli.py",
+      "target": "function:src/nuv/cli.py:_validate_python_version",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/cli.py",
+      "target": "function:src/nuv/cli.py:cli",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/cli.py",
+      "target": "function:src/nuv/cli.py:new_cmd",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/cli.py",
+      "target": "function:src/nuv/cli.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/cli.py",
+      "target": "function:src/nuv/cli.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:validate_name",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:render_template",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:generate_jupyter_notebook",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:scaffold_files",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:_scaffold_spark",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:_scaffold_fastapi",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:_scaffold_polars",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:run_uv_sync",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:run_tool_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:resolve_target",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:run_new",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "function:src/nuv/commands/new.py:run_new",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/nuv/cli.py:new_cmd",
+      "target": "function:src/nuv/commands/new.py:run_new",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/nuv/cli.py:cli",
+      "target": "function:src/nuv/_logging.py:configure",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/nuv/cli.py",
+      "target": "file:tests/test_new.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/nuv/commands/new.py",
+      "target": "file:tests/test_new.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:pyproject.toml",
+      "target": "file:src/nuv/cli.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/nuv/cli.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/nuv/commands/new.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/superpowers/specs/2026-04-30-polars-archetype-design.md",
+      "target": "file:src/nuv/templates/__init__.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/superpowers/specs/2026-04-30-polars-archetype-design.md",
+      "target": "function:src/nuv/commands/new.py:_scaffold_polars",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/superpowers/plans/2026-04-30-polars-archetype.md",
+      "target": "function:src/nuv/commands/new.py:_scaffold_polars",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/superpowers/plans/2026-04-30-polars-archetype.md",
+      "target": "document:docs/superpowers/specs/2026-04-30-polars-archetype-design.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "pipeline:.github/workflows/ci.yml",
+      "target": "file:tests/test_new.py",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/publish-pypi.yml",
+      "target": "config:pyproject.toml",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:cli",
+      "name": "CLI & Entry Point",
+      "description": "Click-based command-line surface defining the nuv group and nuv new command, plus the logging helper it configures and the top-level package marker.",
+      "nodeIds": [
+        "file:src/nuv/__init__.py",
+        "file:src/nuv/cli.py",
+        "file:src/nuv/_logging.py"
+      ]
+    },
+    {
+      "id": "layer:scaffolding",
+      "name": "Scaffolding Engine",
+      "description": "Core engine in commands/new.py that validates inputs, renders templates, generates notebooks, writes archetype files, and runs uv sync / tool install.",
+      "nodeIds": [
+        "file:src/nuv/commands/__init__.py",
+        "file:src/nuv/commands/new.py"
+      ]
+    },
+    {
+      "id": "layer:templates",
+      "name": "Archetype Templates",
+      "description": "Locatable template packages whose .tpl payloads back the script, spark, and fastapi archetypes resolved at scaffold time.",
+      "nodeIds": [
+        "file:src/nuv/templates/__init__.py",
+        "file:src/nuv/templates/script/__init__.py",
+        "file:src/nuv/templates/spark/__init__.py",
+        "file:src/nuv/templates/fastapi/__init__.py"
+      ]
+    },
+    {
+      "id": "layer:test",
+      "name": "Tests",
+      "description": "Pytest suite exercising the CLI and scaffolding engine end-to-end across all archetypes, depending only on the src package.",
+      "nodeIds": [
+        "file:tests/__init__.py",
+        "file:tests/test_new.py"
+      ]
+    },
+    {
+      "id": "layer:ci-cd",
+      "name": "CI/CD",
+      "description": "GitHub Actions workflows that lint, type-check, and test on every push, and build and publish the distribution to PyPI on tagged releases.",
+      "nodeIds": [
+        "pipeline:.github/workflows/ci.yml",
+        "pipeline:.github/workflows/publish-pypi.yml"
+      ]
+    },
+    {
+      "id": "layer:config",
+      "name": "Build & Configuration",
+      "description": "Project manifest, task runner recipes, and interpreter pin that declare metadata, the click dependency, the console entry point, and lint/test/build tooling.",
+      "nodeIds": [
+        "config:pyproject.toml",
+        "config:justfile",
+        "config:.python-version"
+      ]
+    },
+    {
+      "id": "layer:documentation",
+      "name": "Documentation",
+      "description": "Project overview README, contributor-facing Copilot instructions, and the Polars archetype design spec and implementation plan.",
+      "nodeIds": [
+        "document:README.md",
+        "document:.github/copilot-instructions.md",
+        "document:docs/superpowers/specs/2026-04-30-polars-archetype-design.md",
+        "document:docs/superpowers/plans/2026-04-30-polars-archetype.md"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "What nuv Is and Why",
+      "description": "Start with the README to understand nuv's purpose: `nuv new my-tool` scaffolds an opinionated uv-based Python project that is fully working \u2014 click CLI, logging, tests, and linting all green from commit zero. The pain it solves is the gap left by `uv init`, which only produces a stub; nuv closes the distance between an empty project and writing real code. This document also introduces the four archetypes (script, spark, fastapi, polars) that the rest of the tour will trace through actual code.",
+      "nodeIds": [
+        "document:README.md"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "The CLI Entry Point",
+      "description": "The console script `nuv = nuv.cli:main` lands here. cli.py uses Click to define the `nuv` command group and the `nuv new` command, declaring every option from the README (--at, --archetype, --python-version, --install, --keep-on-failure) and validating them before any work happens. It configures logging via the small _logging helper, then delegates the actual scaffolding to commands/new.py \u2014 keeping the command surface thin and the orchestration separate.",
+      "nodeIds": [
+        "file:src/nuv/cli.py",
+        "file:src/nuv/_logging.py"
+      ],
+      "languageLesson": "Click builds CLIs declaratively: @click.group() defines a parent command and @click.command() with @click.option() decorators turn function parameters into validated flags. Choice types (e.g. click.Choice) reject invalid archetype names at parse time, so the engine never sees bad input."
+    },
+    {
+      "order": 3,
+      "title": "The Scaffolding Engine",
+      "description": "This is the heart of nuv and the most depended-upon module in the codebase. commands/new.py runs the full orchestration that backs `nuv new`: validate inputs, resolve the target directory, render shared templates, generate a Jupyter notebook, dispatch to the archetype-specific writer (script/spark/fastapi/polars), run `uv sync`, optionally install the tool, and clean up the directory on any failure. Building on the thin Click layer from Step 2, this is where the README's promise of a ready-to-run project is actually fulfilled.",
+      "nodeIds": [
+        "file:src/nuv/commands/new.py"
+      ],
+      "languageLesson": "The cleanup-on-failure pattern wraps the scaffold steps so a partially-written project directory is removed if anything raises \u2014 unless --keep-on-failure is passed. In Python this is typically a try/except that shutil.rmtree's the target on error, guaranteeing no half-built projects are left behind."
+    },
+    {
+      "order": 4,
+      "title": "How Archetypes Are Located",
+      "description": "Each archetype is a locatable Python package under nuv.templates. The empty __init__.py files for the script, spark, and fastapi archetypes exist so their sibling .tpl payload files can be resolved at scaffold time using package-resource lookup rather than fragile relative paths. The templates/__init__.py marks the parent package that the engine from Step 3 walks to find the right archetype directory for the chosen --archetype.",
+      "nodeIds": [
+        "file:src/nuv/templates/__init__.py",
+        "file:src/nuv/templates/script/__init__.py",
+        "file:src/nuv/templates/spark/__init__.py",
+        "file:src/nuv/templates/fastapi/__init__.py"
+      ],
+      "languageLesson": "A directory becomes an importable Python package only when it contains __init__.py. Marking template folders as packages lets nuv use importlib.resources to locate bundled .tpl files reliably even after the tool is installed as a wheel, where the files live inside site-packages rather than the source tree."
+    },
+    {
+      "order": 5,
+      "title": "Designing a New Archetype",
+      "description": "The polars archetype is a useful case study because its template files are excluded .tpl payloads not surfaced as code nodes \u2014 the design lives in these documents instead. The spec details the Polars + DuckDB + Delta structure, modules, dependencies, and template wiring, while the plan breaks the work into six concrete tasks spanning CLI registration, templates, the scaffold function, and tests. Together they show the exact recipe a contributor follows to extend the engine from Step 3 with a new archetype.",
+      "nodeIds": [
+        "document:docs/superpowers/specs/2026-04-30-polars-archetype-design.md",
+        "document:docs/superpowers/plans/2026-04-30-polars-archetype.md"
+      ]
+    },
+    {
+      "order": 6,
+      "title": "Why a Scaffolder Needs Heavy Tests",
+      "description": "A tool whose entire value proposition is \"everything passes from commit zero\" must prove it, and this 100+ test pytest suite does exactly that. test_new.py exercises both the Click layer from Step 2 and the engine from Step 3: option validation, template rendering, notebook generation, uv sync and tool-install behavior, and full end-to-end scaffolding for all four archetypes. Because generated projects are themselves checked for passing tests and clean linting, the suite guards the core guarantee against every change.",
+      "nodeIds": [
+        "file:tests/test_new.py"
+      ],
+      "languageLesson": "pytest favors plain functions with fixtures over class hierarchies. The tmp_path fixture gives each test an isolated temporary directory \u2014 ideal for a scaffolder, since every test can generate a real project on disk and assert on the result without polluting the repo or colliding with other tests."
+    },
+    {
+      "order": 7,
+      "title": "Build & Project Configuration",
+      "description": "pyproject.toml is the single manifest tying everything together: it declares the click dependency, registers the `nuv = nuv.cli:main` console entry point that makes Step 2 reachable as a command, and configures pytest, ruff, coverage, and the hatch build backend. The .python-version pin fixes the interpreter for developing nuv itself, and the justfile collects the lint/test workflows into convenient task-runner recipes so contributors run the same checks locally that CI runs remotely.",
+      "nodeIds": [
+        "config:pyproject.toml",
+        "config:.python-version",
+        "config:justfile"
+      ],
+      "languageLesson": "In pyproject.toml, [project.scripts] maps a command name to a module:function target (here nuv -> nuv.cli:main). When the package is installed, the build backend generates an executable shim on PATH that imports and calls that function \u2014 this is how a Python library becomes a runnable CLI."
+    },
+    {
+      "order": 8,
+      "title": "Enforcing Green From Commit Zero",
+      "description": "CI/CD is the capstone that turns nuv's promise into an enforced invariant. The ci.yml workflow lints, type-checks, and runs the full pytest suite from Step 6 on every push and pull request, so a regression in the scaffolding engine can never merge silently. The publish-pypi.yml workflow builds the distribution defined by pyproject.toml from Step 7 and publishes it to PyPI on tagged releases, completing the path from source to the installable tool described in the README.",
+      "nodeIds": [
+        "pipeline:.github/workflows/ci.yml",
+        "pipeline:.github/workflows/publish-pypi.yml"
+      ],
+      "languageLesson": "GitHub Actions workflows use `on` triggers (push, pull_request, or tag patterns) to decide when to run, and `jobs` made of sequential `steps`. Gating release on a tag pattern while gating tests on every push is a common split: validate continuously, publish deliberately."
+    }
+  ]
+}

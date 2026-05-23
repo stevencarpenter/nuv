@@ -1,0 +1,1601 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "7f405890d8878d88ca7a54162506455b08d1d3a4",
+  "generatedAt": "2026-05-23T21:32:51.053Z",
+  "files": {
+    ".github/copilot-instructions.md": {
+      "filePath": ".github/copilot-instructions.md",
+      "contentHash": "9f34a36839af0ea9755eea6c7aa99da9c7c758728227876b935a1ced4adcc8ca",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 66,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/ci.yml": {
+      "filePath": ".github/workflows/ci.yml",
+      "contentHash": "9385310552d923a809a194fe60e89b68c013912c08e6e2af65588f98de6bd4c4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 91,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/publish-pypi.yml": {
+      "filePath": ".github/workflows/publish-pypi.yml",
+      "contentHash": "b78c708cee6ad3e25e6352825ecce88035d68009fbf7d9abaa14966037599ff0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 72,
+      "hasStructuralAnalysis": true
+    },
+    ".python-version": {
+      "filePath": ".python-version",
+      "contentHash": "a876e0b10411037a012498b9fe18d9bc1df32ed8b722a13564dc944ddcfd9135",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": false
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "3fc19933aca5c4881d0e839b49b9861a5bb31368cd8b1de0c443f2e3df22d48a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 261,
+      "hasStructuralAnalysis": true
+    },
+    "docs/superpowers/plans/2026-04-30-polars-archetype.md": {
+      "filePath": "docs/superpowers/plans/2026-04-30-polars-archetype.md",
+      "contentHash": "353d0c992c79a311dcec04300dd241d157caa9569a40be00d00a974f520ab1fd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 799,
+      "hasStructuralAnalysis": true
+    },
+    "docs/superpowers/specs/2026-04-30-polars-archetype-design.md": {
+      "filePath": "docs/superpowers/specs/2026-04-30-polars-archetype-design.md",
+      "contentHash": "be45d903bcdaf35c3590ef834dfb3ad69ba1befba0442609874d9153779cdad8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 178,
+      "hasStructuralAnalysis": true
+    },
+    "justfile": {
+      "filePath": "justfile",
+      "contentHash": "143fcf945144855ff70af8262de267c8f3d36838c9bbaaca856bcbd8c8abc72f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "pyproject.toml": {
+      "filePath": "pyproject.toml",
+      "contentHash": "4701539dfac8794c902c0d687c0f3783590353c742313c6e06004a09384803ea",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 69,
+      "hasStructuralAnalysis": true
+    },
+    "src/nuv/__init__.py": {
+      "filePath": "src/nuv/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "src/nuv/_logging.py": {
+      "filePath": "src/nuv/_logging.py",
+      "contentHash": "f077585296f11be1c9e1c4cdf7a8315185e1a6ce4015824e9ad6bf86f31b3ca6",
+      "functions": [
+        {
+          "name": "configure",
+          "params": [
+            "level"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "logging",
+          "specifiers": [
+            "logging"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        }
+      ],
+      "exports": [
+        "configure"
+      ],
+      "totalLines": 13,
+      "hasStructuralAnalysis": true
+    },
+    "src/nuv/cli.py": {
+      "filePath": "src/nuv/cli.py",
+      "contentHash": "c7be82183aa88de503fca42dff4670aa7a051dd1b9ec55ada7f3bb6bf061105b",
+      "functions": [
+        {
+          "name": "_validate_python_version",
+          "params": [
+            "ctx",
+            "param",
+            "value"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "cli",
+          "params": [
+            "ctx",
+            "log_level"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "new_cmd",
+          "params": [
+            "ctx",
+            "name",
+            "at",
+            "archetype",
+            "python_version",
+            "install_mode",
+            "keep_on_failure"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "main",
+          "params": [
+            "argv"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Sequence"
+          ]
+        },
+        {
+          "source": "click",
+          "specifiers": [
+            "click"
+          ]
+        },
+        {
+          "source": "nuv._logging",
+          "specifiers": [
+            "configure"
+          ]
+        },
+        {
+          "source": "nuv.commands.new",
+          "specifiers": [
+            "validate_python_version"
+          ]
+        }
+      ],
+      "exports": [
+        "_validate_python_version",
+        "cli",
+        "new_cmd",
+        "main"
+      ],
+      "totalLines": 118,
+      "hasStructuralAnalysis": true
+    },
+    "src/nuv/commands/__init__.py": {
+      "filePath": "src/nuv/commands/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "src/nuv/commands/new.py": {
+      "filePath": "src/nuv/commands/new.py",
+      "contentHash": "d2c997a64a6a5d55c5701b9d9b43d20377df424658211cd1c24e35ca058b8643",
+      "functions": [
+        {
+          "name": "validate_name",
+          "params": [
+            "name"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "validate_python_version",
+          "params": [
+            "version"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "validate_install_mode",
+          "params": [
+            "mode"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "render_template",
+          "params": [
+            "tpl_name",
+            "archetype",
+            "name",
+            "module_name",
+            "python_version"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "write_with_trailing_newline",
+          "params": [
+            "path",
+            "content"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "generate_jupyter_notebook",
+          "params": [
+            "name",
+            "python_version"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 74
+        },
+        {
+          "name": "scaffold_files",
+          "params": [
+            "target",
+            "name",
+            "module_name",
+            "archetype",
+            "python_version"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 39
+        },
+        {
+          "name": "_scaffold_spark",
+          "params": [
+            "target",
+            "template_vars",
+            "name",
+            "module_name"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 31
+        },
+        {
+          "name": "_scaffold_fastapi",
+          "params": [
+            "target",
+            "template_vars",
+            "module_name"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "_scaffold_polars",
+          "params": [
+            "target",
+            "template_vars",
+            "module_name"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "run_uv_sync",
+          "params": [
+            "target"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "build_tool_install_command",
+          "params": [
+            "target"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "run_tool_install",
+          "params": [
+            "target",
+            "mode"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "resolve_target",
+          "params": [
+            "name",
+            "at",
+            "cwd"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "run_new",
+          "params": [
+            "name",
+            "at",
+            "cwd",
+            "archetype",
+            "python_version",
+            "install_mode",
+            "keep_on_failure"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 38
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "logging",
+          "specifiers": [
+            "logging"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "shutil",
+          "specifiers": [
+            "shutil"
+          ]
+        },
+        {
+          "source": "subprocess",
+          "specifiers": [
+            "subprocess"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        }
+      ],
+      "exports": [
+        "validate_name",
+        "validate_python_version",
+        "validate_install_mode",
+        "render_template",
+        "write_with_trailing_newline",
+        "generate_jupyter_notebook",
+        "scaffold_files",
+        "_scaffold_spark",
+        "_scaffold_fastapi",
+        "_scaffold_polars",
+        "run_uv_sync",
+        "build_tool_install_command",
+        "run_tool_install",
+        "resolve_target",
+        "run_new"
+      ],
+      "totalLines": 353,
+      "hasStructuralAnalysis": true
+    },
+    "src/nuv/templates/__init__.py": {
+      "filePath": "src/nuv/templates/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "src/nuv/templates/fastapi/__init__.py": {
+      "filePath": "src/nuv/templates/fastapi/__init__.py",
+      "contentHash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "src/nuv/templates/script/__init__.py": {
+      "filePath": "src/nuv/templates/script/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "src/nuv/templates/spark/__init__.py": {
+      "filePath": "src/nuv/templates/spark/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "tests/__init__.py": {
+      "filePath": "tests/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_new.py": {
+      "filePath": "tests/test_new.py",
+      "contentHash": "7c2ccb094eddb5d08dedd080c54c54a469daeabcf741060677136d60cca0f610",
+      "functions": [
+        {
+          "name": "_load_generated_module",
+          "params": [
+            "path"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_install_pyspark_stubs",
+          "params": [
+            "monkeypatch"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_no_command_returns_1",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_validate_name_simple",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_validate_name_underscores",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_validate_name_empty",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_validate_name_spaces",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_validate_name_leading_hyphen",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_validate_name_invalid_chars",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_validate_python_version_valid",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_validate_python_version_invalid_patch",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_validate_python_version_invalid_bare",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_validate_install_mode_valid",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_validate_install_mode_invalid",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_build_tool_install_command",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_run_tool_install_none",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_run_tool_install_command_only",
+          "params": [
+            "tmp_path",
+            "caplog"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_run_tool_install_editable_calls_uv",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_run_tool_install_editable_logs_success",
+          "params": [
+            "tmp_path",
+            "caplog"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_run_tool_install_editable_uv_not_found",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_run_tool_install_editable_nonzero_exit",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_resolve_target_default",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_resolve_target_explicit",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_resolve_target_already_exists",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_render_template_substitutes_name",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_render_template_pyproject_uses_name",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_render_template_unknown_raises",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_generate_jupyter_notebook_valid_json",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_generate_jupyter_notebook_contains_spark_session",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_generate_jupyter_notebook_python_version_default",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_generate_jupyter_notebook_python_version_custom",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_scaffold_files_creates_expected_files",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_scaffold_files_python_version_content",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_scaffold_files_gitignore_includes_common_dev_tooling",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "test_scaffold_files_custom_python_version",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_scaffold_files_invalid_python_version",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_scaffold_files_substitutes_name",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_scaffold_files_logging_module_created",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_scaffold_files_main_has_project_name",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_scaffold_files_end_with_trailing_newline",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "test_scaffold_files_unknown_archetype_raises",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_run_uv_sync_calls_uv",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_run_uv_sync_uv_not_found",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_run_uv_sync_nonzero_exit",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_run_new_success",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_run_new_invalid_name",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_run_new_existing_dir",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_run_new_uv_not_found",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_run_new_uv_not_found_keep_on_failure",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_run_new_missing_template",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_default_python_versions_script",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_default_python_versions_spark",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_run_new_spark_uses_default_python_313",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_cli_no_args_returns_1",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_cli_new_dispatches",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_cli_new_default_install_logs_command",
+          "params": [
+            "tmp_path",
+            "caplog"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_cli_invalid_archetype_rejected",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_cli_invalid_python_version_rejected",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_cli_python_version_passed_through",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_cli_invalid_install_mode_rejected",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_run_new_install_none_only_sync",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_cli_install_command_only",
+          "params": [
+            "tmp_path",
+            "caplog"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_cli_new_keep_on_failure_flag",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_cli_new_unexpected_error_returns_1",
+          "params": [
+            "capsys"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_scaffold_files_spark_creates_expected_files",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "test_scaffold_files_spark_python_version_content",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_scaffold_files_spark_pyproject_has_pyspark",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_scaffold_files_spark_gitignore_has_spark_entries",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_scaffold_files_spark_main_imports_package",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_scaffold_files_spark_resolve_params_reads_sys_argv_when_argv_none",
+          "params": [
+            "tmp_path",
+            "monkeypatch"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_scaffold_files_spark_main_returns_2_for_usage_errors",
+          "params": [
+            "tmp_path",
+            "monkeypatch",
+            "capsys"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "test_scaffold_files_spark_main_returns_0_for_help",
+          "params": [
+            "tmp_path",
+            "monkeypatch",
+            "capsys"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "test_scaffold_files_spark_test_uses_chispa",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_scaffold_files_spark_notebook_valid_json",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_scaffold_files_spark_end_with_trailing_newline",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "test_run_new_spark_success",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_run_new_spark_cleanup_on_failure",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_run_new_spark_keep_on_failure",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_cli_new_spark_archetype",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_cli_spark_default_python_version",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_scaffold_files_fastapi_creates_expected_files",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "test_scaffold_files_fastapi_pyproject_has_deps",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_scaffold_files_fastapi_main_imports_package",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_scaffold_files_fastapi_app_factory",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_scaffold_files_fastapi_dockerfile_multi_stage",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_scaffold_files_fastapi_test_uses_httpx",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_scaffold_files_fastapi_end_with_trailing_newline",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "test_run_new_fastapi_success",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_run_new_fastapi_cleanup_on_failure",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_run_new_fastapi_keep_on_failure",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_cli_new_fastapi_archetype",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_cli_fastapi_default_python_version",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_default_python_versions_fastapi",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_run_new_fastapi_uses_default_python_314",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_default_python_versions_polars",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_scaffold_files_polars_creates_expected_files",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "test_scaffold_files_polars_pyproject_has_deps",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "test_scaffold_files_polars_main_uses_click",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_scaffold_files_polars_package_modules",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "test_scaffold_files_polars_end_with_trailing_newline",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "test_run_new_polars_success",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_run_new_polars_cleanup_on_failure",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_run_new_polars_keep_on_failure",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_cli_new_polars_archetype",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_cli_polars_default_python_version",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_run_new_polars_uses_default_python_314",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "importlib.util",
+          "specifiers": [
+            "importlib.util"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "types",
+          "specifiers": [
+            "types"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "unittest.mock",
+          "specifiers": [
+            "MagicMock",
+            "patch"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "nuv.cli",
+          "specifiers": [
+            "cli_main"
+          ]
+        },
+        {
+          "source": "nuv.commands.new",
+          "specifiers": [
+            "DEFAULT_PYTHON_VERSION",
+            "DEFAULT_PYTHON_VERSIONS",
+            "build_tool_install_command",
+            "generate_jupyter_notebook",
+            "render_template",
+            "resolve_target",
+            "run_new",
+            "run_tool_install",
+            "run_uv_sync",
+            "scaffold_files",
+            "validate_install_mode",
+            "validate_name",
+            "validate_python_version"
+          ]
+        }
+      ],
+      "exports": [
+        "_load_generated_module",
+        "_install_pyspark_stubs",
+        "test_no_command_returns_1",
+        "test_validate_name_simple",
+        "test_validate_name_underscores",
+        "test_validate_name_empty",
+        "test_validate_name_spaces",
+        "test_validate_name_leading_hyphen",
+        "test_validate_name_invalid_chars",
+        "test_validate_python_version_valid",
+        "test_validate_python_version_invalid_patch",
+        "test_validate_python_version_invalid_bare",
+        "test_validate_install_mode_valid",
+        "test_validate_install_mode_invalid",
+        "test_build_tool_install_command",
+        "test_run_tool_install_none",
+        "test_run_tool_install_command_only",
+        "test_run_tool_install_editable_calls_uv",
+        "test_run_tool_install_editable_logs_success",
+        "test_run_tool_install_editable_uv_not_found",
+        "test_run_tool_install_editable_nonzero_exit",
+        "test_resolve_target_default",
+        "test_resolve_target_explicit",
+        "test_resolve_target_already_exists",
+        "test_render_template_substitutes_name",
+        "test_render_template_pyproject_uses_name",
+        "test_render_template_unknown_raises",
+        "test_generate_jupyter_notebook_valid_json",
+        "test_generate_jupyter_notebook_contains_spark_session",
+        "test_generate_jupyter_notebook_python_version_default",
+        "test_generate_jupyter_notebook_python_version_custom",
+        "test_scaffold_files_creates_expected_files",
+        "test_scaffold_files_python_version_content",
+        "test_scaffold_files_gitignore_includes_common_dev_tooling",
+        "test_scaffold_files_custom_python_version",
+        "test_scaffold_files_invalid_python_version",
+        "test_scaffold_files_substitutes_name",
+        "test_scaffold_files_logging_module_created",
+        "test_scaffold_files_main_has_project_name",
+        "test_scaffold_files_end_with_trailing_newline",
+        "test_scaffold_files_unknown_archetype_raises",
+        "test_run_uv_sync_calls_uv",
+        "test_run_uv_sync_uv_not_found",
+        "test_run_uv_sync_nonzero_exit",
+        "test_run_new_success",
+        "test_run_new_invalid_name",
+        "test_run_new_existing_dir",
+        "test_run_new_uv_not_found",
+        "test_run_new_uv_not_found_keep_on_failure",
+        "test_run_new_missing_template",
+        "test_default_python_versions_script",
+        "test_default_python_versions_spark",
+        "test_run_new_spark_uses_default_python_313",
+        "test_cli_no_args_returns_1",
+        "test_cli_new_dispatches",
+        "test_cli_new_default_install_logs_command",
+        "test_cli_invalid_archetype_rejected",
+        "test_cli_invalid_python_version_rejected",
+        "test_cli_python_version_passed_through",
+        "test_cli_invalid_install_mode_rejected",
+        "test_run_new_install_none_only_sync",
+        "test_cli_install_command_only",
+        "test_cli_new_keep_on_failure_flag",
+        "test_cli_new_unexpected_error_returns_1",
+        "test_scaffold_files_spark_creates_expected_files",
+        "test_scaffold_files_spark_python_version_content",
+        "test_scaffold_files_spark_pyproject_has_pyspark",
+        "test_scaffold_files_spark_gitignore_has_spark_entries",
+        "test_scaffold_files_spark_main_imports_package",
+        "test_scaffold_files_spark_resolve_params_reads_sys_argv_when_argv_none",
+        "test_scaffold_files_spark_main_returns_2_for_usage_errors",
+        "test_scaffold_files_spark_main_returns_0_for_help",
+        "test_scaffold_files_spark_test_uses_chispa",
+        "test_scaffold_files_spark_notebook_valid_json",
+        "test_scaffold_files_spark_end_with_trailing_newline",
+        "test_run_new_spark_success",
+        "test_run_new_spark_cleanup_on_failure",
+        "test_run_new_spark_keep_on_failure",
+        "test_cli_new_spark_archetype",
+        "test_cli_spark_default_python_version",
+        "test_scaffold_files_fastapi_creates_expected_files",
+        "test_scaffold_files_fastapi_pyproject_has_deps",
+        "test_scaffold_files_fastapi_main_imports_package",
+        "test_scaffold_files_fastapi_app_factory",
+        "test_scaffold_files_fastapi_dockerfile_multi_stage",
+        "test_scaffold_files_fastapi_test_uses_httpx",
+        "test_scaffold_files_fastapi_end_with_trailing_newline",
+        "test_run_new_fastapi_success",
+        "test_run_new_fastapi_cleanup_on_failure",
+        "test_run_new_fastapi_keep_on_failure",
+        "test_cli_new_fastapi_archetype",
+        "test_cli_fastapi_default_python_version",
+        "test_default_python_versions_fastapi",
+        "test_run_new_fastapi_uses_default_python_314",
+        "test_default_python_versions_polars",
+        "test_scaffold_files_polars_creates_expected_files",
+        "test_scaffold_files_polars_pyproject_has_deps",
+        "test_scaffold_files_polars_main_uses_click",
+        "test_scaffold_files_polars_package_modules",
+        "test_scaffold_files_polars_end_with_trailing_newline",
+        "test_run_new_polars_success",
+        "test_run_new_polars_cleanup_on_failure",
+        "test_run_new_polars_keep_on_failure",
+        "test_cli_new_polars_archetype",
+        "test_cli_polars_default_python_version",
+        "test_run_new_polars_uses_default_python_314"
+      ],
+      "totalLines": 1197,
+      "hasStructuralAnalysis": true
+    }
+  }
+}
