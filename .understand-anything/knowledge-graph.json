@@ -942,14 +942,14 @@
     {
       "order": 4,
       "title": "How Archetypes Are Located",
-      "description": "Each archetype is a locatable Python package under nuv.templates. The empty __init__.py files for the script, spark, and fastapi archetypes exist so their sibling .tpl payload files can be resolved at scaffold time using package-resource lookup rather than fragile relative paths. The templates/__init__.py marks the parent package that the engine from Step 3 walks to find the right archetype directory for the chosen --archetype.",
+      "description": "Archetype templates live as directories under src/nuv/templates/. At scaffold time, the engine from Step 3 resolves templates from its filesystem templates root and then joins the selected archetype name and template filename to find the correct .tpl payloads. The __init__.py files in templates/ and its archetype subdirectories identify those folders in the source tree, but the current template lookup described here is path-based rather than package-resource-based.",
       "nodeIds": [
         "file:src/nuv/templates/__init__.py",
         "file:src/nuv/templates/script/__init__.py",
         "file:src/nuv/templates/spark/__init__.py",
         "file:src/nuv/templates/fastapi/__init__.py"
       ],
-      "languageLesson": "A directory becomes an importable Python package only when it contains __init__.py. Marking template folders as packages lets nuv use importlib.resources to locate bundled .tpl files reliably even after the tool is installed as a wheel, where the files live inside site-packages rather than the source tree."
+      "languageLesson": "Python's pathlib makes simple filesystem-based resource lookup explicit: code can compute a templates root relative to __file__ and then append path components such as the archetype name and template filename. That approach differs from package-resource APIs like importlib.resources, so docs should describe the path join the code actually performs."
     },
     {
       "order": 5,
