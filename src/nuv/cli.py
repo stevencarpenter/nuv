@@ -6,7 +6,7 @@ from nuv._logging import configure
 from nuv.commands.new import validate_python_version
 
 LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
-ARCHETYPES = ("script", "spark", "fastapi", "polars")
+ARCHETYPES = ("script", "spark", "fastapi", "polars", "ds")
 INSTALL_MODES = ("editable", "none", "command-only")
 
 
@@ -56,7 +56,7 @@ def cli(ctx: click.Context, log_level: str) -> None:
     default=None,
     metavar="VERSION",
     callback=_validate_python_version,
-    help="Python version (default depends on archetype — script=3.14, spark=3.13, fastapi=3.14, polars=3.14). Must be MAJOR.MINOR format.",
+    help="Python version (default depends on archetype — script=3.14, spark=3.13, fastapi=3.14, polars=3.14, ds=3.13). Must be MAJOR.MINOR format.",
 )
 @click.option(
     "--install",

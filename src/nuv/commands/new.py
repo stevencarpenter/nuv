@@ -24,7 +24,7 @@ def validate_name(name: str) -> str:
 
 _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
 DEFAULT_PYTHON_VERSION = "3.14"
-DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14", "polars": "3.14"}
+DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14", "polars": "3.14", "ds": "3.13"}
 
 
 def validate_python_version(version: str) -> str:
@@ -139,7 +139,87 @@ def generate_jupyter_notebook(name: str, *, python_version: str = DEFAULT_PYTHON
     return json.dumps(notebook, indent=1) + "\n"
 
 
-VALID_ARCHETYPES = ("script", "spark", "fastapi", "polars")
+def generate_ds_notebook(name: str, *, python_version: str = DEFAULT_PYTHON_VERSION) -> str:
+    """Build a starter Jupyter/IPython notebook for the data science archetype.
+
+    Generated programmatically instead of via .tpl because .ipynb JSON
+    braces conflict with str.format() placeholders.
+    """
+
+    def _code_cell(source: list[str]) -> dict:
+        return {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": source,
+        }
+
+    def _md_cell(source: list[str]) -> dict:
+        return {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": source,
+        }
+
+    cells = [
+        _md_cell([f"# {name} — Exploration Notebook"]),
+        _code_cell(
+            [
+                "import numpy as np\n",
+                "import pandas as pd",
+            ]
+        ),
+        _md_cell(["## Create a sample DataFrame"]),
+        _code_cell(
+            [
+                "rng = np.random.default_rng(42)\n",
+                'df = pd.DataFrame({"x": [1, 2, 3], "y": ["a", "b", "c"], "z": rng.random(3)})\n',
+                "df",
+            ]
+        ),
+        _md_cell(["## Summarize"]),
+        _code_cell(
+            [
+                "df.describe(include='all')",
+            ]
+        ),
+        _md_cell(
+            [
+                "## Plot\n",
+                "\n",
+                "Uncomment `matplotlib` in `pyproject.toml`, `uv sync`, then:",
+            ]
+        ),
+        _code_cell(
+            [
+                "# import matplotlib.pyplot as plt\n",
+                "# df.plot(x='x', y='x', kind='bar')\n",
+                "# plt.show()",
+            ]
+        ),
+    ]
+
+    notebook = {
+        "cells": cells,
+        "metadata": {
+            "kernelspec": {
+                "display_name": "Python 3",
+                "language": "python",
+                "name": "python3",
+            },
+            "language_info": {
+                "name": "python",
+                "version": f"{python_version}.0",
+            },
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    return json.dumps(notebook, indent=1) + "\n"
+
+
+VALID_ARCHETYPES = ("script", "spark", "fastapi", "polars", "ds")
 
 
 def scaffold_files(
@@ -179,6 +259,8 @@ def scaffold_files(
             _scaffold_spark(target, template_vars=template_vars, name=name, module_name=module_name)
         case "polars":
             _scaffold_polars(target, template_vars=template_vars, module_name=module_name)
+        case "ds":
+            _scaffold_ds(target, template_vars=template_vars, name=name, module_name=module_name)
         case _:  # fastapi — validated by VALID_ARCHETYPES above
             _scaffold_fastapi(target, template_vars=template_vars, module_name=module_name)
 
@@ -272,6 +354,36 @@ def _scaffold_polars(
 
     (target / "data" / "raw").mkdir(parents=True)
     (target / "data" / "features").mkdir(parents=True)
+
+
+def _scaffold_ds(
+    target: Path,
+    *,
+    template_vars: dict[str, str],
+    name: str,
+    module_name: str,
+) -> None:
+    pkg_dir = target / "src" / module_name
+    pkg_dir.mkdir(parents=True)
+    write_with_trailing_newline(pkg_dir / "__init__.py", render_template("init.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "_logging.py", render_template("_logging.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "config.py", render_template("config.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "data.py", render_template("data.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "main.py", render_template("main.py.tpl", **template_vars))
+
+    tests_dir = target / "tests"
+    write_with_trailing_newline(tests_dir / "conftest.py", render_template("conftest.py.tpl", **template_vars))
+    write_with_trailing_newline(tests_dir / "test_data.py", render_template("test_data.py.tpl", **template_vars))
+
+    # notebooks/ — Jupyter/IPython (.ipynb) and marimo (.py) side by side
+    notebooks_dir = target / "notebooks"
+    notebooks_dir.mkdir()
+    write_with_trailing_newline(notebooks_dir / "explore.ipynb", generate_ds_notebook(name, python_version=template_vars["python_version"]))
+    write_with_trailing_newline(notebooks_dir / "explore_marimo.py", render_template("notebooks/explore_marimo.py.tpl", **template_vars))
+
+    (target / "data" / "raw").mkdir(parents=True)
+    (target / "data" / "processed").mkdir(parents=True)
+    (target / "models").mkdir()
 
 
 def run_uv_sync(target: Path) -> None:

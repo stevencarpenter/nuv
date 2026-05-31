@@ -75,6 +75,12 @@ jobs:
           uv run --frozen nuv new api-smoke --at /tmp/api-smoke --archetype fastapi
           cd /tmp/api-smoke && uv sync --frozen && uv run --frozen pytest
 
+      - name: Integration smoke test (ds)
+        if: matrix.python-version == '3.14'
+        run: |
+          uv run --frozen nuv new ds-smoke --at /tmp/ds-smoke --archetype ds
+          cd /tmp/ds-smoke && uv sync --frozen && uv run --frozen pytest && uv run --frozen ruff check . && uv run --frozen ty check
+
       - name: Build wheel for distribution smoke tests
         if: matrix.python-version == '3.14'
         run: uv build
