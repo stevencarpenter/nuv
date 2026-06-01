@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 )
 def main(log_level: str) -> None:
     from {module_name}._logging import configure
+
     configure(log_level)
     log.info("Starting {name}")
 

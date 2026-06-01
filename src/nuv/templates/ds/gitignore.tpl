@@ -68,9 +68,11 @@ ipython_config.py
 .virtual_documents/
 __marimo__/
 
-# --- Data (keep it out of git; version it with DVC/LFS if you must) ----------
-data/
-!data/.gitkeep
+# --- Data: keep the directory tree, ignore its contents ----------------------
+# (version actual datasets with DVC/LFS if you must)
+data/**
+!data/**/
+!data/**/.gitkeep
 *.csv
 *.tsv
 *.parquet
@@ -92,8 +94,9 @@ warehouse.db
 _delta_log/
 
 # --- Models & checkpoints ----------------------------------------------------
-models/
-!models/.gitkeep
+models/**
+!models/**/
+!models/**/.gitkeep
 checkpoints/
 *.ckpt
 *.pt

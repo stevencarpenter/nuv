@@ -63,32 +63,54 @@ def write_with_trailing_newline(path: Path, content: str) -> None:
     path.write_text(normalized, encoding="utf-8")
 
 
-def generate_jupyter_notebook(name: str, *, python_version: str = DEFAULT_PYTHON_VERSION) -> str:
-    """Build a starter Jupyter notebook as JSON.
+def _nb_code_cell(source: list[str]) -> dict:
+    return {
+        "cell_type": "code",
+        "execution_count": None,
+        "metadata": {},
+        "outputs": [],
+        "source": source,
+    }
+
+
+def _nb_md_cell(source: list[str]) -> dict:
+    return {
+        "cell_type": "markdown",
+        "metadata": {},
+        "source": source,
+    }
+
+
+def _notebook_json(cells: list[dict], *, python_version: str) -> str:
+    """Wrap notebook cells in the nbformat v4 envelope and serialize to JSON.
 
     Generated programmatically instead of via .tpl because .ipynb JSON
     braces conflict with str.format() placeholders.
     """
+    notebook = {
+        "cells": cells,
+        "metadata": {
+            "kernelspec": {
+                "display_name": "Python 3",
+                "language": "python",
+                "name": "python3",
+            },
+            "language_info": {
+                "name": "python",
+                "version": f"{python_version}.0",
+            },
+        },
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    return json.dumps(notebook, indent=1) + "\n"
 
-    def _code_cell(source: list[str]) -> dict:
-        return {
-            "cell_type": "code",
-            "execution_count": None,
-            "metadata": {},
-            "outputs": [],
-            "source": source,
-        }
 
-    def _md_cell(source: list[str]) -> dict:
-        return {
-            "cell_type": "markdown",
-            "metadata": {},
-            "source": source,
-        }
-
+def generate_jupyter_notebook(name: str, *, python_version: str = DEFAULT_PYTHON_VERSION) -> str:
+    """Build a starter Jupyter notebook (PySpark) as JSON."""
     cells = [
-        _md_cell([f"# {name} — Exploration Notebook"]),
-        _code_cell(
+        _nb_md_cell([f"# {name} — Exploration Notebook"]),
+        _nb_code_cell(
             [
                 "from pyspark.sql import SparkSession\n",
                 "\n",
@@ -96,102 +118,64 @@ def generate_jupyter_notebook(name: str, *, python_version: str = DEFAULT_PYTHON
                 "spark",
             ]
         ),
-        _md_cell(["## Create a sample DataFrame"]),
-        _code_cell(
+        _nb_md_cell(["## Create a sample DataFrame"]),
+        _nb_code_cell(
             [
                 'data = [("alice", 1), ("bob", 2), ("charlie", 3)]\n',
                 'df = spark.createDataFrame(data, ["name", "value"])\n',
                 "df.show()",
             ]
         ),
-        _md_cell(["## Filter"]),
-        _code_cell(
+        _nb_md_cell(["## Filter"]),
+        _nb_code_cell(
             [
                 "filtered = df.filter(df.value > 1)\n",
                 "filtered.show()",
             ]
         ),
-        _md_cell(["## Group By"]),
-        _code_cell(
+        _nb_md_cell(["## Group By"]),
+        _nb_code_cell(
             [
                 'grouped = df.groupBy("name").sum("value")\n',
                 "grouped.show()",
             ]
         ),
     ]
-
-    notebook = {
-        "cells": cells,
-        "metadata": {
-            "kernelspec": {
-                "display_name": "Python 3",
-                "language": "python",
-                "name": "python3",
-            },
-            "language_info": {
-                "name": "python",
-                "version": f"{python_version}.0",
-            },
-        },
-        "nbformat": 4,
-        "nbformat_minor": 5,
-    }
-    return json.dumps(notebook, indent=1) + "\n"
+    return _notebook_json(cells, python_version=python_version)
 
 
 def generate_ds_notebook(name: str, *, python_version: str = DEFAULT_PYTHON_VERSION) -> str:
-    """Build a starter Jupyter/IPython notebook for the data science archetype.
-
-    Generated programmatically instead of via .tpl because .ipynb JSON
-    braces conflict with str.format() placeholders.
-    """
-
-    def _code_cell(source: list[str]) -> dict:
-        return {
-            "cell_type": "code",
-            "execution_count": None,
-            "metadata": {},
-            "outputs": [],
-            "source": source,
-        }
-
-    def _md_cell(source: list[str]) -> dict:
-        return {
-            "cell_type": "markdown",
-            "metadata": {},
-            "source": source,
-        }
-
+    """Build a starter Jupyter/IPython notebook (pandas) for the ds archetype."""
     cells = [
-        _md_cell([f"# {name} — Exploration Notebook"]),
-        _code_cell(
+        _nb_md_cell([f"# {name} — Exploration Notebook"]),
+        _nb_code_cell(
             [
                 "import numpy as np\n",
                 "import pandas as pd",
             ]
         ),
-        _md_cell(["## Create a sample DataFrame"]),
-        _code_cell(
+        _nb_md_cell(["## Create a sample DataFrame"]),
+        _nb_code_cell(
             [
                 "rng = np.random.default_rng(42)\n",
                 'df = pd.DataFrame({"x": [1, 2, 3], "y": ["a", "b", "c"], "z": rng.random(3)})\n',
                 "df",
             ]
         ),
-        _md_cell(["## Summarize"]),
-        _code_cell(
+        _nb_md_cell(["## Summarize"]),
+        _nb_code_cell(
             [
-                "df.describe(include='all')",
+                'df.describe(include="all")',
             ]
         ),
-        _md_cell(
+        _nb_md_cell(
             [
                 "## Plot\n",
                 "\n",
                 "Uncomment `matplotlib` in `pyproject.toml`, `uv sync`, then:",
             ]
         ),
-        _code_cell(
+        _nb_code_cell(
             [
                 "# import matplotlib.pyplot as plt\n",
                 "# df.plot(x='x', y='x', kind='bar')\n",
@@ -199,24 +183,7 @@ def generate_ds_notebook(name: str, *, python_version: str = DEFAULT_PYTHON_VERS
             ]
         ),
     ]
-
-    notebook = {
-        "cells": cells,
-        "metadata": {
-            "kernelspec": {
-                "display_name": "Python 3",
-                "language": "python",
-                "name": "python3",
-            },
-            "language_info": {
-                "name": "python",
-                "version": f"{python_version}.0",
-            },
-        },
-        "nbformat": 4,
-        "nbformat_minor": 5,
-    }
-    return json.dumps(notebook, indent=1) + "\n"
+    return _notebook_json(cells, python_version=python_version)
 
 
 VALID_ARCHETYPES = ("script", "spark", "fastapi", "polars", "ds")
@@ -381,9 +348,12 @@ def _scaffold_ds(
     write_with_trailing_newline(notebooks_dir / "explore.ipynb", generate_ds_notebook(name, python_version=template_vars["python_version"]))
     write_with_trailing_newline(notebooks_dir / "explore_marimo.py", render_template("notebooks/explore_marimo.py.tpl", **template_vars))
 
-    (target / "data" / "raw").mkdir(parents=True)
-    (target / "data" / "processed").mkdir(parents=True)
-    (target / "models").mkdir()
+    # Scratch dirs with .gitkeep so the tree survives a fresh clone while the
+    # .gitignore keeps their contents out of version control.
+    for rel in ("data/raw", "data/processed", "models"):
+        keep_dir = target / rel
+        keep_dir.mkdir(parents=True)
+        (keep_dir / ".gitkeep").write_text("", encoding="utf-8")
 
 
 def run_uv_sync(target: Path) -> None:

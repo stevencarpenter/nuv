@@ -3,6 +3,9 @@
 Read/write CSV, Parquet, and JSON, plus a couple of quick-look helpers for
 the REPL and notebooks. Swap pandas for polars (uncomment it in
 pyproject.toml) once a dataset outgrows comfortable in-memory pandas.
+
+Note: JSON does not preserve dtypes (datetimes round-trip as strings, not
+``datetime64``). Reach for Parquet when you need full-fidelity round-trips.
 """
 
 from pathlib import Path
@@ -30,6 +33,7 @@ def write(df: pd.DataFrame, path: str | Path, **kwargs) -> None:
     elif suffix == ".parquet":
         df.to_parquet(path, **kwargs)
     elif suffix == ".json":
+        kwargs.setdefault("date_format", "iso")
         df.to_json(path, **kwargs)
     else:
         raise ValueError(f"Unsupported format: {{suffix}}")

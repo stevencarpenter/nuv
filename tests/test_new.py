@@ -1255,9 +1255,9 @@ def test_scaffold_files_ds_creates_expected_files(tmp_path: Path) -> None:
     assert (target / "tests" / "test_data.py").exists()
     assert (target / "notebooks" / "explore.ipynb").exists()
     assert (target / "notebooks" / "explore_marimo.py").exists()
-    assert (target / "data" / "raw").exists()
-    assert (target / "data" / "processed").exists()
-    assert (target / "models").exists()
+    assert (target / "data" / "raw" / ".gitkeep").exists()
+    assert (target / "data" / "processed" / ".gitkeep").exists()
+    assert (target / "models" / ".gitkeep").exists()
 
 
 def test_scaffold_files_ds_pyproject_thin_core_and_catalog(tmp_path: Path) -> None:
@@ -1294,6 +1294,8 @@ def test_scaffold_files_ds_data_module(tmp_path: Path) -> None:
     assert "def summary" in data_content
     config = (target / "src" / "my_ds_app" / "config.py").read_text()
     assert "pydantic_settings" in config
+    # env_prefix isolates settings so ambient env vars don't clobber defaults
+    assert 'env_prefix="my_ds_app_"' in config
 
 
 def test_scaffold_files_ds_gitignore_has_ml_entries(tmp_path: Path) -> None:
