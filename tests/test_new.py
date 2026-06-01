@@ -1265,23 +1265,43 @@ def test_scaffold_files_ds_pyproject_thin_core_and_catalog(tmp_path: Path) -> No
     target.mkdir()
     scaffold_files(target, name="my-ds-app", module_name="my_ds_app", archetype="ds", python_version="3.13")
     pyproject = (target / "pyproject.toml").read_text()
-    # thin active core
-    assert "numpy>=2.4.6" in pyproject
-    assert "pandas>=3.0.3" in pyproject
-    assert "pyarrow>=24.0.0" in pyproject
-    assert "click>=8.4.1" in pyproject
+    # thin active core (assert names, not version floors, so version bumps
+    # don't churn this test)
+    for pkg in ("numpy>=", "pandas>=", "pyarrow>=", "pydantic-settings>=", "click>="):
+        assert pkg in pyproject
     # commented catalog — present but off by default
     assert '#   "torch>=' in pyproject
     assert '#   "transformers>=' in pyproject
     assert '#   "scikit-learn>=' in pyproject
     assert '#   "jax>=' in pyproject
     # notebooks group covers Jupyter + IPython + marimo
-    assert "jupyterlab>=4.5.7" in pyproject
-    assert "ipykernel>=7.2.0" in pyproject
-    assert "marimo>=0.23.8" in pyproject
+    for pkg in ("jupyterlab>=", "ipykernel>=", "marimo>="):
+        assert pkg in pyproject
     assert "py313" in pyproject
     assert 'packages = ["src/my_ds_app"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
+
+
+def test_scaffold_files_ds_pyproject_is_valid_toml_and_uncomment_works(tmp_path: Path) -> None:
+    """The commented catalog must live inside `dependencies` so that simply
+    dropping a leading `#` yields valid TOML (the core 'uncomment a line'
+    promise)."""
+    import tomllib
+
+    target = tmp_path / "my-ds-app"
+    target.mkdir()
+    scaffold_files(target, name="my-ds-app", module_name="my_ds_app", archetype="ds", python_version="3.13")
+    raw = (target / "pyproject.toml").read_text()
+
+    # As shipped: parses, thin core only.
+    parsed = tomllib.loads(raw)
+    assert any(dep.startswith("numpy") for dep in parsed["project"]["dependencies"])
+    assert not any("torch" in dep for dep in parsed["project"]["dependencies"])
+
+    # Uncomment a catalog line -> still valid TOML, now an active dependency.
+    uncommented = raw.replace('#   "torch>=', '    "torch>=')
+    parsed2 = tomllib.loads(uncommented)
+    assert any(dep.startswith("torch") for dep in parsed2["project"]["dependencies"])
 
 
 def test_scaffold_files_ds_data_module(tmp_path: Path) -> None:

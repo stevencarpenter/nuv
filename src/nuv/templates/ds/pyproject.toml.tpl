@@ -20,15 +20,13 @@ dependencies = [
     "pyarrow>=24.0.0",
     "pydantic-settings>=2.14.1",
     "click>=8.4.1",
-]
-
-# ---------------------------------------------------------------------------
-# The catalog. Uncomment what you need, then `uv sync`.
-# Versions are floors for the latest stable PyPI releases as of June 1, 2026.
-# `uv add <pkg>` is the other way in — it edits this list for you.
-# ---------------------------------------------------------------------------
-
-# --- Dataframes, formats & local engines ----------------------------------
+    # -----------------------------------------------------------------------
+    # The catalog lives *inside* this array: uncomment a line (drop the
+    # leading `#`) and it becomes a valid dependency, then run `uv sync`.
+    # Versions are floors for the latest stable PyPI releases as of June 1,
+    # 2026. `uv add <pkg>` is the other way in — it edits this list for you.
+    # -----------------------------------------------------------------------
+    # --- Dataframes, formats & local engines ----------------------------------
 #   "polars>=1.41.2",          # fast multi-threaded dataframes (Arrow-native)
 #   "duckdb>=1.5.3",           # in-process OLAP SQL over Parquet/Arrow/Polars
 #   "deltalake>=1.6.0",        # Delta Lake tables without the JVM
@@ -115,6 +113,7 @@ dependencies = [
 #   "tqdm>=4.67.3",            # progress bars
 #   "rich>=15.0.0",            # rich terminal output
 #   "python-dotenv>=1.2.2",    # load .env files
+]
 
 [project.scripts]
 {name} = "{module_name}.main:main"

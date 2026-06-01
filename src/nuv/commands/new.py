@@ -178,7 +178,7 @@ def generate_ds_notebook(name: str, *, python_version: str = DEFAULT_PYTHON_VERS
         _nb_code_cell(
             [
                 "# import matplotlib.pyplot as plt\n",
-                "# df.plot(x='x', y='x', kind='bar')\n",
+                "# df.plot(x='x', y='z', kind='bar')\n",
                 "# plt.show()",
             ]
         ),
