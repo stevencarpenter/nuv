@@ -39,6 +39,7 @@ nuv new <name> --at <path>                  # creates at an explicit path
 nuv new <name> --archetype spark            # PySpark 4 project with notebooks
 nuv new <name> --archetype fastapi          # FastAPI + Granian + Docker
 nuv new <name> --archetype polars           # Polars + DuckDB + Delta Lake for local data work
+nuv new <name> --archetype ds               # Data science: thin core + commented DS/ML/LLM catalog
 nuv new <name> --python-version 3.13        # override default Python version
 nuv new <name> --install none               # scaffold + sync, skip tool install
 nuv new <name> --install command-only       # log install command, do not execute (default)
@@ -224,6 +225,57 @@ uv run marimo edit notebooks/explore.py
 - You want a marimo notebook for exploration with the I/O helpers pre-wired.
 
 **Pick `spark` instead when** the dataset doesn't fit on one machine, or you need a long-running cluster.
+
+### ds
+
+A batteries-included data science project. **Manifesto: all of what you need or want, but off by default.**
+
+```bash
+nuv new my-ds-project --archetype ds
+```
+
+`pyproject.toml` ships a deliberately thin active core — numpy, pandas, Arrow, a Click CLI, and typed config — alongside a large, curated, **commented-out** catalog of the rest of the modern stack: classical ML (scikit-learn, scipy, statsmodels, XGBoost/LightGBM/CatBoost), deep learning & neural nets (PyTorch, TensorFlow, Keras, JAX/Flax/Optax), LLMs & NLP (transformers, datasets, accelerate, peft, vLLM, OpenAI/Anthropic clients, LangChain, LlamaIndex, spaCy), vector stores, viz, and experiment tracking (MLflow, Weights & Biases, DVC, Hydra, Ray). Uncomment a line, run `uv sync`, and uv resolves it against everything already locked.
+
+```
+my-ds-project/
+├── main.py                          # Click CLI entry point
+├── pyproject.toml                   # thin core + commented catalog
+├── src/my_ds_project/
+│   ├── __init__.py
+│   ├── _logging.py
+│   ├── config.py                    # Pydantic settings (paths, seed, ...)
+│   ├── data.py                      # CSV/Parquet/JSON I/O + quick-look helpers
+│   └── main.py
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py
+│   └── test_data.py
+├── notebooks/
+│   ├── explore.ipynb                # Jupyter / IPython
+│   └── explore_marimo.py            # marimo
+├── data/
+│   ├── raw/                         # inputs (gitignored)
+│   └── processed/                   # derived data (gitignored)
+└── models/                          # trained artifacts (gitignored)
+```
+
+Default Python version: 3.13 (broadest compatibility across the DS/ML ecosystem).
+
+```bash
+uv run pytest          # passing, 100% coverage
+uv run ruff check .    # clean
+uv run ty check        # clean
+```
+
+Notebooks ship in two flavors and are an optional dependency group (Jupyter/IPython **and** marimo):
+
+```bash
+uv sync --group notebooks
+uv run jupyter lab notebooks/                  # Jupyter / IPython
+uv run marimo edit notebooks/explore_marimo.py # marimo
+```
+
+The generated `.gitignore` is comprehensive for AI/ML work: datasets, model weights and checkpoints (`*.safetensors`, `*.ckpt`, `*.gguf`, ...), experiment-tracking dirs (`mlruns/`, `wandb/`, `lightning_logs/`), notebook and library caches, and `.env` secrets.
 
 ## Quality out of the box
 

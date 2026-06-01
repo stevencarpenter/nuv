@@ -11,6 +11,7 @@ from nuv.commands.new import (
     DEFAULT_PYTHON_VERSION,
     DEFAULT_PYTHON_VERSIONS,
     build_tool_install_command,
+    generate_ds_notebook,
     generate_jupyter_notebook,
     render_template,
     resolve_target,
@@ -1194,3 +1195,193 @@ def test_run_new_polars_uses_default_python_314(tmp_path: Path) -> None:
     call_kwargs = mock_scaffold.call_args[1]
     assert call_kwargs["python_version"] == "3.14"
     assert call_kwargs["archetype"] == "polars"
+
+
+# ---------------------------------------------------------------------------
+# ds (data science) archetype — generate_ds_notebook
+# ---------------------------------------------------------------------------
+
+
+def test_generate_ds_notebook_valid_json() -> None:
+    import json
+
+    result = generate_ds_notebook("my-ds-app")
+    notebook = json.loads(result)
+    assert notebook["nbformat"] == 4
+    assert notebook["cells"][0]["cell_type"] == "markdown"
+    assert "my-ds-app" in notebook["cells"][0]["source"][0]
+
+
+def test_generate_ds_notebook_imports_pandas() -> None:
+    result = generate_ds_notebook("my-ds-app")
+    assert "import pandas as pd" in result
+    assert "import numpy as np" in result
+
+
+def test_generate_ds_notebook_python_version() -> None:
+    import json
+
+    result = generate_ds_notebook("my-ds-app", python_version="3.13")
+    notebook = json.loads(result)
+    assert notebook["metadata"]["language_info"]["version"] == "3.13.0"
+
+
+# ---------------------------------------------------------------------------
+# ds archetype — scaffold_files
+# ---------------------------------------------------------------------------
+
+
+def test_default_python_versions_ds() -> None:
+    assert DEFAULT_PYTHON_VERSIONS["ds"] == "3.13"
+
+
+def test_scaffold_files_ds_creates_expected_files(tmp_path: Path) -> None:
+    target = tmp_path / "my-ds-app"
+    target.mkdir()
+    scaffold_files(target, name="my-ds-app", module_name="my_ds_app", archetype="ds", python_version="3.13")
+
+    assert (target / ".python-version").exists()
+    assert (target / ".gitignore").exists()
+    assert (target / "main.py").exists()
+    assert (target / "pyproject.toml").exists()
+    assert (target / "README.md").exists()
+    assert (target / "src" / "my_ds_app" / "__init__.py").exists()
+    assert (target / "src" / "my_ds_app" / "_logging.py").exists()
+    assert (target / "src" / "my_ds_app" / "config.py").exists()
+    assert (target / "src" / "my_ds_app" / "data.py").exists()
+    assert (target / "src" / "my_ds_app" / "main.py").exists()
+    assert (target / "tests" / "__init__.py").exists()
+    assert (target / "tests" / "conftest.py").exists()
+    assert (target / "tests" / "test_data.py").exists()
+    assert (target / "notebooks" / "explore.ipynb").exists()
+    assert (target / "notebooks" / "explore_marimo.py").exists()
+    assert (target / "data" / "raw" / ".gitkeep").exists()
+    assert (target / "data" / "processed" / ".gitkeep").exists()
+    assert (target / "models" / ".gitkeep").exists()
+
+
+def test_scaffold_files_ds_pyproject_thin_core_and_catalog(tmp_path: Path) -> None:
+    target = tmp_path / "my-ds-app"
+    target.mkdir()
+    scaffold_files(target, name="my-ds-app", module_name="my_ds_app", archetype="ds", python_version="3.13")
+    pyproject = (target / "pyproject.toml").read_text()
+    # thin active core
+    assert "numpy>=2.4.6" in pyproject
+    assert "pandas>=3.0.3" in pyproject
+    assert "pyarrow>=24.0.0" in pyproject
+    assert "click>=8.4.1" in pyproject
+    # commented catalog — present but off by default
+    assert '#   "torch>=' in pyproject
+    assert '#   "transformers>=' in pyproject
+    assert '#   "scikit-learn>=' in pyproject
+    assert '#   "jax>=' in pyproject
+    # notebooks group covers Jupyter + IPython + marimo
+    assert "jupyterlab>=4.5.7" in pyproject
+    assert "ipykernel>=7.2.0" in pyproject
+    assert "marimo>=0.23.8" in pyproject
+    assert "py313" in pyproject
+    assert 'packages = ["src/my_ds_app"]' in pyproject
+    assert 'build-backend = "hatchling.build"' in pyproject
+
+
+def test_scaffold_files_ds_data_module(tmp_path: Path) -> None:
+    target = tmp_path / "my-ds-app"
+    target.mkdir()
+    scaffold_files(target, name="my-ds-app", module_name="my_ds_app", archetype="ds", python_version="3.13")
+    data_content = (target / "src" / "my_ds_app" / "data.py").read_text()
+    assert "import pandas as pd" in data_content
+    assert "read_parquet" in data_content
+    assert "def summary" in data_content
+    config = (target / "src" / "my_ds_app" / "config.py").read_text()
+    assert "pydantic_settings" in config
+    # env_prefix isolates settings so ambient env vars don't clobber defaults
+    assert 'env_prefix="my_ds_app_"' in config
+
+
+def test_scaffold_files_ds_gitignore_has_ml_entries(tmp_path: Path) -> None:
+    target = tmp_path / "my-ds-app"
+    target.mkdir()
+    scaffold_files(target, name="my-ds-app", module_name="my_ds_app", archetype="ds", python_version="3.13")
+    content = (target / ".gitignore").read_text()
+    assert "*.safetensors" in content
+    assert "mlruns/" in content
+    assert "wandb/" in content
+    assert ".ipynb_checkpoints/" in content
+    assert "__marimo__/" in content
+    assert ".cache/huggingface/" in content
+
+
+def test_scaffold_files_ds_end_with_trailing_newline(tmp_path: Path) -> None:
+    target = tmp_path / "my-ds-app"
+    target.mkdir()
+    scaffold_files(target, name="my-ds-app", module_name="my_ds_app", archetype="ds", python_version="3.13")
+
+    generated_files = [
+        ".python-version",
+        ".gitignore",
+        "main.py",
+        "pyproject.toml",
+        "README.md",
+        "src/my_ds_app/__init__.py",
+        "src/my_ds_app/_logging.py",
+        "src/my_ds_app/config.py",
+        "src/my_ds_app/data.py",
+        "src/my_ds_app/main.py",
+        "tests/__init__.py",
+        "tests/conftest.py",
+        "tests/test_data.py",
+        "notebooks/explore.ipynb",
+        "notebooks/explore_marimo.py",
+    ]
+
+    for rel_path in generated_files:
+        content = (target / rel_path).read_text()
+        assert content.endswith("\n"), f"Expected trailing newline in {rel_path}"
+
+
+# ---------------------------------------------------------------------------
+# ds archetype — integration & CLI
+# ---------------------------------------------------------------------------
+
+
+def test_run_new_ds_success(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = run_new("my-ds-app", at=str(tmp_path / "my-ds-app"), cwd=tmp_path, archetype="ds")
+    assert result == 0
+    assert (tmp_path / "my-ds-app" / "src" / "my_ds_app" / "data.py").exists()
+    assert (tmp_path / "my-ds-app" / "notebooks" / "explore.ipynb").exists()
+    assert (tmp_path / "my-ds-app" / "models").exists()
+
+
+def test_run_new_ds_cleanup_on_failure(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = run_new("my-ds-app", cwd=tmp_path, archetype="ds")
+    assert result == 1
+    assert not (tmp_path / "my-ds-app").exists()
+
+
+def test_cli_new_ds_archetype(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "my-ds-app", "--at", str(tmp_path / "my-ds-app"), "--archetype", "ds"])
+    assert result == 0
+    assert (tmp_path / "my-ds-app" / "src" / "my_ds_app" / "__init__.py").exists()
+    assert (tmp_path / "my-ds-app" / "notebooks" / "explore_marimo.py").exists()
+
+
+def test_cli_ds_default_python_version(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "my-ds-app", "--at", str(tmp_path / "my-ds-app"), "--archetype", "ds"])
+    assert result == 0
+    assert (tmp_path / "my-ds-app" / ".python-version").read_text().strip() == "3.13"

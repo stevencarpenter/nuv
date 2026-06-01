@@ -764,3 +764,63 @@ cython_debug/
 .agents
 .opencode
 .worktrees
+.copilot
+.cursor
+.aider*
+.continue
+
+### AI / ML / Data Science development
+# Datasets — version with DVC/LFS rather than git
+data/
+*.parquet
+*.feather
+*.arrow
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.duckdb
+warehouse.db
+_delta_log/
+
+# Trained models & checkpoints
+models/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.onnx
+*.pb
+*.tflite
+*.gguf
+*.ggml
+*.joblib
+*.h5
+*.hdf5
+
+# Experiment tracking & orchestration
+mlruns/
+mlartifacts/
+wandb/
+.neptune/
+lightning_logs/
+ray_results/
+catboost_info/
+outputs/
+.hydra/
+multirun/
+
+# Notebook & ML library caches
+.virtual_documents/
+__marimo__/
+.keras/
+.torch/
+.cache/huggingface/
+nltk_data/
+
+# Secrets
+.env
+.env.*
+!.env.example
