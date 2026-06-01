@@ -1266,10 +1266,10 @@ def test_scaffold_files_ds_pyproject_thin_core_and_catalog(tmp_path: Path) -> No
     scaffold_files(target, name="my-ds-app", module_name="my_ds_app", archetype="ds", python_version="3.13")
     pyproject = (target / "pyproject.toml").read_text()
     # thin active core
-    assert "numpy>=2.4.0" in pyproject
-    assert "pandas>=2.2.0" in pyproject
-    assert "pyarrow>=18.0.0" in pyproject
-    assert "click>=8.3.3" in pyproject
+    assert "numpy>=2.4.6" in pyproject
+    assert "pandas>=3.0.3" in pyproject
+    assert "pyarrow>=24.0.0" in pyproject
+    assert "click>=8.4.1" in pyproject
     # commented catalog — present but off by default
     assert '#   "torch>=' in pyproject
     assert '#   "transformers>=' in pyproject
@@ -1277,8 +1277,8 @@ def test_scaffold_files_ds_pyproject_thin_core_and_catalog(tmp_path: Path) -> No
     assert '#   "jax>=' in pyproject
     # notebooks group covers Jupyter + IPython + marimo
     assert "jupyterlab>=4.5.7" in pyproject
-    assert "ipykernel>=7.0.0" in pyproject
-    assert "marimo>=0.23.4" in pyproject
+    assert "ipykernel>=7.2.0" in pyproject
+    assert "marimo>=0.23.8" in pyproject
     assert "py313" in pyproject
     assert 'packages = ["src/my_ds_app"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
