@@ -143,7 +143,7 @@ my-api/
     └── test_health.py
 ```
 
-Default Python version: 3.14.
+Default Python version: 3.13 (Delta Lake wheel compatibility).
 
 ```bash
 uv run pytest          # passing

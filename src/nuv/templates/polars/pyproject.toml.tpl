@@ -5,11 +5,12 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "polars>=1.40.1",
-    "duckdb>=1.5.2",
-    "deltalake>=1.5.1",
-    "pydantic-settings>=2.14.0",
-    "click>=8.3.3",
+    "polars>=1.41.2",
+    "pyarrow>=24.0.0",
+    "duckdb>=1.5.3",
+    "deltalake>=1.6.0",
+    "pydantic-settings>=2.14.1",
+    "click>=8.4.1",
 ]
 
 [project.scripts]
@@ -19,11 +20,11 @@ dependencies = [
 dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
-    "ruff>=0.15.12",
-    "ty>=0.0.34",
+    "ruff>=0.15.15",
+    "ty>=0.0.43",
 ]
 notebooks = [
-    "marimo>=0.23.4",
+    "marimo>=0.23.8",
 ]
 
 [tool.uv]
@@ -38,6 +39,12 @@ line-length = 180
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"notebooks/*.py" = ["B018"]
+
+[tool.ty.src]
+exclude = ["notebooks"]
 
 [tool.coverage.run]
 branch = true

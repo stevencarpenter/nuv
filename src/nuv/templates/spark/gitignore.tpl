@@ -11,6 +11,13 @@
 .copilot/
 .amp/
 .opencode/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.toml
+.secrets/
 .venv/
 __pycache__/
 *.pyc

@@ -124,7 +124,7 @@ dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
     "ruff>=0.15.15",
-    "ty>=0.0.40",
+    "ty>=0.0.43",
     "ipython>=9.14.0",
 ]
 # Jupyter / IPython + marimo notebooks. `uv sync --group notebooks` to enable.

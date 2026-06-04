@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.23.4"
+__generated_with = "0.23.8"
 app = marimo.App(width="medium")
 
 
@@ -8,8 +8,8 @@ app = marimo.App(width="medium")
 def _():
     import polars as pl
 
-    from {module_name}._io import read_csv, read_parquet, show, glimpse
     from {module_name}._db import sql
+    from {module_name}._io import glimpse, read_csv, read_parquet, show
 
     pl
     return (pl, read_csv, read_parquet, show, glimpse, sql)

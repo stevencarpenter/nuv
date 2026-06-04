@@ -1,5 +1,17 @@
 .git/
 .gitignore
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.toml
+.secrets/
+.claude/
+.codex/
+.copilot/
+.amp/
+.opencode/
 .venv/
 __pycache__/
 *.pyc

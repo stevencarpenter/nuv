@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python{python_version}-bookworm-slim AS builder
+FROM {uv_docker_image} AS builder
 
 WORKDIR /app
 
@@ -8,10 +8,11 @@ RUN uv sync --no-dev --no-install-project --frozen
 COPY . .
 RUN uv sync --no-dev --frozen
 
-FROM python:{python_version}-slim-bookworm
+FROM {python_docker_image}
 
 WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/src /app/src
 ENV PATH="/app/.venv/bin:$PATH"
 
 RUN addgroup --system app && adduser --system --ingroup app app

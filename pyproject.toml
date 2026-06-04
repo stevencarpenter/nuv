@@ -21,7 +21,7 @@ classifiers = [
     "Topic :: Software Development :: Code Generators",
 ]
 dependencies = [
-    "click>=8.3.3",
+    "click>=8.4.1",
 ]
 
 [project.urls]
@@ -36,8 +36,8 @@ nuv = "nuv.cli:main"
 dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
-    "ruff>=0.15.12",
-    "ty>=0.0.34",
+    "ruff>=0.15.15",
+    "ty>=0.0.43",
 ]
 
 [tool.uv]

@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from {module_name}._logging import configure
 from {module_name}.config import Settings
 from {module_name}.routes import register_routes
 
@@ -17,6 +18,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app(settings: Settings | None = None) -> FastAPI:
     if settings is None:
         settings = Settings()
+    configure(settings.log_level)
     app = FastAPI(
         title=settings.app_name,
         lifespan=lifespan,

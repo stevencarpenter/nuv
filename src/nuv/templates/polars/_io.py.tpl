@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 import polars as pl
 
@@ -32,7 +33,10 @@ def write(df: pl.DataFrame, path: str | Path, **kwargs) -> None:
         raise ValueError(f"Unsupported format: {{suffix}}")
 
 
-def write_delta(df: pl.DataFrame, path: str | Path, mode: str = "overwrite", **kwargs) -> None:
+DeltaWriteMode = Literal["error", "append", "overwrite", "ignore"]
+
+
+def write_delta(df: pl.DataFrame, path: str | Path, mode: DeltaWriteMode = "overwrite", **kwargs) -> None:
     df.write_delta(path, mode=mode, **kwargs)
 
 

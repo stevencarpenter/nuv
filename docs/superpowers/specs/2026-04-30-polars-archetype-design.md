@@ -91,11 +91,12 @@ A marimo notebook scaffold with a default cell importing the project's modules a
 ### Runtime requirements
 
 ```
-polars>=1.40.1
-duckdb>=1.5.2
-deltalake>=1.5.1
-pydantic-settings>=2.14.0
-click>=8.3.3
+polars>=1.41.2
+pyarrow>=24.0.0
+duckdb>=1.5.3
+deltalake>=1.6.0
+pydantic-settings>=2.14.1
+click>=8.4.1
 ```
 
 ### Dev requirements
@@ -103,14 +104,14 @@ click>=8.3.3
 ```
 pytest>=9.0.3
 pytest-cov>=7.1.0
-ruff>=0.15.12
+ruff>=0.15.15
 ty>=0.0.33
-marimo>=0.23.4
+marimo>=0.23.8
 ```
 
 ### Python
 
-`requires-python = ">=3.11"`, defaults to latest stable (3.14). No version pin constraints unlike the Spark archetype.
+`requires-python = ">=3.13"`, defaults to Python 3.13 for Delta Lake wheel compatibility.
 
 ## Testing
 

@@ -37,10 +37,24 @@ def _load_generated_module(path: Path):
 def _install_pyspark_stubs(monkeypatch: pytest.MonkeyPatch) -> None:
     pyspark = types.ModuleType("pyspark")
     sql = types.ModuleType("pyspark.sql")
-    sql.DataFrame = type("DataFrame", (), {})
-    sql.SparkSession = type("SparkSession", (), {})
+    sql.__dict__["DataFrame"] = type("DataFrame", (), {})
+    sql.__dict__["SparkSession"] = type("SparkSession", (), {})
     monkeypatch.setitem(sys.modules, "pyspark", pyspark)
     monkeypatch.setitem(sys.modules, "pyspark.sql", sql)
+
+
+def _assert_secret_ignores(content: str) -> None:
+    expected_entries = [
+        ".env",
+        ".env.*",
+        "!.env.example",
+        "*.pem",
+        "*.key",
+        "secrets.toml",
+        ".secrets/",
+    ]
+    for entry in expected_entries:
+        assert entry in content
 
 
 def test_no_command_returns_1() -> None:
@@ -78,6 +92,12 @@ def test_validate_name_leading_hyphen() -> None:
 def test_validate_name_invalid_chars() -> None:
     with pytest.raises(ValueError, match="invalid"):
         validate_name("bad/name")
+
+
+@pytest.mark.parametrize("name", ["123app", "123-app", "class", "match", "_bad", "bad_", "bad-"])
+def test_validate_name_rejects_names_that_break_packaging_or_imports(name: str) -> None:
+    with pytest.raises(ValueError):
+        validate_name(name)
 
 
 # ---------------------------------------------------------------------------
@@ -194,6 +214,15 @@ def test_resolve_target_already_exists(tmp_path: Path) -> None:
         resolve_target("my-project", at=None, cwd=tmp_path)
 
 
+def test_run_new_returns_1_for_parent_path_that_is_file(tmp_path: Path) -> None:
+    parent_file = tmp_path / "parent-file"
+    parent_file.write_text("not a directory")
+
+    result = run_new("my-project", at=str(parent_file / "child"), cwd=tmp_path)
+
+    assert result == 1
+
+
 # ---------------------------------------------------------------------------
 # render_template
 # ---------------------------------------------------------------------------
@@ -212,6 +241,11 @@ def test_render_template_pyproject_uses_name() -> None:
 def test_render_template_unknown_raises() -> None:
     with pytest.raises(FileNotFoundError):
         render_template("nonexistent.tpl", name="x", module_name="x")
+
+
+def test_render_template_rejects_path_traversal() -> None:
+    with pytest.raises(ValueError, match="Template path"):
+        render_template("../commands/new.py", name="x", module_name="x")
 
 
 # ---------------------------------------------------------------------------
@@ -313,6 +347,14 @@ def test_scaffold_files_gitignore_includes_common_dev_tooling(tmp_path: Path) ->
 
     for entry in expected_entries:
         assert entry in content
+
+
+def test_scaffold_files_script_gitignore_excludes_common_secrets(tmp_path: Path) -> None:
+    target = tmp_path / "my-project"
+    target.mkdir()
+    scaffold_files(target, name="my-project", module_name="my_project")
+
+    _assert_secret_ignores((target / ".gitignore").read_text())
 
 
 def test_scaffold_files_custom_python_version(tmp_path: Path) -> None:
@@ -645,13 +687,15 @@ def test_scaffold_files_spark_pyproject_has_pyspark(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "pyspark>=4.1.1,<5" in pyproject
+    assert "pyspark>=4.1.2,<5" in pyproject
     assert "chispa>=0.12.0" in pyproject
     assert "jupyterlab>=4.5.7" in pyproject
-    assert "marimo>=0.23.4" in pyproject
+    assert "marimo>=0.23.8" in pyproject
     assert "py313" in pyproject
     assert 'packages = ["src/my_spark_app"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
+    assert 'exclude = ["notebooks"]' in pyproject
+    assert '"notebooks/*.py" = ["B018"]' in pyproject
 
 
 def test_scaffold_files_spark_gitignore_has_spark_entries(tmp_path: Path) -> None:
@@ -669,10 +713,20 @@ def test_scaffold_files_spark_main_imports_package(tmp_path: Path) -> None:
     target = tmp_path / "my-spark-app"
     target.mkdir()
     scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
-    main_content = (target / "main.py").read_text()
+    main_content = (target / "src" / "my_spark_app" / "main.py").read_text()
     assert "from my_spark_app._logging import configure" in main_content
     assert "from my_spark_app.config import resolve_params" in main_content
     assert "from my_spark_app.session import create_spark_session" in main_content
+    assert "run_failed = False" in main_content
+
+
+def test_scaffold_files_spark_root_main_delegates_to_package(tmp_path: Path) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+
+    main_content = (target / "main.py").read_text()
+    assert "from my_spark_app.main import main" in main_content
 
 
 def test_scaffold_files_spark_resolve_params_reads_sys_argv_when_argv_none(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -725,6 +779,7 @@ def test_scaffold_files_spark_test_uses_chispa(tmp_path: Path) -> None:
     test_content = (target / "tests" / "test_example.py").read_text()
     assert "from chispa import assert_df_equality" in test_content
     assert "from my_spark_app.jobs.example import run, transform" in test_content
+    assert "as mock_example" not in test_content
 
 
 def test_scaffold_files_spark_notebook_valid_json(tmp_path: Path) -> None:
@@ -754,6 +809,7 @@ def test_scaffold_files_spark_end_with_trailing_newline(tmp_path: Path) -> None:
         "src/my_spark_app/_logging.py",
         "src/my_spark_app/config.py",
         "src/my_spark_app/session.py",
+        "src/my_spark_app/main.py",
         "src/my_spark_app/jobs/__init__.py",
         "src/my_spark_app/jobs/example.py",
         "tests/__init__.py",
@@ -862,13 +918,15 @@ def test_scaffold_files_fastapi_pyproject_has_deps(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "fastapi>=0.136.1" in pyproject
-    assert "granian>=2.7.4" in pyproject
-    assert "pydantic-settings>=2.14.0" in pyproject
+    assert "fastapi>=0.136.3" in pyproject
+    assert "granian>=2.7.5" in pyproject
+    assert "pydantic>=2.13.4" in pyproject
+    assert "pydantic-settings>=2.14.1" in pyproject
     assert "httpx>=0.28.1" in pyproject
-    assert "pytest-asyncio>=1.3.0" in pyproject
+    assert "pytest-asyncio>=1.4.0" in pyproject
     assert "py314" in pyproject
     assert 'packages = ["src/my_api"]' in pyproject
+    assert 'my-api = "my_api.main:main"' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
 
 
@@ -876,9 +934,21 @@ def test_scaffold_files_fastapi_main_imports_package(tmp_path: Path) -> None:
     target = tmp_path / "my-api"
     target.mkdir()
     scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
-    main_content = (target / "main.py").read_text()
+    main_content = (target / "src" / "my_api" / "main.py").read_text()
     assert "from my_api._logging import configure" in main_content
     assert "from granian import Granian" in main_content
+    assert "address=host" in main_content
+    assert "host=host" not in main_content
+    assert "0.0.0.0 exposes all interfaces" in main_content
+
+
+def test_scaffold_files_fastapi_root_main_delegates_to_package(tmp_path: Path) -> None:
+    target = tmp_path / "my-api"
+    target.mkdir()
+    scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
+
+    main_content = (target / "main.py").read_text()
+    assert "from my_api.main import main" in main_content
 
 
 def test_scaffold_files_fastapi_app_factory(tmp_path: Path) -> None:
@@ -899,6 +969,7 @@ def test_scaffold_files_fastapi_dockerfile_multi_stage(tmp_path: Path) -> None:
     assert "python:3.14-slim-bookworm" in dockerfile  # default python_version
     assert "USER app" in dockerfile
     assert "my_api.app:create_app" in dockerfile
+    assert "COPY --from=builder /app/src /app/src" in dockerfile
 
 
 def test_scaffold_files_fastapi_test_uses_httpx(tmp_path: Path) -> None:
@@ -908,6 +979,16 @@ def test_scaffold_files_fastapi_test_uses_httpx(tmp_path: Path) -> None:
     test_content = (target / "tests" / "test_health.py").read_text()
     assert "from httpx import AsyncClient" in test_content
     assert "from my_api.app import create_app" in test_content
+    assert "getattr(route, \"path\", None)" in test_content
+
+
+def test_scaffold_files_fastapi_ignores_common_secrets(tmp_path: Path) -> None:
+    target = tmp_path / "my-api"
+    target.mkdir()
+    scaffold_files(target, name="my-api", module_name="my_api", archetype="fastapi")
+
+    _assert_secret_ignores((target / ".gitignore").read_text())
+    _assert_secret_ignores((target / ".dockerignore").read_text())
 
 
 def test_scaffold_files_fastapi_end_with_trailing_newline(tmp_path: Path) -> None:
@@ -927,6 +1008,7 @@ def test_scaffold_files_fastapi_end_with_trailing_newline(tmp_path: Path) -> Non
         "src/my_api/app.py",
         "src/my_api/config.py",
         "src/my_api/_logging.py",
+        "src/my_api/main.py",
         "src/my_api/dependencies.py",
         "src/my_api/routes/__init__.py",
         "src/my_api/routes/health.py",
@@ -1025,7 +1107,7 @@ def test_run_new_fastapi_uses_default_python_314(tmp_path: Path) -> None:
 
 
 def test_default_python_versions_polars() -> None:
-    assert DEFAULT_PYTHON_VERSIONS["polars"] == "3.14"
+    assert DEFAULT_PYTHON_VERSIONS["polars"] == "3.13"
 
 
 def test_scaffold_files_polars_creates_expected_files(tmp_path: Path) -> None:
@@ -1057,15 +1139,18 @@ def test_scaffold_files_polars_pyproject_has_deps(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-polars-app", module_name="my_polars_app", archetype="polars")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "polars>=1.40.1" in pyproject
-    assert "duckdb>=1.5.2" in pyproject
-    assert "deltalake>=1.5.1" in pyproject
-    assert "pydantic-settings>=2.14.0" in pyproject
-    assert "click>=8.3.3" in pyproject
-    assert "marimo>=0.23.4" in pyproject
-    assert "py314" in pyproject
+    assert "polars>=1.41.2" in pyproject
+    assert "pyarrow>=24.0.0" in pyproject
+    assert "duckdb>=1.5.3" in pyproject
+    assert "deltalake>=1.6.0" in pyproject
+    assert "pydantic-settings>=2.14.1" in pyproject
+    assert "click>=8.4.1" in pyproject
+    assert "marimo>=0.23.8" in pyproject
+    assert "py313" in pyproject
     assert 'packages = ["src/my_polars_app"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
+    assert 'exclude = ["notebooks"]' in pyproject
+    assert '"notebooks/*.py" = ["B018"]' in pyproject
 
 
 def test_scaffold_files_polars_main_uses_click(tmp_path: Path) -> None:
@@ -1086,6 +1171,7 @@ def test_scaffold_files_polars_package_modules(tmp_path: Path) -> None:
     assert "read_parquet" in io_content
     assert "show" in io_content
     assert "glimpse" in io_content
+    assert 'Literal["error", "append", "overwrite", "ignore"]' in io_content
     db_content = (target / "src" / "my_polars_app" / "_db.py").read_text()
     assert "import duckdb" in db_content
     assert "def sql" in db_content
@@ -1179,10 +1265,10 @@ def test_cli_polars_default_python_version(tmp_path: Path) -> None:
         mock_run.return_value = MagicMock(returncode=0)
         result = cli_main(["new", "my-polars-app", "--at", str(tmp_path / "my-polars-app"), "--archetype", "polars"])
     assert result == 0
-    assert (tmp_path / "my-polars-app" / ".python-version").read_text().strip() == "3.14"
+    assert (tmp_path / "my-polars-app" / ".python-version").read_text().strip() == "3.13"
 
 
-def test_run_new_polars_uses_default_python_314(tmp_path: Path) -> None:
+def test_run_new_polars_uses_default_python_313(tmp_path: Path) -> None:
     with (
         patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
         patch("nuv.commands.new.subprocess.run") as mock_run,
@@ -1193,8 +1279,16 @@ def test_run_new_polars_uses_default_python_314(tmp_path: Path) -> None:
     assert result == 0
     mock_scaffold.assert_called_once()
     call_kwargs = mock_scaffold.call_args[1]
-    assert call_kwargs["python_version"] == "3.14"
+    assert call_kwargs["python_version"] == "3.13"
     assert call_kwargs["archetype"] == "polars"
+
+
+def test_scaffold_files_polars_ignores_common_secrets(tmp_path: Path) -> None:
+    target = tmp_path / "my-polars-app"
+    target.mkdir()
+    scaffold_files(target, name="my-polars-app", module_name="my_polars_app", archetype="polars")
+
+    _assert_secret_ignores((target / ".gitignore").read_text())
 
 
 # ---------------------------------------------------------------------------
@@ -1279,6 +1373,7 @@ def test_scaffold_files_ds_pyproject_thin_core_and_catalog(tmp_path: Path) -> No
     assert "jupyterlab>=4.5.7" in pyproject
     assert "ipykernel>=7.2.0" in pyproject
     assert "marimo>=0.23.8" in pyproject
+    assert "ty>=0.0.43" in pyproject
     assert "py313" in pyproject
     assert 'packages = ["src/my_ds_app"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
@@ -1385,3 +1480,11 @@ def test_cli_ds_default_python_version(tmp_path: Path) -> None:
         result = cli_main(["new", "my-ds-app", "--at", str(tmp_path / "my-ds-app"), "--archetype", "ds"])
     assert result == 0
     assert (tmp_path / "my-ds-app" / ".python-version").read_text().strip() == "3.13"
+
+
+def test_scaffold_files_spark_ignores_common_secrets(tmp_path: Path) -> None:
+    target = tmp_path / "my-spark-app"
+    target.mkdir()
+    scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
+
+    _assert_secret_ignores((target / ".gitignore").read_text())

@@ -5,7 +5,7 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "click>=8.3.3",
+    "click>=8.4.1",
 ]
 
 [project.scripts]
@@ -15,8 +15,8 @@ dependencies = [
 dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
-    "ruff>=0.15.12",
-    "ty>=0.0.34",
+    "ruff>=0.15.15",
+    "ty>=0.0.43",
 ]
 
 [tool.uv]

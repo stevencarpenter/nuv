@@ -1,6 +1,8 @@
 import polars as pl
+from click.testing import CliRunner
 from polars.testing import assert_frame_equal
 
+from {module_name}._db import sql
 from {module_name}._io import (
     glimpse,
     read_csv,
@@ -11,6 +13,9 @@ from {module_name}._io import (
     write,
     write_delta,
 )
+from {module_name}._logging import configure
+from {module_name}.config import Settings
+from {module_name}.main import main
 
 
 def test_read_parquet_roundtrip(tmp_path):
@@ -59,3 +64,23 @@ def test_show_does_not_raise(sample_df):
 
 def test_glimpse_does_not_raise(sample_df):
     glimpse(sample_df)
+
+
+def test_sql_returns_polars_dataframe():
+    result = sql("select 1 as x")
+    assert result.to_dict(as_series=False) == {{"x": [1]}}
+
+
+def test_settings_defaults():
+    settings = Settings()
+    assert settings.app_name == "{name}"
+    assert settings.data_root.name == "data"
+
+
+def test_configure_does_not_raise():
+    configure("INFO")
+
+
+def test_main_cli_runs():
+    result = CliRunner().invoke(main, ["--log-level", "INFO"])
+    assert result.exit_code == 0

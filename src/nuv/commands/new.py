@@ -1,4 +1,5 @@
 import json
+import keyword
 import logging
 import re
 import shutil
@@ -19,12 +20,25 @@ def validate_name(name: str) -> str:
         raise ValueError("Name cannot start with a leading hyphen.")
     if not re.fullmatch(r"[a-zA-Z0-9_\-]+", name):
         raise ValueError(f"Name contains invalid characters: {name!r}")
+    if not re.fullmatch(r"[a-zA-Z0-9](?:[a-zA-Z0-9_\-]*[a-zA-Z0-9])?", name):
+        raise ValueError("Name must start and end with a letter or digit.")
+    module_name = name.replace("-", "_")
+    if not module_name.isidentifier() or keyword.iskeyword(module_name) or keyword.issoftkeyword(module_name):
+        raise ValueError(f"Name does not produce a valid Python module name: {module_name!r}")
     return name
 
 
 _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
 DEFAULT_PYTHON_VERSION = "3.14"
-DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14", "polars": "3.14", "ds": "3.13"}
+DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14", "polars": "3.13", "ds": "3.13"}
+UV_DOCKER_IMAGES = {
+    "3.13": "ghcr.io/astral-sh/uv:python3.13-bookworm-slim@sha256:531f855bda2c73cd6ef67d56b733b357cea384185b3022bd09f05e002cd144ca",
+    "3.14": "ghcr.io/astral-sh/uv:python3.14-bookworm-slim@sha256:7cf77f594be8042dab6daa9fe326f90962252268b4f120a7f5dccce4d947e6c1",
+}
+PYTHON_DOCKER_IMAGES = {
+    "3.13": "python:3.13-slim-bookworm@sha256:e4fa1f978c539608a10cdf74700ac32a3f719dfc6e8b6b6001da82deb36302a2",
+    "3.14": "python:3.14-slim-bookworm@sha256:a9bee15510a364124aa24692899d269835683b883de42f7ebec8c293cf679ccb",
+}
 
 
 def validate_python_version(version: str) -> str:
@@ -47,7 +61,14 @@ def render_template(
     module_name: str,
     python_version: str = DEFAULT_PYTHON_VERSION,
 ) -> str:
-    tpl_path = _TEMPLATES_ROOT / archetype / tpl_name
+    tpl_parts = Path(tpl_name).parts
+    archetype_parts = Path(archetype).parts
+    if Path(tpl_name).is_absolute() or Path(archetype).is_absolute() or ".." in tpl_parts or ".." in archetype_parts:
+        raise ValueError(f"Template path must stay inside templates root: {archetype}/{tpl_name}")
+    tpl_path = (_TEMPLATES_ROOT / archetype / tpl_name).resolve()
+    templates_root = _TEMPLATES_ROOT.resolve()
+    if not tpl_path.is_relative_to(templates_root):
+        raise ValueError(f"Template path must stay inside templates root: {archetype}/{tpl_name}")
     if not tpl_path.exists():
         raise FileNotFoundError(f"Template not found: {archetype}/{tpl_name}")
     return tpl_path.read_text(encoding="utf-8").format(
@@ -55,6 +76,8 @@ def render_template(
         module_name=module_name,
         python_version=python_version,
         python_version_nodot=python_version.replace(".", ""),
+        uv_docker_image=UV_DOCKER_IMAGES.get(python_version, f"ghcr.io/astral-sh/uv:python{python_version}-bookworm-slim"),
+        python_docker_image=PYTHON_DOCKER_IMAGES.get(python_version, f"python:{python_version}-slim-bookworm"),
     )
 
 
@@ -195,10 +218,12 @@ def scaffold_files(
     name: str,
     module_name: str,
     archetype: str = "script",
-    python_version: str = DEFAULT_PYTHON_VERSION,
+    python_version: str | None = None,
 ) -> None:
     if archetype not in VALID_ARCHETYPES:
         raise ValueError(f"Unknown archetype: {archetype!r}")
+    if python_version is None:
+        python_version = DEFAULT_PYTHON_VERSIONS.get(archetype, DEFAULT_PYTHON_VERSION)
     validate_python_version(python_version)
     template_vars = {
         "name": name,
@@ -246,6 +271,7 @@ def _scaffold_spark(
     write_with_trailing_newline(pkg_dir / "_logging.py", render_template("_logging.py.tpl", **template_vars))
     write_with_trailing_newline(pkg_dir / "config.py", render_template("config.py.tpl", **template_vars))
     write_with_trailing_newline(pkg_dir / "session.py", render_template("session.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "main.py", render_template("package_main.py.tpl", **template_vars))
 
     # src/<module_name>/jobs/
     jobs_dir = pkg_dir / "jobs"
@@ -279,6 +305,7 @@ def _scaffold_fastapi(
     write_with_trailing_newline(pkg_dir / "config.py", render_template("config.py.tpl", **template_vars))
     write_with_trailing_newline(pkg_dir / "_logging.py", render_template("_logging.py.tpl", **template_vars))
     write_with_trailing_newline(pkg_dir / "dependencies.py", render_template("dependencies.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "main.py", render_template("package_main.py.tpl", **template_vars))
 
     # src/<module_name>/routes/
     routes_dir = pkg_dir / "routes"
@@ -425,7 +452,7 @@ def run_new(
         )
         run_uv_sync(target)
         run_tool_install(target, mode=install_mode)
-    except (ValueError, RuntimeError, FileNotFoundError) as exc:
+    except (ValueError, RuntimeError, OSError) as exc:
         if created_target and target is not None and not keep_on_failure:
             shutil.rmtree(target, ignore_errors=True)
         log.error("%s", exc)

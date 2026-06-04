@@ -5,24 +5,24 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "click>=8.3.3",
-    "pyspark>=4.1.1,<5",
+    "click>=8.4.1",
+    "pyspark>=4.1.2,<5",
 ]
 
 [project.scripts]
-{name} = "main:main"
+{name} = "{module_name}.main:main"
 
 [dependency-groups]
 dev = [
     "chispa>=0.12.0",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
-    "ruff>=0.15.12",
-    "ty>=0.0.34",
+    "ruff>=0.15.15",
+    "ty>=0.0.43",
 ]
 notebooks = [
     "jupyterlab>=4.5.7",
-    "marimo>=0.23.4",
+    "marimo>=0.23.8",
 ]
 
 [tool.uv]
@@ -37,6 +37,12 @@ line-length = 180
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"notebooks/*.py" = ["B018"]
+
+[tool.ty.src]
+exclude = ["notebooks"]
 
 [tool.coverage.run]
 branch = true

@@ -5,24 +5,24 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "click>=8.3.3",
-    "fastapi>=0.136.1",
-    "granian>=2.7.4",
-    "pydantic>=2.13.3",
-    "pydantic-settings>=2.14.0",
+    "click>=8.4.1",
+    "fastapi>=0.136.3",
+    "granian>=2.7.5",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
 ]
 
 [project.scripts]
-{name} = "main:main"
+{name} = "{module_name}.main:main"
 
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
     "pytest>=9.0.3",
-    "pytest-asyncio>=1.3.0",
+    "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
-    "ruff>=0.15.12",
-    "ty>=0.0.34",
+    "ruff>=0.15.15",
+    "ty>=0.0.43",
 ]
 
 [tool.uv]

@@ -7,15 +7,13 @@ from {module_name}._logging import configure
 from {module_name}.app import create_app
 from {module_name}.config import Settings
 from {module_name}.dependencies import get_settings
-
+from {module_name}.main import main
 
 # --- Main ---
 
 
 def test_main_starts_granian():
-    from main import main
-
-    with patch("main.Granian") as mock_cls:
+    with patch("{module_name}.main.Granian") as mock_cls:
         mock_server = MagicMock()
         mock_cls.return_value = mock_server
         result = main([])
@@ -28,7 +26,7 @@ def test_main_starts_granian():
 
 def test_create_app_has_healthz():
     app = create_app()
-    paths = [route.path for route in app.routes]
+    paths = [getattr(route, "path", None) for route in app.routes]
     assert "/healthz" in paths
 
 

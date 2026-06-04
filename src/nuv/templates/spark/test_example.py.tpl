@@ -2,24 +2,23 @@ import logging
 import sys
 from unittest.mock import MagicMock, patch
 
+import pytest
 from chispa import assert_df_equality
 
 from {module_name}._logging import configure
 from {module_name}.config import resolve_params
 from {module_name}.jobs.example import run, transform
+from {module_name}.main import main
 from {module_name}.session import create_spark_session
-
 
 # --- Main ---
 
 
 def test_main_returns_zero():
-    from main import main
-
     mock_spark = MagicMock()
     with (
-        patch("main.create_spark_session", return_value=mock_spark),
-        patch("main.example") as mock_example,
+        patch("{module_name}.main.create_spark_session", return_value=mock_spark),
+        patch("{module_name}.main.example"),
     ):
         result = main([])
     assert result == 0
@@ -27,19 +26,37 @@ def test_main_returns_zero():
 
 
 def test_main_returns_2_for_usage_errors(capsys):
-    from main import main
-
     result = main(["--bogus"])
     assert result == 2
     assert "No such option" in capsys.readouterr().err
 
 
 def test_main_returns_0_for_help(capsys):
-    from main import main
-
     result = main(["--help"])
     assert result == 0
     assert "--env" in capsys.readouterr().out
+
+
+def test_main_preserves_job_error_when_stop_also_fails():
+    mock_spark = MagicMock()
+    mock_spark.stop.side_effect = RuntimeError("stop failed")
+    with (
+        patch("{module_name}.main.create_spark_session", return_value=mock_spark),
+        patch("{module_name}.main.example.run", side_effect=ValueError("job failed")),
+        pytest.raises(ValueError, match="job failed"),
+    ):
+        main([])
+
+
+def test_main_raises_stop_error_when_job_succeeds():
+    mock_spark = MagicMock()
+    mock_spark.stop.side_effect = RuntimeError("stop failed")
+    with (
+        patch("{module_name}.main.create_spark_session", return_value=mock_spark),
+        patch("{module_name}.main.example.run"),
+        pytest.raises(RuntimeError, match="stop failed"),
+    ):
+        main([])
 
 
 # --- Jobs ---

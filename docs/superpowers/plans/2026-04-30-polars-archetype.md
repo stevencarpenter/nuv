@@ -21,7 +21,7 @@
 - [ ] **Step 1: Add `"polars"` to DEFAULT_PYTHON_VERSIONS**
 
 ```python
-DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14", "polars": "3.14"}
+DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14", "polars": "3.13"}
 ```
 
 - [ ] **Step 2: Add `"polars"` to VALID_ARCHETYPES**
@@ -39,7 +39,7 @@ choices=["script", "spark", "fastapi", "polars"],
 - [ ] **Step 4: Update help text to mention polars**
 
 ```python
-help="Python version (default depends on archetype — script=3.14, spark=3.13, fastapi=3.14, polars=3.14). Must be MAJOR.MINOR format.",
+help="Python version (default depends on archetype — script=3.14, spark=3.13, fastapi=3.14, polars=3.13). Must be MAJOR.MINOR format.",
 ```
 
 - [ ] **Step 5: Run existing tests to confirm nothing broke**
@@ -77,11 +77,12 @@ description = ""
 readme = "README.md"
 requires-python = ">={python_version}"
 dependencies = [
-    "polars>=1.40.1",
-    "duckdb>=1.5.2",
-    "deltalake>=1.5.1",
-    "pydantic-settings>=2.14.0",
-    "click>=8.3.3",
+    "polars>=1.41.2",
+    "pyarrow>=24.0.0",
+    "duckdb>=1.5.3",
+    "deltalake>=1.6.0",
+    "pydantic-settings>=2.14.1",
+    "click>=8.4.1",
 ]
 
 [project.scripts]
@@ -91,11 +92,11 @@ dependencies = [
 dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
-    "ruff>=0.15.12",
+    "ruff>=0.15.15",
     "ty>=0.0.33",
 ]
 notebooks = [
-    "marimo>=0.23.4",
+    "marimo>=0.23.8",
 ]
 
 [tool.uv]
@@ -335,7 +336,7 @@ def sql(query: str) -> pl.DataFrame:
 ```python
 import marimo
 
-__generated_with = "0.23.4"
+__generated_with = "0.23.8"
 app = marimo.App(width="medium")
 
 
@@ -578,7 +579,7 @@ git commit -m "feat: add _scaffold_polars and dispatch from scaffold_files"
 
 ```python
 def test_default_python_versions_polars() -> None:
-    assert DEFAULT_PYTHON_VERSIONS["polars"] == "3.14"
+    assert DEFAULT_PYTHON_VERSIONS["polars"] == "3.13"
 ```
 
 - [ ] **Step 2: Add test for polars scaffold_files creates expected files**
@@ -616,12 +617,13 @@ def test_scaffold_files_polars_pyproject_has_deps(tmp_path: Path) -> None:
     target.mkdir()
     scaffold_files(target, name="my-polars-app", module_name="my_polars_app", archetype="polars")
     pyproject = (target / "pyproject.toml").read_text()
-    assert "polars>=1.40.1" in pyproject
-    assert "duckdb>=1.5.2" in pyproject
-    assert "deltalake>=1.5.1" in pyproject
-    assert "pydantic-settings>=2.14.0" in pyproject
-    assert "click>=8.3.3" in pyproject
-    assert "marimo>=0.23.4" in pyproject
+    assert "polars>=1.41.2" in pyproject
+    assert "pyarrow>=24.0.0" in pyproject
+    assert "duckdb>=1.5.3" in pyproject
+    assert "deltalake>=1.6.0" in pyproject
+    assert "pydantic-settings>=2.14.1" in pyproject
+    assert "click>=8.4.1" in pyproject
+    assert "marimo>=0.23.8" in pyproject
     assert "py314" in pyproject
     assert 'packages = ["src/my_polars_app"]' in pyproject
     assert 'build-backend = "hatchling.build"' in pyproject
@@ -743,13 +745,13 @@ def test_cli_polars_default_python_version(tmp_path: Path) -> None:
         mock_run.return_value = MagicMock(returncode=0)
         result = cli_main(["new", "my-polars-app", "--at", str(tmp_path / "my-polars-app"), "--archetype", "polars"])
     assert result == 0
-    assert (tmp_path / "my-polars-app" / ".python-version").read_text().strip() == "3.14"
+    assert (tmp_path / "my-polars-app" / ".python-version").read_text().strip() == "3.13"
 ```
 
 - [ ] **Step 10: Add polars default version test**
 
 ```python
-def test_run_new_polars_uses_default_python_314(tmp_path: Path) -> None:
+def test_run_new_polars_uses_default_python_313(tmp_path: Path) -> None:
     with (
         patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
         patch("nuv.commands.new.subprocess.run") as mock_run,
