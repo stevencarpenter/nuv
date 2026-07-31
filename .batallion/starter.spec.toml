@@ -1,0 +1,20 @@
+# Starter demo spec written by ``batallion init``.
+# Preview: batallion plan   .batallion/starter.spec.toml
+# Run:     batallion campaign .batallion/starter.spec.toml
+
+objective = "Build a tiny, fully tested greeting library"
+
+# Target is resolved relative to this file, staying inside .batallion/.
+target = "./starter-demo"
+
+details = """
+A single-module Python package exposing greet(name: str) -> str that returns
+the string "Hello, <name>!". Ship it as a proper package with a pyproject.toml
+and a pytest test module that exercises greet().
+"""
+
+constraints = [
+    "pure standard library -- no runtime dependencies",
+    "include a pytest test file that covers greet()",
+    "the package must import cleanly as `greeting`",
+]

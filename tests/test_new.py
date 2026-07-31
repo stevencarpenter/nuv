@@ -979,7 +979,7 @@ def test_scaffold_files_fastapi_test_uses_httpx(tmp_path: Path) -> None:
     test_content = (target / "tests" / "test_health.py").read_text()
     assert "from httpx import AsyncClient" in test_content
     assert "from my_api.app import create_app" in test_content
-    assert "getattr(route, \"path\", None)" in test_content
+    assert 'getattr(route, "path", None)' in test_content
 
 
 def test_scaffold_files_fastapi_ignores_common_secrets(tmp_path: Path) -> None:
