@@ -41,6 +41,23 @@ the reference — their CI steps run the generated project's `ruff check`,
 `ruff format --check`, and `ty check` alongside its tests, which is the standard
 a new archetype must meet.
 
+## A red archetype you did not touch is usually dependency drift
+
+Templates ship no lockfile — every scaffold resolves its dependencies fresh, so
+an upstream release can break an archetype with no change on our side. When CI
+fails in an archetype your diff never touched, check the resolved versions in
+the generated `uv.lock` before hunting for a regression in your own work.
+
+Prefer fixing the template against stable public API over pinning the dependency
+back. Generated projects that ship a deliberately stale framework defeat the
+point of the tool. Never assert against private or structural internals of a
+framework in a generated test — `fastapi.include_router` stopped flattening
+routes into `app.routes` in 0.141, which broke exactly that kind of assertion.
+
+Note also that the smoke steps run in sequence inside one job: the first failing
+archetype prevents every later archetype and the wheel checks from running at
+all. A green run above the failure line is not evidence they pass.
+
 ## Generator tests stay dependency-free
 
 `tests/test_new.py` stubs heavy runtime dependencies (`_install_pyspark_stubs`)

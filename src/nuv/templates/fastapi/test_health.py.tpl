@@ -26,8 +26,7 @@ def test_main_starts_granian():
 
 def test_create_app_has_healthz():
     app = create_app()
-    paths = [getattr(route, "path", None) for route in app.routes]
-    assert "/healthz" in paths
+    assert "/healthz" in app.openapi()["paths"]
 
 
 def test_create_app_uses_custom_settings():
