@@ -67,6 +67,9 @@ def render_template(
         raise ValueError(f"Template path must stay inside templates root: {archetype}/{tpl_name}")
     tpl_path = (_TEMPLATES_ROOT / archetype / tpl_name).resolve()
     templates_root = _TEMPLATES_ROOT.resolve()
+    if not tpl_path.exists():
+        # Fall back to templates shared by all archetypes.
+        tpl_path = (templates_root / "shared" / tpl_name).resolve()
     if not tpl_path.is_relative_to(templates_root):
         raise ValueError(f"Template path must stay inside templates root: {archetype}/{tpl_name}")
     if not tpl_path.exists():
@@ -209,7 +212,7 @@ def generate_ds_notebook(name: str, *, python_version: str = DEFAULT_PYTHON_VERS
     return _notebook_json(cells, python_version=python_version)
 
 
-VALID_ARCHETYPES = ("script", "spark", "fastapi", "polars", "ds")
+ARCHETYPES = ("script", "spark", "fastapi", "polars", "ds")
 
 
 def scaffold_files(
@@ -220,7 +223,7 @@ def scaffold_files(
     archetype: str = "script",
     python_version: str | None = None,
 ) -> None:
-    if archetype not in VALID_ARCHETYPES:
+    if archetype not in ARCHETYPES:
         raise ValueError(f"Unknown archetype: {archetype!r}")
     if python_version is None:
         python_version = DEFAULT_PYTHON_VERSIONS.get(archetype, DEFAULT_PYTHON_VERSION)
@@ -253,7 +256,7 @@ def scaffold_files(
             _scaffold_polars(target, template_vars=template_vars, module_name=module_name)
         case "ds":
             _scaffold_ds(target, template_vars=template_vars, name=name, module_name=module_name)
-        case _:  # fastapi — validated by VALID_ARCHETYPES above
+        case _:  # fastapi — validated by ARCHETYPES above
             _scaffold_fastapi(target, template_vars=template_vars, module_name=module_name)
 
 
