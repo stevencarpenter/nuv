@@ -3,11 +3,9 @@ from collections.abc import Sequence
 import click
 
 from nuv._logging import configure
-from nuv.commands.new import validate_python_version
+from nuv.commands.new import ARCHETYPES, INSTALL_MODES, validate_python_version
 
 LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
-ARCHETYPES = ("script", "spark", "fastapi", "polars", "ds")
-INSTALL_MODES = ("editable", "none", "command-only")
 
 
 def _validate_python_version(ctx: click.Context, param: click.Parameter, value: str | None) -> str | None:
