@@ -4,6 +4,7 @@ import types
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import click
 import pytest
 
 from nuv.cli import main as cli_main
@@ -1488,3 +1489,159 @@ def test_scaffold_files_spark_ignores_common_secrets(tmp_path: Path) -> None:
     scaffold_files(target, name="my-spark-app", module_name="my_spark_app", archetype="spark", python_version="3.13")
 
     _assert_secret_ignores((target / ".gitignore").read_text())
+
+
+# ---------------------------------------------------------------------------
+# util archetype — scaffold_files
+# ---------------------------------------------------------------------------
+
+
+def _scaffold_util(tmp_path: Path, name: str = "my-util") -> Path:
+    target = tmp_path / name
+    target.mkdir()
+    scaffold_files(target, name=name, module_name=name.replace("-", "_"), archetype="util")
+    return target
+
+
+def test_default_python_versions_util() -> None:
+    assert DEFAULT_PYTHON_VERSIONS["util"] == "3.14"
+
+
+def test_scaffold_files_util_creates_expected_files(tmp_path: Path) -> None:
+    target = _scaffold_util(tmp_path)
+
+    expected = {
+        ".python-version",
+        ".gitignore",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "pyproject.toml",
+        "README.md",
+        "src/my_util/__init__.py",
+        "src/my_util/_logging.py",
+        "src/my_util/main.py",
+        "tests/__init__.py",
+        "tests/test_main.py",
+    }
+    assert {p.relative_to(target).as_posix() for p in target.rglob("*") if p.is_file()} == expected
+    assert (target / ".python-version").read_text().strip() == "3.14"
+
+
+def test_scaffold_files_util_pyproject_uses_uv_build(tmp_path: Path) -> None:
+    pyproject = (_scaffold_util(tmp_path) / "pyproject.toml").read_text()
+
+    assert 'requires = ["uv_build>=0.13.6,<0.14.0"]' in pyproject
+    assert 'build-backend = "uv_build"' in pyproject
+    assert "hatchling" not in pyproject
+    assert 'module-name = "my_util"' in pyproject
+    assert 'my-util = "my_util.main:main"' in pyproject
+    assert '"click>=8.5.0"' in pyproject
+    assert '"ruff>=0.17.3"' in pyproject
+    assert '"ty>=0.0.92"' in pyproject
+    assert '"pytest>=9.1.1"' in pyproject
+    assert "pytest-cov" not in pyproject
+    assert 'target-version = "py314"' in pyproject
+
+
+def test_scaffold_files_util_module_name_keeps_case(tmp_path: Path) -> None:
+    # uv_build lowercases the module name by default, so a mixed-case name only
+    # builds because module-name is pinned to the directory nuv actually creates.
+    target = _scaffold_util(tmp_path, name="MyTool")
+
+    assert (target / "src" / "MyTool" / "main.py").exists()
+    assert 'module-name = "MyTool"' in (target / "pyproject.toml").read_text()
+
+
+def test_scaffold_files_util_agent_instructions(tmp_path: Path) -> None:
+    target = _scaffold_util(tmp_path)
+
+    agents = (target / "AGENTS.md").read_text()
+    assert "uv run my-util --help" in agents
+    assert "src/my_util/main.py" in agents
+    for gate in ("uv run pytest", "uv run ruff check .", "uv run ruff format --check .", "uv run ty check"):
+        assert gate in agents
+    assert "--dry-run" in agents
+    assert (target / "CLAUDE.md").read_text() == "@AGENTS.md\n"
+
+
+def test_scaffold_files_util_tests_import_package(tmp_path: Path) -> None:
+    target = _scaffold_util(tmp_path)
+
+    assert "from my_util.main import main" in (target / "tests" / "test_main.py").read_text()
+    assert "from my_util._logging import configure" in (target / "src" / "my_util" / "main.py").read_text()
+
+
+def test_scaffold_files_util_main_exit_codes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    target = _scaffold_util(tmp_path, name="util-exit-codes")
+    monkeypatch.syspath_prepend(str(target / "src"))
+    main_module = _load_generated_module(target / "src" / "util_exit_codes" / "main.py")
+
+    assert main_module.main([]) == 0
+    assert main_module.main(["--dry-run"]) == 0
+    assert main_module.main(["--help"]) == 0
+    assert "Usage: util-exit-codes" in capsys.readouterr().out
+
+    assert main_module.main(["--bogus"]) == 2
+    assert "No such option" in capsys.readouterr().err
+
+    monkeypatch.setattr(main_module, "run", lambda *, dry_run: 3)
+    assert main_module.main([]) == 3
+
+    def _fail(*, dry_run: bool) -> int:
+        raise click.ClickException("boom")
+
+    monkeypatch.setattr(main_module, "run", _fail)
+    assert main_module.main([]) == 1
+    assert "boom" in capsys.readouterr().err
+
+
+def test_scaffold_files_util_ignores_common_secrets(tmp_path: Path) -> None:
+    _assert_secret_ignores((_scaffold_util(tmp_path) / ".gitignore").read_text())
+
+
+def test_scaffold_files_util_end_with_trailing_newline(tmp_path: Path) -> None:
+    target = _scaffold_util(tmp_path)
+
+    for path in target.rglob("*"):
+        if path.is_file():
+            assert path.read_text().endswith("\n"), f"Expected trailing newline in {path.relative_to(target)}"
+
+
+# ---------------------------------------------------------------------------
+# util archetype — integration & CLI
+# ---------------------------------------------------------------------------
+
+
+def test_run_new_util_success(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = run_new("my-util", at=str(tmp_path / "my-util"), cwd=tmp_path, archetype="util")
+    assert result == 0
+    assert (tmp_path / "my-util" / "src" / "my_util" / "main.py").exists()
+    assert not (tmp_path / "my-util" / "main.py").exists()
+
+
+def test_run_new_util_cleanup_on_failure(tmp_path: Path) -> None:
+    with patch("nuv.commands.new.shutil.which", return_value=None):
+        result = run_new("my-util", cwd=tmp_path, archetype="util")
+    assert result == 1
+    assert not (tmp_path / "my-util").exists()
+
+
+def test_cli_new_util_archetype(tmp_path: Path) -> None:
+    with (
+        patch("nuv.commands.new.shutil.which", return_value="/usr/bin/uv"),
+        patch("nuv.commands.new.subprocess.run") as mock_run,
+    ):
+        mock_run.return_value = MagicMock(returncode=0)
+        result = cli_main(["new", "my-util", "--at", str(tmp_path / "my-util"), "--archetype", "util"])
+    assert result == 0
+    assert (tmp_path / "my-util" / "AGENTS.md").exists()
+    assert (tmp_path / "my-util" / ".python-version").read_text().strip() == "3.14"
