@@ -36,7 +36,7 @@ scaffold has been created and its own suite has passed.
 7. A scaffold smoke-test step in `.github/workflows/ci.yml`.
 8. A `### <archetype>` section under `## Archetypes` in `README.md`.
 
-All five archetypes are wired through all eight points. Copy `ds` or `polars` as
+All six archetypes are wired through all eight points. Copy `ds` or `polars` as
 the reference — their CI steps run the generated project's `ruff check`,
 `ruff format --check`, and `ty check` alongside its tests, which is the standard
 a new archetype must meet.
@@ -72,7 +72,7 @@ module-level helpers, `tmp_path` / `caplog` / `monkeypatch` fixtures, and
 - Work on a branch and merge through a PR — history is `summary (#NN)`. Do not
   commit directly to `main`.
 - CI must be green to merge: lint and type check on 3.14; tests on 3.11 and
-  3.14; scaffold smoke tests for all five archetypes; and wheel install checks.
+  3.14; scaffold smoke tests for all six archetypes; and wheel install checks.
 
 ## Packaging changes need their own proof
 
@@ -89,3 +89,7 @@ uv build && uvx --from dist/*.whl nuv new wheelcheck --at /tmp/wheelcheck --arch
 
 - Never hand-edit `uv.lock`; regenerate it with uv.
 - Keep `README.md`'s archetype list in sync with what `nuv new` accepts.
+- `plugins/nuv/skills/util/SKILL.md` (the Claude Code plugin this repo hosts
+  via `.claude-plugin/marketplace.json`) tells agents how to scaffold and run a
+  `util` project. Update it when the util layout, commands, or flags change,
+  and run `claude plugin validate .` after editing either manifest.

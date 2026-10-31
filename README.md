@@ -40,6 +40,7 @@ nuv new <name> --archetype spark            # PySpark 4 project with notebooks
 nuv new <name> --archetype fastapi          # FastAPI + Granian + Docker
 nuv new <name> --archetype polars           # Polars + DuckDB + Delta Lake for local data work
 nuv new <name> --archetype ds               # Data science: thin core + commented DS/ML/LLM catalog
+nuv new <name> --archetype util             # Lean reusable utility (uv_build, agent-ready) for scripts, migrations, remediations
 nuv new <name> --python-version 3.13        # override default Python version
 nuv new <name> --install none               # scaffold + sync, skip tool install
 nuv new <name> --install command-only       # log install command, do not execute (default)
@@ -66,6 +67,49 @@ my-tool/
     ├── __init__.py
     └── test_main.py
 ```
+
+### util
+
+The leanest archetype: a reusable utility for the scripts you (or your agents) end up running more than once, such as helpers, migrations, remediations, and backfills. It's built on the [`uv_build`](https://docs.astral.sh/uv/concepts/build-backend/) backend, with click as the only runtime dependency, and ships instructions for coding agents.
+
+```bash
+nuv new fix-thing --archetype util
+```
+
+```
+fix-thing/
+├── AGENTS.md                # working agreement for coding agents
+├── CLAUDE.md                # @AGENTS.md, so Claude Code loads it even when nested in a repo
+├── pyproject.toml           # uv_build, click, pytest + ruff + ty
+├── README.md
+├── src/fix_thing/
+│   ├── __init__.py
+│   ├── _logging.py
+│   └── main.py              # run() holds the logic; click wrapper with --dry-run
+└── tests/
+    ├── __init__.py
+    └── test_main.py
+```
+
+Default Python version: 3.14.
+
+```bash
+uv run fix-thing --help       # console script, no root main.py
+uv run fix-thing --dry-run    # rehearse without side effects
+uv run pytest                 # passing
+uv run ruff check .           # clean
+uv run ty check               # clean
+uv build                      # wheel + sdist via uv_build
+```
+
+**Compared with `script`:**
+- **Build backend:** `uv_build` instead of hatchling, so the layout is src-only.
+- **No coverage gate:** tests ship and pass, but there's no `--cov-fail-under`.
+- **`run()` / CLI split:** the logic lives in `run()`, separate from the click wrapper, so the tool is as easy to import as it is to run.
+- **Exit codes:** `run()` returns the exit code, so a check can return non-zero for "drift found", and `click.ClickException` exits 1 cleanly.
+- **Agent instructions:** `AGENTS.md` carries the gates and conventions, including the dry-run and idempotency rules for tools that change things.
+
+**Use this when** a script is going to outlive the conversation that wrote it. Pair it with the [Claude Code plugin](#claude-code-plugin) so agents reach for it on their own.
 
 ### spark
 
@@ -277,13 +321,30 @@ uv run marimo edit notebooks/explore_marimo.py # marimo
 
 The generated `.gitignore` is comprehensive for AI/ML work: datasets, model weights and checkpoints (`*.safetensors`, `*.ckpt`, `*.gguf`, ...), experiment-tracking dirs (`mlruns/`, `wandb/`, `lightning_logs/`), notebook and library caches, and `.env` secrets.
 
+## Claude Code plugin
+
+This repo is also a Claude Code plugin marketplace. The `nuv` plugin adds one skill, `/nuv:util`. Claude invokes it on its own when it's about to write a Python script that will run more than once, such as a helper, a migration, or a remediation. The skill has Claude scaffold the script with `nuv new --archetype util` and build it there, instead of leaving a loose `.py` file behind.
+
+```bash
+claude plugin marketplace add stevencarpenter/nuv
+claude plugin install nuv@nuv
+```
+
+To pick up skill changes later, run `claude plugin update nuv@nuv`, or turn on auto-update for the `nuv` marketplace under `/plugin` → **Marketplaces**. To skip the plugin, copy `plugins/nuv/skills/util/` to `~/.claude/skills/nuv-util/` instead.
+
+The skill tells Claude to:
+- Name the tool verb-first in kebab-case.
+- Put it where you said, or in `tools/<name>/` when it operates on the current repo, or ask you where it belongs.
+- Run `nuv new` (falling back to `uvx nuv@latest`), then follow the generated `AGENTS.md`.
+- Finish only when pytest, ruff, and ty are green.
+
 ## Quality out of the box
 
 Every generated project ships with these tools configured and green:
 
 | Tool | Config |
 |---|---|
-| pytest | branch coverage enforced |
+| pytest | branch coverage enforced (`util`: tests only, no coverage gate) |
 | ruff | lint + format |
 | ty | type checking |
 
