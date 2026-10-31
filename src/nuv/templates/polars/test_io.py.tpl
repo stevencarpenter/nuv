@@ -1,4 +1,5 @@
 import polars as pl
+import pytest
 from click.testing import CliRunner
 from polars.testing import assert_frame_equal
 
@@ -69,6 +70,11 @@ def test_glimpse_does_not_raise(sample_df):
 def test_sql_returns_polars_dataframe():
     result = sql("select 1 as x")
     assert result.to_dict(as_series=False) == {{"x": [1]}}
+
+
+def test_sql_rejects_query_without_statement():
+    with pytest.raises(ValueError, match="no SQL statement"):
+        sql("-- nothing to run")
 
 
 def test_settings_defaults():
