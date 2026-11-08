@@ -1,6 +1,6 @@
 ---
 name: util
-description: Give any Python script a pinned environment with uv instead of writing a loose .py file. Use when you are about to write or hand over Python code outside an existing project, whether a one-off check, a helper you will call again, a data or schema migration, a remediation, cleanup, or backfill, or an ops or reporting task, or when a throwaway script is turning into one of those.
+description: Use before writing any Python script outside an existing project, so it gets a pinned environment with uv instead of a loose .py file. Covers a one-off check, a helper you will call again, a data or schema migration, a remediation, cleanup, or backfill, an ops or reporting task, and a throwaway script that is turning into one of those.
 ---
 
 # Python scripts get a pinned environment, never a loose `.py`
