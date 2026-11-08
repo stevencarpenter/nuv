@@ -38,8 +38,8 @@ One file that carries its own Python version and dependencies.
    # ///
    ```
 
-   Set `requires-python` to what the script needs. `uv add --script` writes the interpreter it happened to use.
-4. **Run** it with `uv run --script tools/<name>.py`. The `--script` flag keeps a nearby `pyproject.toml` from capturing it. `chmod +x` lets the user run it directly through the shebang.
+   Set `requires-python` to what the script needs. `uv add --script` writes the interpreter it happened to use. `uv init --script` writes no shebang, so add the `#!/usr/bin/env -S uv run --script` line yourself.
+4. **Run** it with `uv run --script tools/<name>.py`. The `--script` flag keeps a nearby `pyproject.toml` from capturing it. With the shebang in place, `chmod +x` lets the user run it directly.
 5. **Hand off** with the exact invocation. For a run the user must reproduce later, `uv lock --script tools/<name>.py` writes `<name>.py.lock` beside it.
 
 Move to tier 3 when the file needs a test, a second module, or starts changing external state. Its body becomes `run()`.
