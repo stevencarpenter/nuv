@@ -30,7 +30,7 @@ def validate_name(name: str) -> str:
 
 _TEMPLATES_ROOT = Path(__file__).parent.parent / "templates"
 DEFAULT_PYTHON_VERSION = "3.14"
-DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14", "polars": "3.13", "ds": "3.13"}
+DEFAULT_PYTHON_VERSIONS = {"script": "3.14", "spark": "3.13", "fastapi": "3.14", "polars": "3.13", "ds": "3.13", "util": "3.14"}
 UV_DOCKER_IMAGES = {
     "3.13": "ghcr.io/astral-sh/uv:python3.13-bookworm-slim@sha256:531f855bda2c73cd6ef67d56b733b357cea384185b3022bd09f05e002cd144ca",
     "3.14": "ghcr.io/astral-sh/uv:python3.14-bookworm-slim@sha256:7cf77f594be8042dab6daa9fe326f90962252268b4f120a7f5dccce4d947e6c1",
@@ -212,7 +212,7 @@ def generate_ds_notebook(name: str, *, python_version: str = DEFAULT_PYTHON_VERS
     return _notebook_json(cells, python_version=python_version)
 
 
-ARCHETYPES = ("script", "spark", "fastapi", "polars", "ds")
+ARCHETYPES = ("script", "spark", "fastapi", "polars", "ds", "util")
 
 
 def scaffold_files(
@@ -240,7 +240,9 @@ def scaffold_files(
     write_with_trailing_newline(target / ".gitignore", render_template("gitignore.tpl", **template_vars))
     write_with_trailing_newline(target / "pyproject.toml", render_template("pyproject.toml.tpl", **template_vars))
     write_with_trailing_newline(target / "README.md", render_template("readme.md.tpl", **template_vars))
-    write_with_trailing_newline(target / "main.py", render_template("main.py.tpl", **template_vars))
+    if archetype != "util":
+        # util is src-layout only (uv_build): its entry point lives in the package.
+        write_with_trailing_newline(target / "main.py", render_template("main.py.tpl", **template_vars))
 
     tests_dir = target / "tests"
     tests_dir.mkdir()
@@ -256,6 +258,8 @@ def scaffold_files(
             _scaffold_polars(target, template_vars=template_vars, module_name=module_name)
         case "ds":
             _scaffold_ds(target, template_vars=template_vars, name=name, module_name=module_name)
+        case "util":
+            _scaffold_util(target, template_vars=template_vars, module_name=module_name)
         case _:  # fastapi — validated by ARCHETYPES above
             _scaffold_fastapi(target, template_vars=template_vars, module_name=module_name)
 
@@ -384,6 +388,27 @@ def _scaffold_ds(
         keep_dir = target / rel
         keep_dir.mkdir(parents=True)
         (keep_dir / ".gitkeep").write_text("", encoding="utf-8")
+
+
+def _scaffold_util(
+    target: Path,
+    *,
+    template_vars: dict[str, str],
+    module_name: str,
+) -> None:
+    pkg_dir = target / "src" / module_name
+    pkg_dir.mkdir(parents=True)
+    write_with_trailing_newline(pkg_dir / "__init__.py", render_template("init.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "_logging.py", render_template("_logging.py.tpl", **template_vars))
+    write_with_trailing_newline(pkg_dir / "main.py", render_template("main.py.tpl", **template_vars))
+
+    tests_dir = target / "tests"
+    write_with_trailing_newline(tests_dir / "test_main.py", render_template("test_main.py.tpl", **template_vars))
+
+    # Agent instructions: AGENTS.md for every coding agent, CLAUDE.md imports it so
+    # Claude Code still loads it when the util is nested under a repo with its own CLAUDE.md.
+    write_with_trailing_newline(target / "AGENTS.md", render_template("agents.md.tpl", **template_vars))
+    write_with_trailing_newline(target / "CLAUDE.md", render_template("claude.md.tpl", **template_vars))
 
 
 def run_uv_sync(target: Path) -> None:

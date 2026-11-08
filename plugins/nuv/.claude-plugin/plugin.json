@@ -1,0 +1,11 @@
+{
+  "name": "nuv",
+  "description": "Start reusable Python scripts, migrations, and remediations from `nuv new --archetype util` instead of a loose .py file",
+  "author": {
+    "name": "Steven Carpenter"
+  },
+  "homepage": "https://github.com/stevencarpenter/nuv",
+  "repository": "https://github.com/stevencarpenter/nuv",
+  "license": "MIT",
+  "keywords": ["uv", "python", "scaffold"]
+}

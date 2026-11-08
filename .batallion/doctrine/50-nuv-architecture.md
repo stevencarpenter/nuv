@@ -10,7 +10,8 @@
   `mkdir` → `scaffold_files()` → `uv sync` → optional tool install.
 - `scaffold_files()` writes the five shared files (`.python-version`,
   `.gitignore`, `pyproject.toml`, `README.md`, `main.py`) plus `tests/`, then
-  dispatches to one `_scaffold_<archetype>()` helper.
+  dispatches to one `_scaffold_<archetype>()` helper. `util` is the exception:
+  it is src-layout only (`uv_build`), so it gets no root `main.py`.
 
 ## Template contract
 

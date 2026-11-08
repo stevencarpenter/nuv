@@ -1,0 +1,14 @@
+{
+  "name": "nuv",
+  "description": "Claude Code plugins for nuv, the opinionated uv project scaffolder",
+  "owner": {
+    "name": "Steven Carpenter"
+  },
+  "plugins": [
+    {
+      "name": "nuv",
+      "source": "./plugins/nuv",
+      "description": "Start reusable Python scripts, migrations, and remediations from `nuv new --archetype util` instead of a loose .py file"
+    }
+  ]
+}

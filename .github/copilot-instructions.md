@@ -26,6 +26,9 @@ src/nuv/
     fastapi/
     polars/
     ds/
+    util/           # uv_build backend, src-only (no root main.py)
+plugins/nuv/        # Claude Code plugin: skill routing reusable scripts to `nuv new --archetype util`
+.claude-plugin/     # marketplace manifest that publishes plugins/nuv
 tests/
   test_new.py       # unit tests (92% branch coverage gate)
 ```
