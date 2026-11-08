@@ -332,6 +332,12 @@ claude plugin install nuv@nuv
 
 To pick up skill changes later, run `claude plugin update nuv@nuv`, or turn on auto-update for the `nuv` marketplace under `/plugin` → **Marketplaces**. To skip the plugin, copy `plugins/nuv/skills/util/` to `~/.claude/skills/nuv-util/` instead.
 
+The same skill works in Codex. Copy it (Codex skips symlinks), then restart Codex:
+
+```bash
+cp -r plugins/nuv/skills/util ~/.codex/skills/util
+```
+
 The skill tells Claude to:
 - Name the tool verb-first in kebab-case.
 - Put it where you said, or in `tools/<name>/` when it operates on the current repo, or ask you where it belongs.

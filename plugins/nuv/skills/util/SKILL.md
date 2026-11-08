@@ -1,4 +1,5 @@
 ---
+name: util
 description: Scaffold a reusable Python utility with nuv instead of writing a loose .py file. Use when you are about to write a Python script that will run more than once or be handed to the user to run (a helper you will call again, a data or schema migration, a remediation, cleanup, or backfill, an ops or reporting task), or when a throwaway script is turning into one of those.
 ---
 
