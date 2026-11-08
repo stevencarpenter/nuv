@@ -323,7 +323,7 @@ The generated `.gitignore` is comprehensive for AI/ML work: datasets, model weig
 
 ## Claude Code plugin
 
-This repo is also a Claude Code plugin marketplace. The `nuv` plugin adds one skill, `/nuv:util`. Claude invokes it on its own when it's about to write a Python script that will run more than once, such as a helper, a migration, or a remediation. The skill has Claude scaffold the script with `nuv new --archetype util` and build it there, instead of leaving a loose `.py` file behind.
+This repo is also a Claude Code plugin marketplace. The `nuv` plugin adds one skill, `/nuv:util`. Claude invokes it on its own when it's about to write Python outside an existing project. The skill routes the script to the smallest tier that gives it a pinned environment: an inline `uv run --with` for a one-off, a single file with a PEP 723 header run by `uv run --script`, or a `util` project from `nuv new --archetype util` when it needs tests or changes real systems. No loose `.py` file is left behind.
 
 ```bash
 claude plugin marketplace add stevencarpenter/nuv
@@ -340,8 +340,9 @@ cp -r plugins/nuv/skills/util ~/.codex/skills/util
 
 The skill tells Claude to:
 - Name the tool verb-first in kebab-case.
-- Put it where you said, or in `tools/<name>/` when it operates on the current repo, or ask you where it belongs.
-- Run `nuv new` (falling back to `uvx nuv@latest`), then follow the generated `AGENTS.md`.
+- Put it where you said, or under `tools/` when it operates on the current repo, or ask you where it belongs.
+- For a single file, write the PEP 723 header, add dependencies with `uv add --script`, and run it with `uv run --script`.
+- For a project, run `nuv new` (falling back to `uvx nuv@latest`), then follow the generated `AGENTS.md`.
 - Finish only when pytest, ruff, and ty are green.
 
 ## Quality out of the box
