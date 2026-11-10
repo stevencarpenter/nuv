@@ -825,6 +825,3 @@ nltk_data/
 .env.*
 !.env.example
 .codegraph/
-
-# Batallion campaign artifacts
-.artifacts/
