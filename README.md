@@ -371,7 +371,7 @@ This project uses trusted publishing from GitHub Actions.
 
 1. Bump `[project].version` in `pyproject.toml`.
 2. Push a matching tag: `vX.Y.Z`.
-3. GitHub Actions builds and publishes to PyPI.
+3. GitHub Actions builds and publishes to PyPI, then creates the GitHub release page for the tag.
 
 After release:
 
