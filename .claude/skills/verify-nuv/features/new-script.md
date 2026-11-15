@@ -23,7 +23,7 @@ Preconditions:
 - The baseline in [README](./README.md) holds.
 - The scratch directory has no `demo-tool` entry.
 
-- **Create.** Run `nuv new demo-tool`. Run `nv nuv script-create -- new demo-tool`. Exit code `0`. Stderr ends with `WARNING nuv.commands.new: Run this to install the generated tool:` and `WARNING nuv.commands.new: uv tool install --editable <scratch>/demo-tool`.
+- **Create.** Run `nv nuv script-create -- new demo-tool`. Exit code `0`. Stderr ends with `WARNING nuv.commands.new: Run this to install the generated tool:` and `WARNING nuv.commands.new: uv tool install --editable <scratch>/demo-tool`.
 - **Tree.** List the project. Run `nv tree script-tree demo-tool`. The files are exactly `.gitignore`, `.python-version`, `_logging.py`, `main.py`, `pyproject.toml`, `README.md`, `tests/__init__.py`, `tests/test_main.py`, and `uv.lock`.
 - **Python version.** Read the pinned version. Run `nv in script-pyver demo-tool -- cat .python-version`. Stdout is `3.14`.
 - **Tests.** Run the generated tests. Run `nv in script-pytest demo-tool -- uv run --frozen pytest`. Exit code `0`, `2 passed`, and `Required test coverage of 100% reached`.

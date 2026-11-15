@@ -11,11 +11,13 @@ shift 2
 
 EVIDENCE="$REPO/.artifacts/verify-nuv/$RUN"
 # The generated projects must use their own .venv, not the one of the calling shell.
-unset VIRTUAL_ENV
+unset VIRTUAL_ENV UV_PROJECT_ENVIRONMENT
 
 load_scratch() {
     [[ -f "$EVIDENCE/scratch-path" ]] || { echo "run '$RUN' is not initialized: run init first" >&2; exit 2; }
     SCRATCH="$(cat "$EVIDENCE/scratch-path")"
+    # The marker alone is not proof: bind the directory to this run-id by its name.
+    [[ "$(basename "$SCRATCH")" == "nuv-verify-$RUN."* ]] || { echo "scratch path does not belong to run '$RUN': $SCRATCH" >&2; exit 2; }
     [[ -f "$SCRATCH/.nuv-verify-run" ]] || { echo "scratch directory is missing: $SCRATCH (run init with a new run-id)" >&2; exit 2; }
     # `--install editable` must not write to the real uv tool directories.
     export UV_TOOL_DIR="$SCRATCH/.uv-tools" UV_TOOL_BIN_DIR="$SCRATCH/.uv-bin"
@@ -77,9 +79,9 @@ case "$SUB" in
             echo "scratch: $SCRATCH"
             echo "uv tool dir: $(uv tool dir)"
         } | tee "$EVIDENCE/doctor.txt"
-        grep -q "^nuv module: $REPO/src/nuv/__init__.py$" "$EVIDENCE/doctor.txt" \
+        grep -qxF "nuv module: $REPO/src/nuv/__init__.py" "$EVIDENCE/doctor.txt" \
             || { echo "DOCTOR FAIL: nuv does not load from $REPO/src" >&2; exit 1; }
-        grep -q "^uv tool dir: $SCRATCH/.uv-tools$" "$EVIDENCE/doctor.txt" \
+        grep -qxF "uv tool dir: $SCRATCH/.uv-tools" "$EVIDENCE/doctor.txt" \
             || { echo "DOCTOR FAIL: uv tool dir is not inside the scratch directory" >&2; exit 1; }
         echo "DOCTOR OK"
         ;;
@@ -96,6 +98,7 @@ case "$SUB" in
     tree)
         load_scratch
         LABEL="${1:?missing label}"; DIR="${2:-}"
+        [[ "$LABEL" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "label must match [A-Za-z0-9._-]+" >&2; exit 2; }
         (cd "$SCRATCH/$DIR" && find . \( -name .venv -o -name .uv-tools -o -name .uv-bin -o -name .nuv-verify-run \) -prune -o -print | sort) | tee "$EVIDENCE/$LABEL.tree"
         ;;
     cleanup)

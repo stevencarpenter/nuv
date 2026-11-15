@@ -176,7 +176,8 @@ calls `mkdir` once for each missing parent. At most one fault occurs in a run.
 Assumptions. The project name is the fixed valid name `demo-app`. `uv` is replaced: a successful
 `uv sync` and `uv tool install` write nothing. The sandbox holds a sibling file, a sibling
 directory, and an outside directory, and every one of their paths is compared before and after
-by type, content, inode, and modification time.
+by type, content, inode, and modification time. A directory is compared by inode and mode only,
+because a new child changes the modification time of an expected parent.
 
 ## What the check does not cover
 

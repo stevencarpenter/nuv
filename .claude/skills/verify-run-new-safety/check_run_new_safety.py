@@ -219,7 +219,11 @@ def entries_for(prestate: str) -> tuple[str, ...]:
 
 
 def snapshot(root: Path) -> dict[str, tuple]:
-    """Every path under root, without following symlinks: type, content, inode, mtime."""
+    """Every path under root, without following symlinks: type, content, inode, mtime.
+
+    A directory records inode and mode, not mtime: adding a child to an expected parent
+    changes its mtime. A removed or changed child is caught by the child's own entry.
+    """
     snap: dict[str, tuple] = {}
     for dirpath, dirnames, filenames in os.walk(root):
         for name in dirnames + filenames:
@@ -228,7 +232,7 @@ def snapshot(root: Path) -> dict[str, tuple]:
             if os.path.islink(path):
                 snap[path] = ("symlink", os.readlink(path))
             elif os.path.isdir(path):
-                snap[path] = ("dir",)
+                snap[path] = ("dir", st.st_ino, st.st_mode)
             else:
                 with open(path, "rb") as fh:
                     snap[path] = ("file", fh.read(), st.st_ino, st.st_mtime_ns)
