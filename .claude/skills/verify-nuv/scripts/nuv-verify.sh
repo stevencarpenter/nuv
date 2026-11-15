@@ -23,6 +23,14 @@ load_scratch() {
     export UV_TOOL_DIR="$SCRATCH/.uv-tools" UV_TOOL_BIN_DIR="$SCRATCH/.uv-bin"
 }
 
+# scratch_dir <relative-dir>: print the canonical path; exit 2 unless it exists inside the scratch directory.
+scratch_dir() {
+    local resolved
+    resolved="$(cd "$SCRATCH/$1" 2>/dev/null && pwd -P)" || { echo "directory does not exist in scratch: $1" >&2; exit 2; }
+    [[ "$resolved" == "$SCRATCH" || "$resolved" == "$SCRATCH"/* ]] || { echo "directory is outside the scratch directory: $1" >&2; exit 2; }
+    printf '%s\n' "$resolved"
+}
+
 # record <label> <expected-exit> <cwd> <cmd...>: run, save cmd/out/err/exit, compare the exit code.
 record() {
     local label="$1" expect="$2" cwd="$3" code=0
@@ -88,18 +96,21 @@ case "$SUB" in
     nuv)
         load_scratch
         parse_run_args "$@"
-        record "$LABEL" "$EXPECT" "$SCRATCH/$DIR" uv run --project "$REPO" --frozen nuv ${CMD[@]+"${CMD[@]}"}
+        CWD="$(scratch_dir "$DIR")"
+        record "$LABEL" "$EXPECT" "$CWD" uv run --project "$REPO" --frozen nuv ${CMD[@]+"${CMD[@]}"}
         ;;
     in)
         load_scratch
         parse_run_args "$@"
-        record "$LABEL" "$EXPECT" "$SCRATCH/$DIR" "${CMD[@]}"
+        CWD="$(scratch_dir "$DIR")"
+        record "$LABEL" "$EXPECT" "$CWD" "${CMD[@]}"
         ;;
     tree)
         load_scratch
         LABEL="${1:?missing label}"; DIR="${2:-}"
         [[ "$LABEL" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "label must match [A-Za-z0-9._-]+" >&2; exit 2; }
-        (cd "$SCRATCH/$DIR" && find . \( -name .venv -o -name .uv-tools -o -name .uv-bin -o -name .nuv-verify-run \) -prune -o -print | sort) | tee "$EVIDENCE/$LABEL.tree"
+        CWD="$(scratch_dir "$DIR")"
+        (cd "$CWD" && find . \( -name .venv -o -name .uv-tools -o -name .uv-bin -o -name .nuv-verify-run \) -prune -o -print | sort) | tee "$EVIDENCE/$LABEL.tree"
         ;;
     cleanup)
         load_scratch

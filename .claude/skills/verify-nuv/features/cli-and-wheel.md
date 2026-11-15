@@ -34,7 +34,7 @@ Preconditions:
 - **Wheel origin.** Show that `uvx` loads `nuv` from the wheel, not from the checkout. Run `nv in wheel-where -- sh -c 'uvx --from dist/nuv-*.whl python -c "import nuv; print(nuv.__file__)"'`. Stdout is a path in the uv cache that ends with `site-packages/nuv/__init__.py`. It is not under the repo.
 - **Create from wheel.** Run `nv in wheel-new -- sh -c 'uvx --from dist/nuv-*.whl nuv new wheel-tool --archetype util --install none'`. Exit code `0`.
 - **Tree and gate.** Run `nv tree wheel-tree wheel-tool` and `nv in wheel-pytest wheel-tool -- uv run --frozen pytest`. The tree has `AGENTS.md`, `src/wheel_tool/main.py`, and `uv.lock`. Pytest exits `0` with `3 passed`.
-- **Other archetypes from the wheel.** When a change adds or moves a template file, repeat the create step from the wheel for each affected archetype, with a new project name for each.
+- **Other archetypes from the wheel.** After any packaging change, or a change that adds or moves a template file, repeat the create step from the wheel for `script`, `spark`, `fastapi`, `polars`, and `ds`, with a new project name for each. The `util` check alone does not show that the other archetypes' templates are in the wheel.
 - **Proof.** Report `root-bare.*`, `new-help.out`, `wheel-build.err`, `wheel-where.out`, `wheel-new.*`, `wheel-tree.tree`, and `wheel-pytest.*` from `.artifacts/verify-nuv/<run-id>/`.
 
 ## Gotchas
