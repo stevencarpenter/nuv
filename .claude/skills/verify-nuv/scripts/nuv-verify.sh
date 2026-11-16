@@ -11,7 +11,8 @@ shift 2
 
 EVIDENCE="$REPO/.artifacts/verify-nuv/$RUN"
 # The generated projects must use their own .venv, not the one of the calling shell.
-unset VIRTUAL_ENV UV_PROJECT_ENVIRONMENT
+# UV_PROJECT would select another project for `uv sync`.
+unset VIRTUAL_ENV UV_PROJECT_ENVIRONMENT UV_PROJECT
 
 load_scratch() {
     [[ -f "$EVIDENCE/scratch-path" ]] || { echo "run '$RUN' is not initialized: run init first" >&2; exit 2; }

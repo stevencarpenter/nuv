@@ -31,7 +31,7 @@ Preconditions:
 - **Empty name.** Run `nv nuv fail-name-empty --expect 1 -- new ""`. Stderr has `Name cannot be empty.`
 - **Leading hyphen.** Run `nv nuv fail-name-hyphen --expect 1 -- new -- -x`. Stderr has `Name cannot start with a leading hyphen.`
 - **Invalid character.** Run `nv nuv fail-name-chars --expect 1 -- new a.b`. Stderr has `Name contains invalid characters: 'a.b'`.
-- **Path as a name.** Run `nv nuv fail-name-path --expect 1 -- new ../escape`. Stderr has `Name contains invalid characters: '../escape'`.
+- **Path as a name.** First run `nv in fail-name-escape-pre --expect 1 -- test -e ../escape`. Exit code `1` shows that no `escape` entry exists beside the scratch directory. If it exits `0`, set `NUV_VERIFY_SCRATCH_ROOT` to an empty directory and start a new run. Then run `nv nuv fail-name-path --expect 1 -- new ../escape`. Stderr has `Name contains invalid characters: '../escape'`.
 - **Trailing hyphen.** Run `nv nuv fail-name-edge --expect 1 -- new a-`. Stderr has `Name must start and end with a letter or digit.`
 - **Keyword.** Run `nv nuv fail-name-keyword --expect 1 -- new class`. Stderr has `Name does not produce a valid Python module name: 'class'`.
 - **Leading digit.** Run `nv nuv fail-name-digit --expect 1 -- new 1abc`. Stderr has `Name does not produce a valid Python module name: '1abc'`.
